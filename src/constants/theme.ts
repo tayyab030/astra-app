@@ -1,0 +1,33 @@
+export const colors = {
+  slate900: '#0f172a',
+  slate800: '#1e293b',
+  slate700: '#334155',
+  slate400: '#94a3b8',
+  slate300: '#cbd5e1',
+  cyan100: '#cffafe',
+  cyan200: '#a5f3fc',
+  cyan300: '#67e8f9',
+  cyan400: '#22d3ee',
+  cyan500: '#06b6d4',
+  cyan600: '#0891b2',
+  blue500: '#3b82f6',
+  blue600: '#2563eb',
+  purple500: '#a855f7',
+  pink500: '#ec4899',
+  emerald500: '#10b981',
+  teal500: '#14b8a6',
+  amber50: '#fffbeb',
+  amber100: '#fef3c7',
+  amber200: '#fde68a',
+  red400: '#f87171',
+  white: '#ffffff',
+};
+
+export const fonts = {
+  regular: 'Inter_400Regular',
+  medium: 'Inter_500Medium',
+  semibold: 'Inter_600SemiBold',
+  bold: 'Inter_700Bold',
+  heading: 'Poppins_600SemiBold',
+  headingBold: 'Poppins_700Bold',
+};

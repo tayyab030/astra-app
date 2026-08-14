@@ -1,29 +1,35 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
 
-export default function Index() {
+import { AuthScreen } from '@/features/auth/AuthScreen';
+import { LoginForm } from '@/features/auth/LoginForm';
+
+export default function LoginPage() {
   return (
-    <View style={styles.container}>
-      <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
-      <Text style={styles.title}>Welcome to Astra</Text>
-    </View>
+    <AuthScreen>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <LoginForm />
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </AuthScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  flex: {
     flex: 1,
-    alignItems: 'center',
+  },
+  scroll: {
+    flexGrow: 1,
     justifyContent: 'center',
-    backgroundColor: '#061A46',
-    gap: 20,
-  },
-  logo: {
-    width: 160,
-    height: 160,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    alignItems: 'center',
+    padding: 16,
   },
 });
