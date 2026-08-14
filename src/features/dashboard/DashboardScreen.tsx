@@ -1,13 +1,26 @@
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { colors, fonts } from '@/constants/theme';
 import { useCurrency } from '@/hooks/useCurrency';
+import { sendTestNotification } from '@/lib/notifications';
+import { PrimaryButton } from '@/features/wealth/PrimaryButton';
 import { DashboardCard } from './DashboardCard';
 
 export function DashboardScreen() {
   const { formatCurrency } = useCurrency();
+  const [testingNotification, setTestingNotification] = useState(false);
+
+  const handleTestNotification = async () => {
+    setTestingNotification(true);
+    try {
+      await sendTestNotification();
+    } finally {
+      setTestingNotification(false);
+    }
+  };
 
   return (
     <ScrollView
@@ -31,6 +44,21 @@ export function DashboardScreen() {
           <Text style={styles.badgeText}>Life Score: 85</Text>
         </LinearGradient>
       </View>
+
+      <DashboardCard borderColor="rgba(6, 182, 212, 0.3)" style={styles.notifyCard}>
+        <Text style={styles.cardTitle}>Push notifications</Text>
+        <Text style={styles.cardDescription}>
+          Temporary test — tap to schedule a local notification in about 1 second.
+        </Text>
+        <PrimaryButton
+          label="Test notification"
+          icon="notifications-outline"
+          loading={testingNotification}
+          onPress={() => {
+            void handleTestNotification();
+          }}
+        />
+      </DashboardCard>
 
       <View style={styles.stats}>
         <DashboardCard
@@ -318,6 +346,9 @@ const styles = StyleSheet.create({
     color: colors.slate400,
   },
   block: {
+    gap: 12,
+  },
+  notifyCard: {
     gap: 12,
   },
   insightsHeader: {

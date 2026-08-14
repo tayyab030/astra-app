@@ -23,6 +23,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { colors } from '@/constants/theme';
 import { useSession } from '@/hooks/useSession';
 import { hydrateSession } from '@/lib/auth/tokenManager';
+import '@/lib/notifications';
 
 SplashScreen.preventAutoHideAsync();
 SystemUI.setBackgroundColorAsync(colors.slate900);
