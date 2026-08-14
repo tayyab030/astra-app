@@ -11,6 +11,7 @@ import type { WealthFilter } from '@/lib/api/wealth';
 import { BudgetTab } from './BudgetTab';
 import { CategoriesTab } from './CategoriesTab';
 import { OverviewTab } from './OverviewTab';
+import { PrimaryButton } from './PrimaryButton';
 import { TransactionsTab } from './TransactionsTab';
 import { WEALTH_TABS, type WealthTabValue } from './constants';
 import { useWealth } from './useWealth';
@@ -34,6 +35,9 @@ export function WealthScreen() {
   const {
     dashboard,
     isLoading,
+    isError,
+    errorMessage,
+    refetch,
     createTransaction,
     updateTransaction,
     deleteTransaction,
@@ -135,6 +139,16 @@ export function WealthScreen() {
           </View>
           <WealthFilters onChange={setFilter} />
         </View>
+
+        {isError ? (
+          <DashboardCard borderColor="rgba(248, 113, 113, 0.35)">
+            <Text style={styles.errorTitle}>Couldn’t load wealth data</Text>
+            <Text style={styles.errorBody}>
+              {errorMessage ?? 'Failed to load wealth data'}
+            </Text>
+            <PrimaryButton label="Retry" onPress={() => { void refetch(); }} />
+          </DashboardCard>
+        ) : null}
 
         <View style={styles.summary}>
           {summaryCards.map((card) => (
@@ -276,6 +290,18 @@ const styles = StyleSheet.create({
   },
   headingWrap: {
     gap: 4,
+  },
+  errorTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.red300,
+    marginBottom: 8,
+  },
+  errorBody: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate300,
+    marginBottom: 16,
   },
   title: {
     fontFamily: fonts.headingBold,

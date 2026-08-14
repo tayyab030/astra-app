@@ -152,6 +152,18 @@ export async function fetchWealthDashboard(filter: WealthFilter) {
   return response.data;
 }
 
+export async function fetchWealthTransactions(filter: WealthFilter) {
+  const response = await authApi.get<WealthTransaction[]>(WEALTH.TRANSACTIONS, {
+    params: buildWealthFilterParams(filter),
+  });
+  return response.data;
+}
+
+export async function fetchWealthTransaction(id: string) {
+  const response = await authApi.get<WealthTransaction>(WEALTH.TRANSACTION(id));
+  return response.data;
+}
+
 export async function createWealthTransaction(payload: CreateTransactionPayload) {
   const response = await authApi.post<WealthTransaction>(WEALTH.TRANSACTIONS, payload);
   return response.data;
@@ -164,6 +176,18 @@ export async function updateWealthTransaction(id: string, payload: UpdateTransac
 
 export async function deleteWealthTransaction(id: string) {
   const response = await authApi.delete<{ message: string }>(WEALTH.TRANSACTION(id));
+  return response.data;
+}
+
+export async function fetchWealthBudgets(filter: WealthFilter) {
+  const response = await authApi.get<WealthCategoryBudget[]>(WEALTH.BUDGETS, {
+    params: buildWealthFilterParams(filter),
+  });
+  return response.data;
+}
+
+export async function fetchWealthBudget(id: string) {
+  const response = await authApi.get<WealthCategoryBudget>(WEALTH.BUDGET(id));
   return response.data;
 }
 

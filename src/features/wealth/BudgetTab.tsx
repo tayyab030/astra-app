@@ -93,6 +93,9 @@ export function BudgetTab({
   });
 
   const watchedPeriodType = addForm.watch('period_type');
+  const watchedAmount = addForm.watch('amount');
+  const watchedYear = addForm.watch('year');
+  const editAmount = editForm.watch('amount');
 
   const resetAddForm = () => {
     addForm.reset(getDefaultBudgetValues(filter));
@@ -113,17 +116,25 @@ export function BudgetTab({
       ...(data.period_type === 'month' ? { month: Number(data.month) } : {}),
     };
 
-    await onCreateBudget(payload);
-    setShowAddDialog(false);
-    resetAddForm();
+    try {
+      await onCreateBudget(payload);
+      setShowAddDialog(false);
+      resetAddForm();
+    } catch {
+      // Errors are surfaced via mutation toasts
+    }
   });
 
   const handleEditSubmit = editForm.handleSubmit(async (data) => {
     if (!editingBudget) return;
 
-    await onUpdateBudget({ id: editingBudget.id, data: { amount: Number(data.amount) } });
-    setShowEditDialog(false);
-    setEditingBudget(null);
+    try {
+      await onUpdateBudget({ id: editingBudget.id, data: { amount: Number(data.amount) } });
+      setShowEditDialog(false);
+      setEditingBudget(null);
+    } catch {
+      // Errors are surfaced via mutation toasts
+    }
   });
 
   const confirmDelete = (budget: WealthCategoryBudget) => {
@@ -281,6 +292,11 @@ export function BudgetTab({
             placeholder="0.00"
             placeholderTextColor={colors.slate500}
             style={styles.input}
+            value={
+              watchedAmount === undefined || watchedAmount === ('' as unknown as number)
+                ? ''
+                : String(watchedAmount)
+            }
             onChangeText={(value) =>
               addForm.setValue('amount', value as unknown as number, { shouldValidate: true })
             }
@@ -314,7 +330,7 @@ export function BudgetTab({
               keyboardType="number-pad"
               placeholderTextColor={colors.slate500}
               style={styles.input}
-              defaultValue={String(addForm.getValues('year') ?? '')}
+              value={watchedYear === undefined || watchedYear === null ? '' : String(watchedYear)}
               onChangeText={(value) =>
                 addForm.setValue('year', Number(value) as never, { shouldValidate: true })
               }
@@ -374,7 +390,11 @@ export function BudgetTab({
             placeholder="0.00"
             placeholderTextColor={colors.slate500}
             style={styles.input}
-            defaultValue={editingBudget ? String(editingBudget.limit) : ''}
+            value={
+              editAmount === undefined || editAmount === ('' as unknown as number)
+                ? ''
+                : String(editAmount)
+            }
             onChangeText={(value) =>
               editForm.setValue('amount', value as unknown as number, { shouldValidate: true })
             }

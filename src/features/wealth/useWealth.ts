@@ -21,8 +21,8 @@ type WealthToastHandler = (type: 'success' | 'error', message: string) => void;
 export function useWealth(filter: WealthFilter, onToast?: WealthToastHandler) {
   const queryClient = useQueryClient();
 
-  const invalidateWealth = () => {
-    queryClient.invalidateQueries({ queryKey: ['wealth'] });
+  const invalidateWealth = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['wealth'] });
   };
 
   const dashboardQuery = useQuery({
@@ -102,6 +102,9 @@ export function useWealth(filter: WealthFilter, onToast?: WealthToastHandler) {
     dashboard: dashboardQuery.data,
     isLoading: dashboardQuery.isLoading,
     isError: dashboardQuery.isError,
+    errorMessage: dashboardQuery.error
+      ? getWealthErrorMessage(dashboardQuery.error, 'Failed to load wealth data')
+      : null,
     refetch: dashboardQuery.refetch,
     createTransaction: createTransactionMutation.mutateAsync,
     updateTransaction: ({ id, data }: { id: string; data: UpdateTransactionPayload }) =>
