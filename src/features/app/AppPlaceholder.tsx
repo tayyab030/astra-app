@@ -8,7 +8,7 @@ export function AppPlaceholder({ title }: { title: string }) {
     <View style={styles.wrap}>
       <Text style={styles.title}>{title}</Text>
       <DashboardCard>
-        <Text style={styles.body}>This module is coming next.</Text>
+        <Text style={styles.body}>Coming soon.</Text>
       </DashboardCard>
     </View>
   );
