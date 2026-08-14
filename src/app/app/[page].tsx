@@ -8,7 +8,6 @@ const titles: Record<string, string> = {
   goals: 'Goals',
   health: 'Health',
   notes: 'Notes',
-  assistant: 'Assistant',
   communication: 'Communication',
   analytics: 'Analytics',
   'life-score': 'Life Score',

@@ -1,0 +1,295 @@
+import { useRef } from 'react';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import Ionicons from '@expo/vector-icons/Ionicons';
+
+import { colors, fonts } from '@/constants/theme';
+import { MessageList } from './MessageBubble';
+import { useAssistantChat } from './useAssistantChat';
+import { useVoiceInput } from './useVoiceInput';
+
+export function AssistantScreen() {
+  const listRef = useRef<ScrollView>(null);
+  const {
+    messages,
+    input,
+    setInput,
+    busy,
+    speaking,
+    error,
+    setError,
+    speakReplies,
+    setSpeakReplies,
+    sendMessage,
+    clearChat,
+    stopSpeech,
+    configured,
+  } = useAssistantChat();
+
+  const { isRecording, transcribing, toggleRecording } = useVoiceInput({
+    disabled: busy || speaking || !configured,
+    onTranscript: (text) => sendMessage(text),
+    onError: setError,
+  });
+
+  const statusLabel = isRecording
+    ? 'Listening… tap mic to send'
+    : transcribing
+      ? 'Transcribing with Whisper…'
+      : busy
+        ? 'Astra is thinking…'
+        : speaking
+          ? 'Astra is speaking…'
+          : null;
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={88}
+    >
+      <View style={styles.header}>
+        <View style={styles.headerText}>
+          <Text style={styles.title}>Assistant</Text>
+          <Text style={styles.subtitle}>Whisper in · Groq chat · Orpheus out</Text>
+        </View>
+        <View style={styles.headerActions}>
+          <Pressable
+            onPress={() => setSpeakReplies((value) => !value)}
+            style={[styles.iconBtn, speakReplies && styles.iconBtnActive]}
+          >
+            <Ionicons
+              name={speakReplies ? 'volume-high' : 'volume-mute'}
+              size={18}
+              color={speakReplies ? colors.white : colors.slate300}
+            />
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              void stopSpeech();
+            }}
+            style={styles.iconBtn}
+            disabled={!speaking}
+          >
+            <Ionicons name="stop" size={16} color={colors.slate300} />
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              void clearChat();
+            }}
+            style={styles.iconBtn}
+          >
+            <Ionicons name="trash-outline" size={16} color={colors.slate300} />
+          </Pressable>
+        </View>
+      </View>
+
+      {!configured ? (
+        <View style={styles.banner}>
+          <Text style={styles.bannerText}>
+            Add CONSOLE_GROQ_API_KEY to your .env file, then restart Expo.
+          </Text>
+        </View>
+      ) : null}
+
+      <MessageList messages={messages} listRef={listRef} />
+
+      {statusLabel ? (
+        <View style={styles.thinking}>
+          <ActivityIndicator color={isRecording ? colors.red400 : colors.cyan400} size="small" />
+          <Text style={styles.thinkingText}>{statusLabel}</Text>
+        </View>
+      ) : null}
+
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+
+      <View style={styles.composer}>
+        <Pressable
+          disabled={busy || speaking || !configured || transcribing}
+          onPress={() => {
+            void toggleRecording();
+          }}
+          style={[
+            styles.micBtn,
+            isRecording && styles.micBtnActive,
+            (busy || speaking || !configured || transcribing) && styles.micDisabled,
+          ]}
+        >
+          {transcribing ? (
+            <ActivityIndicator color={colors.white} size="small" />
+          ) : (
+            <Ionicons
+              name={isRecording ? 'stop' : 'mic'}
+              size={18}
+              color={colors.white}
+            />
+          )}
+        </Pressable>
+
+        <TextInput
+          value={input}
+          onChangeText={setInput}
+          placeholder={isRecording ? 'Listening…' : 'Ask Astra anything…'}
+          placeholderTextColor={colors.slate500}
+          style={styles.input}
+          multiline
+          editable={!busy && !isRecording && !transcribing}
+          onSubmitEditing={() => {
+            void sendMessage();
+          }}
+        />
+        <Pressable
+          disabled={busy || !input.trim() || isRecording || transcribing}
+          onPress={() => {
+            void sendMessage();
+          }}
+        >
+          <LinearGradient
+            colors={
+              busy || !input.trim() || isRecording || transcribing
+                ? [colors.slate700, colors.slate600]
+                : [colors.cyan500, colors.blue600]
+            }
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.sendBtn}
+          >
+            {busy ? (
+              <ActivityIndicator color={colors.white} size="small" />
+            ) : (
+              <Ionicons name="send" size={16} color={colors.white} />
+            )}
+          </LinearGradient>
+        </Pressable>
+      </View>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 16,
+    gap: 12,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  headerText: {
+    flex: 1,
+    gap: 2,
+  },
+  title: {
+    fontFamily: fonts.headingBold,
+    fontSize: 28,
+    color: colors.cyan300,
+  },
+  subtitle: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  iconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(30, 41, 59, 0.8)',
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.6)',
+  },
+  iconBtnActive: {
+    backgroundColor: 'rgba(6, 182, 212, 0.35)',
+    borderColor: 'rgba(34, 211, 238, 0.45)',
+  },
+  banner: {
+    borderRadius: 10,
+    padding: 12,
+    backgroundColor: 'rgba(185, 28, 28, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(248, 113, 113, 0.35)',
+  },
+  bannerText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.red300,
+  },
+  thinking: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  thinkingText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+  },
+  error: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.red400,
+  },
+  composer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 10,
+  },
+  micBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.blue600,
+    borderWidth: 1,
+    borderColor: 'rgba(34, 211, 238, 0.35)',
+  },
+  micBtnActive: {
+    backgroundColor: colors.red600,
+    borderColor: 'rgba(248, 113, 113, 0.5)',
+  },
+  micDisabled: {
+    opacity: 0.5,
+  },
+  input: {
+    flex: 1,
+    minHeight: 44,
+    maxHeight: 120,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: 'rgba(30, 41, 59, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.7)',
+    color: colors.slate200,
+    fontFamily: fonts.regular,
+    fontSize: 15,
+  },
+  sendBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
