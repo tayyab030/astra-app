@@ -6,7 +6,6 @@ const titles: Record<string, string> = {
   tasks: 'Tasks',
   'time-track': 'Time Track',
   goals: 'Goals',
-  wealth: 'Wealth',
   health: 'Health',
   notes: 'Notes',
   assistant: 'Assistant',
