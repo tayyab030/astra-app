@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -21,6 +21,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { colors } from '@/constants/theme';
+import { useSession } from '@/hooks/useSession';
 import { hydrateSession } from '@/lib/auth/tokenManager';
 
 SplashScreen.preventAutoHideAsync();
@@ -41,6 +42,7 @@ export default function RootLayout() {
     Poppins_800ExtraBold,
     Poppins_900Black,
   });
+  const [sessionReady, setSessionReady] = useState(false);
 
   useEffect(() => {
     async function prepare() {
@@ -49,9 +51,8 @@ export default function RootLayout() {
       } catch (e) {
         console.warn(e);
       } finally {
-        if (loaded || error) {
-          SplashScreen.hideAsync();
-        }
+        setSessionReady(true);
+        SplashScreen.hideAsync();
       }
     }
 
@@ -60,23 +61,36 @@ export default function RootLayout() {
     }
   }, [loaded, error]);
 
-  if (!loaded && !error) {
+  if ((!loaded && !error) || !sessionReady) {
     return null;
   }
 
   return (
     <QueryClientProvider client={queryClient}>
       <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.slate900 },
-          animation: 'fade',
-        }}
-      >
+      <RootNavigator />
+    </QueryClientProvider>
+  );
+}
+
+function RootNavigator() {
+  const { isAuthenticated } = useSession();
+
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.slate900 },
+        animation: 'fade',
+      }}
+    >
+      <Stack.Protected guard={isAuthenticated}>
+        <Stack.Screen name="app" />
+      </Stack.Protected>
+      <Stack.Protected guard={!isAuthenticated}>
         <Stack.Screen name="index" />
         <Stack.Screen name="auth" />
-      </Stack>
-    </QueryClientProvider>
+      </Stack.Protected>
+    </Stack>
   );
 }

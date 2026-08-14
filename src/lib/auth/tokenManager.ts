@@ -18,6 +18,51 @@ let refreshToken: string | null = null;
 let currentUser: AuthUser | null = null;
 let isLoggingOut = false;
 
+type SessionSnapshot = {
+  accessToken: string | null;
+  user: AuthUser | null;
+  isAuthenticated: boolean;
+};
+
+type SessionListener = () => void;
+const listeners = new Set<SessionListener>();
+
+let snapshot: SessionSnapshot = {
+  accessToken: null,
+  user: null,
+  isAuthenticated: false,
+};
+
+function notifySession() {
+  const next: SessionSnapshot = {
+    accessToken,
+    user: currentUser,
+    isAuthenticated: Boolean(accessToken),
+  };
+
+  if (
+    next.accessToken === snapshot.accessToken &&
+    next.user === snapshot.user &&
+    next.isAuthenticated === snapshot.isAuthenticated
+  ) {
+    return;
+  }
+
+  snapshot = next;
+  listeners.forEach((listener) => listener());
+}
+
+export function subscribeSession(listener: SessionListener) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+export function getSessionSnapshot() {
+  return snapshot;
+}
+
 export function getAccessTokenFromStore() {
   return accessToken;
 }
@@ -32,6 +77,7 @@ export async function hydrateSession() {
   accessToken = storedAccess;
   refreshToken = storedRefresh;
   currentUser = storedUser ? (JSON.parse(storedUser) as AuthUser) : null;
+  notifySession();
 }
 
 export async function setSession(session: AuthSession) {
@@ -44,6 +90,7 @@ export async function setSession(session: AuthSession) {
     setSecureItem(REFRESH_TOKEN_KEY, session.refresh),
     setSecureItem(USER_KEY, JSON.stringify(session.user)),
   ]);
+  notifySession();
 }
 
 export async function getRefreshToken() {
@@ -68,6 +115,7 @@ export async function refreshAccessToken(): Promise<string | null> {
     if (newAccessToken) {
       accessToken = newAccessToken;
       await setSecureItem(ACCESS_TOKEN_KEY, newAccessToken);
+      notifySession();
       return newAccessToken;
     }
   } catch (error) {
@@ -111,6 +159,7 @@ export async function logoutSession() {
   ]);
 
   isLoggingOut = false;
+  notifySession();
 }
 
 export function getCurrentUser() {

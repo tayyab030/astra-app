@@ -67,6 +67,7 @@ export function LoginForm() {
 
       await setSession({ access, refresh, user });
       showToast('success', 'Login successful');
+      router.replace(ROUTES.APP.DASHBOARD);
     } catch (error: unknown) {
       console.error(error);
       const errorData = axios.isAxiosError(error) ? error.response?.data : undefined;
