@@ -10,6 +10,8 @@ import { Platform } from 'react-native';
 
 import { stopGroqSpeech, transcribeAudioFile } from '@/lib/groq';
 
+import { normalizeMetering } from './VoiceWaveform';
+
 function guessMimeType(uri: string | null): string {
   if (!uri) return Platform.OS === 'ios' ? 'audio/m4a' : 'audio/mp4';
   if (uri.endsWith('.webm')) return 'audio/webm';
@@ -19,6 +21,11 @@ function guessMimeType(uri: string | null): string {
   return Platform.OS === 'ios' ? 'audio/m4a' : 'audio/mp4';
 }
 
+const recordingOptions = {
+  ...RecordingPresets.HIGH_QUALITY,
+  isMeteringEnabled: true,
+};
+
 type UseVoiceInputOptions = {
   onTranscript: (text: string) => void | Promise<void>;
   onError?: (message: string) => void;
@@ -26,8 +33,9 @@ type UseVoiceInputOptions = {
 };
 
 export function useVoiceInput({ onTranscript, onError, disabled }: UseVoiceInputOptions) {
-  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
-  const recorderState = useAudioRecorderState(recorder);
+  const recorder = useAudioRecorder(recordingOptions);
+  // Poll often so the pitch/level visualizer stays smooth.
+  const recorderState = useAudioRecorderState(recorder, 50);
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
 
@@ -62,7 +70,7 @@ export function useVoiceInput({ onTranscript, onError, disabled }: UseVoiceInput
         playsInSilentMode: true,
         allowsRecording: true,
       });
-      await recorder.prepareToRecordAsync();
+      await recorder.prepareToRecordAsync(recordingOptions);
       recorder.record();
     } catch (error) {
       onError?.(error instanceof Error ? error.message : 'Could not start recording.');
@@ -97,18 +105,12 @@ export function useVoiceInput({ onTranscript, onError, disabled }: UseVoiceInput
     }
   }, [onError, onTranscript, recorder, recorderState.isRecording]);
 
-  const toggleRecording = useCallback(async () => {
-    if (recorderState.isRecording) {
-      await stopRecordingAndTranscribe();
-      return;
-    }
-    await startRecording();
-  }, [recorderState.isRecording, startRecording, stopRecordingAndTranscribe]);
-
   return {
     isRecording: recorderState.isRecording,
+    meteringLevel: normalizeMetering(recorderState.metering),
     transcribing,
-    toggleRecording,
+    startRecording,
+    stopRecordingAndTranscribe,
     permissionGranted,
   };
 }

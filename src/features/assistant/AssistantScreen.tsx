@@ -1,13 +1,16 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   ActivityIndicator,
+  Animated,
   KeyboardAvoidingView,
+  LayoutAnimation,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  UIManager,
   View,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,9 +20,13 @@ import { colors, fonts } from '@/constants/theme';
 import { MessageList } from './MessageBubble';
 import { useAssistantChat } from './useAssistantChat';
 import { useVoiceInput } from './useVoiceInput';
+import { VoiceWaveform } from './VoiceWaveform';
 
 export function AssistantScreen() {
   const listRef = useRef<ScrollView>(null);
+  const textMode = useRef(new Animated.Value(1)).current;
+  const voiceMode = useRef(new Animated.Value(0)).current;
+
   const {
     messages,
     input,
@@ -36,14 +43,42 @@ export function AssistantScreen() {
     configured,
   } = useAssistantChat();
 
-  const { isRecording, transcribing, toggleRecording } = useVoiceInput({
+  const {
+    isRecording,
+    meteringLevel,
+    transcribing,
+    startRecording,
+    stopRecordingAndTranscribe,
+  } = useVoiceInput({
     disabled: busy || speaking || !configured,
     onTranscript: (text) => sendMessage(text),
     onError: setError,
   });
 
+  useEffect(() => {
+    if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+      UIManager.setLayoutAnimationEnabledExperimental(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    Animated.parallel([
+      Animated.timing(textMode, {
+        toValue: isRecording ? 0 : 1,
+        duration: 220,
+        useNativeDriver: true,
+      }),
+      Animated.timing(voiceMode, {
+        toValue: isRecording ? 1 : 0,
+        duration: 220,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [isRecording, textMode, voiceMode]);
+
   const statusLabel = isRecording
-    ? 'Listening… tap mic to send'
+    ? 'Listening… tap send to finish'
     : transcribing
       ? 'Transcribing with Whisper…'
       : busy
@@ -51,6 +86,19 @@ export function AssistantScreen() {
         : speaking
           ? 'Astra is speaking…'
           : null;
+
+  const sendDisabled =
+    transcribing ||
+    busy ||
+    (!isRecording && !input.trim());
+
+  const onSendPress = () => {
+    if (isRecording) {
+      void stopRecordingAndTranscribe();
+      return;
+    }
+    void sendMessage();
+  };
 
   return (
     <KeyboardAvoidingView
@@ -106,7 +154,7 @@ export function AssistantScreen() {
 
       {statusLabel ? (
         <View style={styles.thinking}>
-          <ActivityIndicator color={isRecording ? colors.red400 : colors.cyan400} size="small" />
+          <ActivityIndicator color={isRecording ? colors.cyan400 : colors.cyan400} size="small" />
           <Text style={styles.thinkingText}>{statusLabel}</Text>
         </View>
       ) : null}
@@ -114,57 +162,67 @@ export function AssistantScreen() {
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <View style={styles.composer}>
-        <Pressable
-          disabled={busy || speaking || !configured || transcribing}
-          onPress={() => {
-            void toggleRecording();
-          }}
-          style={[
-            styles.micBtn,
-            isRecording && styles.micBtnActive,
-            (busy || speaking || !configured || transcribing) && styles.micDisabled,
-          ]}
-        >
-          {transcribing ? (
-            <ActivityIndicator color={colors.white} size="small" />
-          ) : (
-            <Ionicons
-              name={isRecording ? 'stop' : 'mic'}
-              size={18}
-              color={colors.white}
-            />
-          )}
-        </Pressable>
+        {!isRecording ? (
+          <Animated.View
+            style={[
+              styles.micSlot,
+              {
+                opacity: textMode,
+              },
+            ]}
+          >
+            <Pressable
+              disabled={busy || speaking || !configured || transcribing}
+              onPress={() => {
+                void startRecording();
+              }}
+              style={[
+                styles.micBtn,
+                (busy || speaking || !configured || transcribing) && styles.micDisabled,
+              ]}
+            >
+              {transcribing ? (
+                <ActivityIndicator color={colors.white} size="small" />
+              ) : (
+                <Ionicons name="mic" size={18} color={colors.white} />
+              )}
+            </Pressable>
+          </Animated.View>
+        ) : null}
 
-        <TextInput
-          value={input}
-          onChangeText={setInput}
-          placeholder={isRecording ? 'Listening…' : 'Ask Astra anything…'}
-          placeholderTextColor={colors.slate500}
-          style={styles.input}
-          multiline
-          editable={!busy && !isRecording && !transcribing}
-          onSubmitEditing={() => {
-            void sendMessage();
-          }}
-        />
-        <Pressable
-          disabled={busy || !input.trim() || isRecording || transcribing}
-          onPress={() => {
-            void sendMessage();
-          }}
-        >
+        <View style={styles.middle}>
+          {isRecording ? (
+            <Animated.View style={[styles.voiceSlot, { opacity: voiceMode }]}>
+              <VoiceWaveform active={isRecording} level={meteringLevel} />
+            </Animated.View>
+          ) : (
+            <Animated.View style={{ opacity: textMode }}>
+              <TextInput
+                value={input}
+                onChangeText={setInput}
+                placeholder="Ask Astra anything…"
+                placeholderTextColor={colors.slate500}
+                style={styles.input}
+                multiline
+                editable={!busy && !transcribing}
+                onSubmitEditing={() => {
+                  void sendMessage();
+                }}
+              />
+            </Animated.View>
+          )}
+        </View>
+
+        <Pressable disabled={sendDisabled} onPress={onSendPress}>
           <LinearGradient
             colors={
-              busy || !input.trim() || isRecording || transcribing
-                ? [colors.slate700, colors.slate600]
-                : [colors.cyan500, colors.blue600]
+              sendDisabled ? [colors.slate700, colors.slate600] : [colors.cyan500, colors.blue600]
             }
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.sendBtn}
+            style={[styles.sendBtn, isRecording && styles.sendBtnListening]}
           >
-            {busy ? (
+            {busy || transcribing ? (
               <ActivityIndicator color={colors.white} size="small" />
             ) : (
               <Ionicons name="send" size={16} color={colors.white} />
@@ -254,6 +312,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     gap: 10,
   },
+  micSlot: {
+    height: 44,
+  },
   micBtn: {
     width: 44,
     height: 44,
@@ -264,15 +325,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(34, 211, 238, 0.35)',
   },
-  micBtnActive: {
-    backgroundColor: colors.red600,
-    borderColor: 'rgba(248, 113, 113, 0.5)',
-  },
   micDisabled: {
     opacity: 0.5,
   },
-  input: {
+  middle: {
     flex: 1,
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  voiceSlot: {
+    flex: 1,
+    minHeight: 44,
+  },
+  input: {
     minHeight: 44,
     maxHeight: 120,
     borderRadius: 12,
@@ -291,5 +356,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  sendBtnListening: {
+    borderWidth: 1,
+    borderColor: 'rgba(34, 211, 238, 0.55)',
   },
 });
