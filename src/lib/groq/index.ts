@@ -11,4 +11,5 @@ export { ASTRA_SYSTEM_PROMPT } from './systemPrompt';
 export { chunkForSpeech, createSpeechWav, sanitizeForSpeech } from './speech';
 export { speakWithGroq, stopGroqSpeech } from './speak';
 export { transcribeAudioFile } from './transcribe';
+export { buildAssistantContext } from './assistantContext';
 export type { AssistantMessage, ChatMessage, ChatRole } from './types';

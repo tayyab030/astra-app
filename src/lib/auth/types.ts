@@ -4,6 +4,11 @@ export type AuthUser = {
   email: string;
   first_name: string;
   last_name: string;
+  gender?: string | null;
+  currency?: string;
+  country?: string | null;
+  timezone?: string;
+  theme?: 'light' | 'dark' | 'neon';
 };
 
 export type AuthSession = {

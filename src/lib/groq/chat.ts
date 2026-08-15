@@ -13,8 +13,14 @@ type GroqChatCompletionResponse = {
   };
 };
 
+type CreateChatCompletionOptions = {
+  /** Extra system context, e.g. live wealth summary. */
+  context?: string | null;
+};
+
 export async function createChatCompletion(
   history: ChatMessage[],
+  options?: CreateChatCompletionOptions,
 ): Promise<string> {
   const apiKey = getGroqApiKey();
   if (!apiKey) {
@@ -25,8 +31,13 @@ export async function createChatCompletion(
 
   const messages: ChatMessage[] = [
     { role: 'system', content: ASTRA_SYSTEM_PROMPT },
-    ...history,
   ];
+
+  if (options?.context?.trim()) {
+    messages.push({ role: 'system', content: options.context.trim() });
+  }
+
+  messages.push(...history);
 
   const response = await fetch(GROQ_CHAT_URL, {
     method: 'POST',

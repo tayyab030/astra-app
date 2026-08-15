@@ -4,6 +4,7 @@ export const API_ENDPOINTS = {
     REGISTER: '/auth/users/',
     REFRESH_ACCESS_TOKEN: '/auth/jwt/refresh/',
     VERIFY_TOKEN: '/auth/jwt/verify/',
+    ME: '/auth/me/',
     OTP_STATUS: (token: string) => `/otp/${token}/status/`,
     RESEND_OTP: '/otp/create/',
     RESEND_OTP_LOGIN: '/otp/resend-login/',

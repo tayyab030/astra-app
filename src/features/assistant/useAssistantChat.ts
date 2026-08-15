@@ -8,6 +8,7 @@ import {
   type AssistantMessage,
   type ChatMessage,
 } from '@/lib/groq';
+import { buildAssistantContext } from '@/lib/groq/assistantContext';
 
 function createId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -17,7 +18,7 @@ const WELCOME: AssistantMessage = {
   id: 'welcome',
   role: 'assistant',
   content:
-    'Good day. I am Astra. Tap the mic to speak, or type a message. I listen with Groq Whisper and reply with voice.',
+    'Good day. I am Astra. I know your profile and wealth data—ask about spending, budgets, or anything else. Tap the mic to speak, or type a message.',
   createdAt: Date.now(),
 };
 
@@ -56,7 +57,10 @@ export function useAssistantChat() {
 
     try {
       await stopGroqSpeech();
-      const reply = await createChatCompletion(historyRef.current);
+      const context = await buildAssistantContext();
+      const reply = await createChatCompletion(historyRef.current, {
+        context,
+      });
       const assistantMessage: AssistantMessage = {
         id: createId(),
         role: 'assistant',
