@@ -62,6 +62,13 @@ export async function deleteAssistantConversation(id: string) {
   return response.data;
 }
 
+export async function updateAssistantConversation(id: string, title: string) {
+  const response = await authApi.patch<AssistantConversation>(ASSISTANT.CONVERSATION(id), {
+    title,
+  });
+  return response.data;
+}
+
 export async function fetchAssistantSpeechWav(text: string) {
   const response = await authApi.post<ArrayBuffer>(
     ASSISTANT.SPEECH,
