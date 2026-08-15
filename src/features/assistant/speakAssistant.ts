@@ -1,7 +1,8 @@
 import { createAudioPlayer, setAudioModeAsync } from 'expo-audio';
 import * as FileSystem from 'expo-file-system/legacy';
 
-import { chunkForSpeech, createSpeechWav } from './speech';
+import { fetchAssistantSpeechWav } from '@/lib/api/assistant';
+import { chunkForSpeech } from './chunkSpeech';
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
@@ -75,7 +76,7 @@ function playFile(uri: string): Promise<void> {
   });
 }
 
-export async function stopGroqSpeech(): Promise<void> {
+export async function stopAssistantSpeech(): Promise<void> {
   stopRequested = true;
   try {
     activePlayer?.pause();
@@ -86,7 +87,7 @@ export async function stopGroqSpeech(): Promise<void> {
   activePlayer = null;
 }
 
-export async function speakWithGroq(text: string): Promise<void> {
+export async function speakAssistantReply(text: string): Promise<void> {
   stopRequested = false;
   await ensureAudioMode();
 
@@ -99,7 +100,7 @@ export async function speakWithGroq(text: string): Promise<void> {
   for (let i = 0; i < chunks.length; i++) {
     if (stopRequested) break;
 
-    const wav = await createSpeechWav(chunks[i]);
+    const wav = await fetchAssistantSpeechWav(chunks[i]);
     if (stopRequested) break;
 
     const path = `${cacheDir}astra-tts-${Date.now()}-${i}.wav`;

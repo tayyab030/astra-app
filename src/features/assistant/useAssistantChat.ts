@@ -1,17 +1,34 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
-  createChatCompletion,
-  hasGroqApiKey,
-  speakWithGroq,
-  stopGroqSpeech,
-  type AssistantMessage,
-  type ChatMessage,
-} from '@/lib/groq';
-import { buildAssistantContext } from '@/lib/groq/assistantContext';
+  createAssistantConversation,
+  getAssistantConversation,
+  getAssistantErrorMessage,
+  listAssistantConversations,
+  sendAssistantMessage,
+  type AssistantChatMessage,
+} from '@/lib/api/assistant';
+
+import { speakAssistantReply, stopAssistantSpeech } from './speakAssistant';
+
+export type AssistantMessage = {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: number;
+};
 
 function createId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function mapApiMessage(message: AssistantChatMessage): AssistantMessage {
+  return {
+    id: message.id,
+    role: message.role,
+    content: message.content,
+    createdAt: new Date(message.created_at).getTime(),
+  };
 }
 
 const WELCOME: AssistantMessage = {
@@ -29,20 +46,44 @@ export function useAssistantChat() {
   const [speaking, setSpeaking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [speakReplies, setSpeakReplies] = useState(true);
-  const historyRef = useRef<ChatMessage[]>([]);
+  const [ready, setReady] = useState(false);
+  const conversationIdRef = useRef<string | null>(null);
   const speakRepliesRef = useRef(speakReplies);
   speakRepliesRef.current = speakReplies;
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const conversations = await listAssistantConversations();
+        if (cancelled) return;
+        const latest = conversations[0];
+        if (!latest) {
+          setReady(true);
+          return;
+        }
+        const detail = await getAssistantConversation(latest.id);
+        if (cancelled) return;
+        conversationIdRef.current = detail.conversation.id;
+        if (detail.messages.length > 0) {
+          setMessages(detail.messages.map(mapApiMessage));
+        }
+      } catch {
+        // Fresh welcome if history cannot load.
+      } finally {
+        if (!cancelled) setReady(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const sendMessage = useCallback(async (rawText?: string) => {
     const text = (rawText ?? input).trim();
     if (!text || busy) return;
 
-    if (!hasGroqApiKey()) {
-      setError('Missing CONSOLE_GROQ_API_KEY. Add it to .env and restart Expo.');
-      return;
-    }
-
-    const userMessage: AssistantMessage = {
+    const optimistic: AssistantMessage = {
       id: createId(),
       role: 'user',
       content: text,
@@ -52,58 +93,63 @@ export function useAssistantChat() {
     setInput('');
     setError(null);
     setBusy(true);
-    setMessages((prev) => [...prev, userMessage]);
-    historyRef.current = [...historyRef.current, { role: 'user', content: text }];
+    setMessages((prev) => [...prev, optimistic]);
 
     try {
-      await stopGroqSpeech();
-      const context = await buildAssistantContext();
-      const reply = await createChatCompletion(historyRef.current, {
-        context,
+      await stopAssistantSpeech();
+      const result = await sendAssistantMessage({
+        message: text,
+        conversationId: conversationIdRef.current,
       });
-      const assistantMessage: AssistantMessage = {
-        id: createId(),
-        role: 'assistant',
-        content: reply,
-        createdAt: Date.now(),
-      };
+      conversationIdRef.current = result.conversation.id;
 
-      historyRef.current = [...historyRef.current, { role: 'assistant', content: reply }];
-      setMessages((prev) => [...prev, assistantMessage]);
+      const userMessage = mapApiMessage(result.user_message);
+      const assistantMessage = mapApiMessage(result.assistant_message);
+
+      setMessages((prev) => {
+        const withoutOptimistic = prev.filter((item) => item.id !== optimistic.id);
+        return [...withoutOptimistic, userMessage, assistantMessage];
+      });
 
       if (speakRepliesRef.current) {
         setSpeaking(true);
         try {
-          await speakWithGroq(reply);
+          await speakAssistantReply(assistantMessage.content);
         } catch (speechError) {
-          console.warn('[groq-tts]', speechError);
+          console.warn('[assistant-tts]', speechError);
           setError(
-            speechError instanceof Error
-              ? `Reply ready, but speech failed: ${speechError.message}`
-              : 'Reply ready, but speech failed.',
+            getAssistantErrorMessage(
+              speechError,
+              'Reply ready, but speech failed.',
+            ),
           );
         } finally {
           setSpeaking(false);
         }
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to reach Astra.';
-      setError(message);
+      setMessages((prev) => prev.filter((item) => item.id !== optimistic.id));
+      setError(getAssistantErrorMessage(err, 'Failed to reach Astra.'));
     } finally {
       setBusy(false);
     }
   }, [busy, input]);
 
   const clearChat = useCallback(async () => {
-    await stopGroqSpeech();
+    await stopAssistantSpeech();
     setSpeaking(false);
-    historyRef.current = [];
+    try {
+      const conversation = await createAssistantConversation('New chat');
+      conversationIdRef.current = conversation.id;
+    } catch {
+      conversationIdRef.current = null;
+    }
     setMessages([{ ...WELCOME, createdAt: Date.now(), id: createId() }]);
     setError(null);
   }, []);
 
   const stopSpeech = useCallback(async () => {
-    await stopGroqSpeech();
+    await stopAssistantSpeech();
     setSpeaking(false);
   }, []);
 
@@ -120,6 +166,6 @@ export function useAssistantChat() {
     sendMessage,
     clearChat,
     stopSpeech,
-    configured: hasGroqApiKey(),
+    configured: ready,
   };
 }

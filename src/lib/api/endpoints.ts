@@ -65,4 +65,12 @@ export const API_ENDPOINTS = {
     BULK: '/notes/bulk/',
     RESTORE_VERSION: (id: string) => `/notes/${id}/versions/restore/`,
   },
+  ASSISTANT: {
+    CHAT: '/assistant/chat/',
+    SPEECH: '/assistant/speech/',
+    TRANSCRIBE: '/assistant/transcribe/',
+    TRANSCRIBE_BASE64: '/assistant/transcribe/base64/',
+    CONVERSATIONS: '/assistant/conversations/',
+    CONVERSATION: (id: string) => `/assistant/conversations/${id}/`,
+  },
 } as const;

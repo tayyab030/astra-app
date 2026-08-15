@@ -4,6 +4,5 @@ module.exports = ({ config }) => ({
   plugins: [...(config.plugins ?? []), 'expo-audio'],
   extra: {
     ...(config.extra ?? {}),
-    consoleGroqApiKey: process.env.CONSOLE_GROQ_API_KEY ?? '',
   },
 });

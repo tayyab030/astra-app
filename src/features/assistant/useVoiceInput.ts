@@ -6,20 +6,16 @@ import {
   useAudioRecorder,
   useAudioRecorderState,
 } from 'expo-audio';
+import * as FileSystem from 'expo-file-system/legacy';
 import { Platform } from 'react-native';
 
-import { stopGroqSpeech, transcribeAudioFile } from '@/lib/groq';
+import {
+  getAssistantErrorMessage,
+  transcribeAssistantAudioBase64,
+} from '@/lib/api/assistant';
 
+import { stopAssistantSpeech } from './speakAssistant';
 import { normalizeMetering } from './VoiceWaveform';
-
-function guessMimeType(uri: string | null): string {
-  if (!uri) return Platform.OS === 'ios' ? 'audio/m4a' : 'audio/mp4';
-  if (uri.endsWith('.webm')) return 'audio/webm';
-  if (uri.endsWith('.wav')) return 'audio/wav';
-  if (uri.endsWith('.mp3')) return 'audio/mpeg';
-  if (uri.endsWith('.m4a')) return 'audio/m4a';
-  return Platform.OS === 'ios' ? 'audio/m4a' : 'audio/mp4';
-}
 
 const recordingOptions = {
   ...RecordingPresets.HIGH_QUALITY,
@@ -34,7 +30,6 @@ type UseVoiceInputOptions = {
 
 export function useVoiceInput({ onTranscript, onError, disabled }: UseVoiceInputOptions) {
   const recorder = useAudioRecorder(recordingOptions);
-  // Poll often so the pitch/level visualizer stays smooth.
   const recorderState = useAudioRecorderState(recorder, 50);
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
@@ -65,7 +60,7 @@ export function useVoiceInput({ onTranscript, onError, disabled }: UseVoiceInput
     }
 
     try {
-      await stopGroqSpeech();
+      await stopAssistantSpeech();
       await setAudioModeAsync({
         playsInSilentMode: true,
         allowsRecording: true,
@@ -89,13 +84,18 @@ export function useVoiceInput({ onTranscript, onError, disabled }: UseVoiceInput
       }
 
       setTranscribing(true);
-      const text = await transcribeAudioFile({
-        uri,
-        mimeType: guessMimeType(uri),
+      const mimeType =
+        Platform.OS === 'ios' ? 'audio/m4a' : 'audio/mp4';
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      const text = await transcribeAssistantAudioBase64({
+        audioBase64: base64,
+        mimeType,
       });
       await onTranscript(text);
     } catch (error) {
-      onError?.(error instanceof Error ? error.message : 'Voice transcription failed.');
+      onError?.(getAssistantErrorMessage(error, 'Voice transcription failed.'));
     } finally {
       setTranscribing(false);
       await setAudioModeAsync({

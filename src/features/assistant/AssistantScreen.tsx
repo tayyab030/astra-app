@@ -144,9 +144,7 @@ export function AssistantScreen() {
 
       {!configured ? (
         <View style={styles.banner}>
-          <Text style={styles.bannerText}>
-            Add CONSOLE_GROQ_API_KEY to your .env file, then restart Expo.
-          </Text>
+          <Text style={styles.bannerText}>Loading assistant…</Text>
         </View>
       ) : null}
 

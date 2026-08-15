@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { colors, fonts } from '@/constants/theme';
-import type { AssistantMessage } from '@/lib/groq';
+import type { AssistantMessage } from './useAssistantChat';
 
 type Props = {
   message: AssistantMessage;
