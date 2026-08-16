@@ -16,6 +16,8 @@ import { AstraLogo } from '@/components/AstraLogo';
 import { colors, fonts } from '@/constants/theme';
 import { BlurTargetContext } from '@/features/auth/GlassCard';
 import { LoginBackground } from '@/features/auth/LoginBackground';
+import { AppNotificationsProvider } from '@/features/notifications/AppNotificationsProvider';
+import { NotificationBell } from '@/features/notifications/NotificationBell';
 import { useSession } from '@/hooks/useSession';
 import { AppSidebar } from './AppSidebar';
 
@@ -33,7 +35,8 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <BlurTargetContext.Provider value={blurTargetRef}>
-      <View style={styles.root}>
+      <AppNotificationsProvider>
+        <View style={styles.root}>
         <BlurTargetView ref={blurTargetRef} style={StyleSheet.absoluteFill}>
           <LinearGradient
             colors={[colors.slate900, colors.slate800, colors.slate900]}
@@ -60,14 +63,17 @@ export function AppShell({ children }: AppShellProps) {
               <AstraLogo />
             </View>
 
-            <LinearGradient
-              colors={[colors.cyan500, colors.blue600]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.avatar}
-            >
-              <Text style={styles.avatarText}>{initials}</Text>
-            </LinearGradient>
+            <View style={styles.headerRight}>
+              <NotificationBell />
+              <LinearGradient
+                colors={[colors.cyan500, colors.blue600]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.avatar}
+              >
+                <Text style={styles.avatarText}>{initials}</Text>
+              </LinearGradient>
+            </View>
           </View>
 
           <View style={styles.main}>{children}</View>
@@ -95,7 +101,8 @@ export function AppShell({ children }: AppShellProps) {
             </LinearGradient>
           </View>
         </Modal>
-      </View>
+        </View>
+      </AppNotificationsProvider>
     </BlurTargetContext.Provider>
   );
 }
@@ -124,6 +131,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
     flexShrink: 1,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   menuButton: {
     width: 36,

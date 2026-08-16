@@ -7,6 +7,7 @@ export type NotificationChannelId =
 
 export const NOTIFICATION_SOURCES = {
   TEST: 'test',
+  ALERT: 'alert',
 } as const;
 
 export type NotificationSource =

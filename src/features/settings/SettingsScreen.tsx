@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -19,6 +19,7 @@ import { ROUTES } from '@/constants/routes';
 import { colors, fonts } from '@/constants/theme';
 import { PageHeader } from '@/components/PageHeader';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
+import { AlertsSettingsPanel } from '@/features/notifications/AlertsSettingsPanel';
 import { FormModal } from '@/features/wealth/FormModal';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
 import { SelectField } from '@/features/wealth/SelectField';
@@ -78,6 +79,7 @@ const TABS = [
   { id: 'profile', label: 'Profile', icon: 'person-outline' as const },
   { id: 'theme', label: 'Theme', icon: 'color-palette-outline' as const },
   { id: 'modules', label: 'Modules', icon: 'grid-outline' as const },
+  { id: 'notifications', label: 'Alerts', icon: 'notifications-outline' as const },
   { id: 'ai', label: 'AI', icon: 'hardware-chip-outline' as const },
   { id: 'security', label: 'Security', icon: 'shield-outline' as const },
 ] as const;
@@ -87,8 +89,20 @@ type TabId = (typeof TABS)[number]['id'];
 export function SettingsScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const params = useLocalSearchParams<{ tab?: string | string[] }>();
 
-  const [tab, setTab] = useState<TabId>('profile');
+  const initialTab = useMemo((): TabId => {
+    const raw = Array.isArray(params.tab) ? params.tab[0] : params.tab;
+    if (TABS.some((t) => t.id === raw)) return raw as TabId;
+    return 'profile';
+  }, [params.tab]);
+
+  const [tab, setTab] = useState<TabId>(initialTab);
+
+  useEffect(() => {
+    setTab(initialTab);
+  }, [initialTab]);
+
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -574,6 +588,8 @@ export function SettingsScreen() {
             ))}
           </DashboardCard>
         ) : null}
+
+        {tab === 'notifications' ? <AlertsSettingsPanel /> : null}
 
         {tab === 'ai' ? (
           <DashboardCard>

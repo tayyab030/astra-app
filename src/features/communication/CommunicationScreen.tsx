@@ -1,64 +1,43 @@
-import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { PageHeader } from '@/components/PageHeader';
 import { ROUTES } from '@/constants/routes';
 import { colors, fonts } from '@/constants/theme';
-import { PageHeader } from '@/components/PageHeader';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
+import { AlertsSettingsPanel } from '@/features/notifications/AlertsSettingsPanel';
+import { useAppNotificationsContext } from '@/features/notifications/AppNotificationsProvider';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
-import { showToast } from '@/lib/ui/toastStore';
+import type { AlertSeverity } from '@/lib/alerts/types';
 
-const PREFS_KEY = 'astra.communication.prefs';
-
-type CommPrefs = {
-  emailDigest: boolean;
-  pushAlerts: boolean;
-  inAppInbox: boolean;
-};
-
-const DEFAULT_PREFS: CommPrefs = {
-  emailDigest: false,
-  pushAlerts: true,
-  inAppInbox: true,
-};
+function severityStyle(severity: AlertSeverity) {
+  if (severity === 'critical') {
+    return { bg: 'rgba(220, 38, 38, 0.2)', text: colors.red300 };
+  }
+  if (severity === 'warning') {
+    return { bg: 'rgba(245, 158, 11, 0.18)', text: '#fbbf24' };
+  }
+  return { bg: 'rgba(34, 211, 238, 0.15)', text: colors.cyan300 };
+}
 
 /**
- * Device-only notification prefs (no Communication backend on astra).
- * Copy and UX make that explicit — do not imply server sync.
+ * In-app alerts inbox + channel prefs.
+ * Prefs are device-local (same as web). No Communication messaging backend.
  */
 export function CommunicationScreen() {
   const router = useRouter();
-  const [prefs, setPrefs] = useState<CommPrefs>(DEFAULT_PREFS);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    void (async () => {
-      try {
-        const raw = await AsyncStorage.getItem(PREFS_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw) as Partial<CommPrefs>;
-          setPrefs({ ...DEFAULT_PREFS, ...parsed });
-        }
-      } catch {
-        // keep defaults
-      } finally {
-        setLoaded(true);
-      }
-    })();
-  }, []);
-
-  const persist = async (next: CommPrefs, message: string) => {
-    setPrefs(next);
-    try {
-      await AsyncStorage.setItem(PREFS_KEY, JSON.stringify(next));
-      showToast('success', message);
-    } catch {
-      showToast('error', 'Could not save preference on this device');
-    }
-  };
+  const {
+    alerts,
+    unreadCount,
+    isLoading,
+    markRead,
+    markAllRead,
+    dismiss,
+    dismissAll,
+    inAppEnabled,
+  } = useAppNotificationsContext();
 
   return (
     <ScrollView
@@ -68,139 +47,120 @@ export function CommunicationScreen() {
     >
       <PageHeader
         title="Communication"
-        subtitle="Local notification prefs only — nothing here syncs to the server yet."
+        subtitle="Life OS alerts derived on-device. Prefs do not sync to the server."
       />
 
-      <DashboardCard borderColor="rgba(250, 204, 21, 0.35)">
+      <DashboardCard>
         <View style={styles.inboxHeader}>
-          <Ionicons name="phone-portrait-outline" size={22} color="#facc15" />
+          <Ionicons name="notifications-outline" size={22} color={colors.cyan400} />
           <View style={styles.inboxMeta}>
-            <Text style={styles.sectionTitle}>On this device</Text>
+            <Text style={styles.sectionTitle}>Alert inbox</Text>
             <Text style={styles.sectionDesc}>
-              Toggles save to AsyncStorage. Email digests and a real inbox need a
-              future backend — Astra does not send messages from this screen today.
+              {isLoading
+                ? 'Refreshing…'
+                : inAppEnabled
+                  ? `${unreadCount} unread · ${alerts.length} total`
+                  : 'In-app alerts are off — enable them in settings below'}
             </Text>
           </View>
         </View>
-      </DashboardCard>
 
-      <DashboardCard>
-        <View style={styles.inboxHeader}>
-          <Ionicons name="mail-unread-outline" size={22} color={colors.cyan400} />
-          <View style={styles.inboxMeta}>
-            <Text style={styles.sectionTitle}>Inbox (placeholder)</Text>
-            <Text style={styles.sectionDesc}>
-              No communication API — this list will stay empty until server messaging ships.
+        {inAppEnabled && alerts.length > 0 ? (
+          <View style={styles.actions}>
+            <Pressable onPress={() => markAllRead()} style={styles.actionBtn}>
+              <Ionicons name="checkmark-done-outline" size={16} color={colors.slate300} />
+              <Text style={styles.actionText}>Mark all read</Text>
+            </Pressable>
+            <Pressable onPress={() => dismissAll()} style={styles.actionBtn}>
+              <Ionicons name="trash-outline" size={16} color={colors.slate300} />
+              <Text style={styles.actionText}>Dismiss all</Text>
+            </Pressable>
+          </View>
+        ) : null}
+
+        {!inAppEnabled ? (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyTitle}>In-app inbox disabled</Text>
+            <Text style={styles.emptyBody}>
+              Turn on In-App Alerts below or in Settings → Alerts to see derived notices here.
             </Text>
           </View>
-        </View>
-        <View style={styles.emptyBox}>
-          <Text style={styles.emptyTitle}>No messages on this device</Text>
-          <Text style={styles.emptyBody}>
-            Prefer Settings for AI and account options. Use the toggles below only as
-            personal reminders of how you want alerts to work later.
-          </Text>
-        </View>
+        ) : alerts.length === 0 ? (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyTitle}>You're all caught up</Text>
+            <Text style={styles.emptyBody}>
+              Alerts appear when tasks, habits, notes, wealth, health, or goals need attention.
+            </Text>
+          </View>
+        ) : (
+          alerts.map((alert) => {
+            const tone = severityStyle(alert.severity);
+            return (
+              <View
+                key={alert.id}
+                style={[styles.row, !alert.read && styles.rowUnread]}
+              >
+                <Pressable
+                  style={styles.rowMain}
+                  onPress={() => {
+                    markRead(alert.id);
+                    router.push(alert.href as never);
+                  }}
+                >
+                  <View style={styles.rowTop}>
+                    <View style={[styles.severityBadge, { backgroundColor: tone.bg }]}>
+                      <Text style={[styles.severityText, { color: tone.text }]}>
+                        {alert.severity}
+                      </Text>
+                    </View>
+                    {!alert.read ? <View style={styles.unreadDot} /> : null}
+                  </View>
+                  <Text style={styles.alertTitle} numberOfLines={1}>
+                    {alert.title}
+                  </Text>
+                  <Text style={styles.alertBody} numberOfLines={2}>
+                    {alert.body}
+                  </Text>
+                  <Text style={styles.alertWhen}>
+                    {formatDistanceToNow(new Date(alert.createdAt), { addSuffix: true })}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => dismiss(alert.id)}
+                  style={styles.dismissBtn}
+                  accessibilityLabel="Dismiss"
+                >
+                  <Ionicons name="close" size={16} color={colors.slate400} />
+                </Pressable>
+              </View>
+            );
+          })
+        )}
       </DashboardCard>
 
-      <DashboardCard>
-        <Text style={styles.sectionTitle}>Channel preferences</Text>
-        <Text style={styles.sectionDesc}>
-          Device-only. Preference saved for later — delivery is not wired.
-        </Text>
-
-        <ToggleRow
-          label="Email digest"
-          description="Preference only — email is not sent from the app yet"
-          value={prefs.emailDigest}
-          disabled={!loaded}
-          onChange={(emailDigest) =>
-            void persist({ ...prefs, emailDigest }, 'Saved on this device (email not sent)')
-          }
-        />
-        <ToggleRow
-          label="Push alerts"
-          description="Device preference for when push becomes available"
-          value={prefs.pushAlerts}
-          disabled={!loaded}
-          onChange={(pushAlerts) =>
-            void persist({ ...prefs, pushAlerts }, 'Push preference saved on this device')
-          }
-        />
-        <ToggleRow
-          label="In-app inbox"
-          description="Show a local inbox UI when notices exist (none yet)"
-          value={prefs.inAppInbox}
-          disabled={!loaded}
-          onChange={(inAppInbox) =>
-            void persist({ ...prefs, inAppInbox }, 'In-app preference saved on this device')
-          }
-        />
-      </DashboardCard>
+      <AlertsSettingsPanel compact />
 
       <DashboardCard>
-        <Text style={styles.sectionTitle}>Related settings</Text>
+        <Text style={styles.sectionTitle}>Full alert settings</Text>
         <Text style={styles.sectionDesc}>
-          Account alerts and AI insight behavior live in Settings.
+          Categories, digest frequency, and quiet hours live under Settings → Alerts.
         </Text>
         <PrimaryButton
-          label="Open Settings"
+          label="Open Alerts settings"
           icon="settings-outline"
-          onPress={() => router.push(ROUTES.APP.SETTINGS as never)}
+          onPress={() =>
+            router.push(`${ROUTES.APP.SETTINGS}?tab=notifications` as never)
+          }
         />
       </DashboardCard>
-
-      <DashboardCard borderColor="rgba(71, 85, 105, 0.4)">
-        <Text style={styles.sectionTitle}>Coming later</Text>
-        {[
-          'Threaded conversations with contacts',
-          'Shared task / goal updates over email',
-          'Server-synced notification history',
-        ].map((item) => (
-          <View key={item} style={styles.comingRow}>
-            <Ionicons name="ellipse-outline" size={10} color={colors.slate500} />
-            <Text style={styles.comingText}>{item}</Text>
-          </View>
-        ))}
-      </DashboardCard>
     </ScrollView>
-  );
-}
-
-function ToggleRow({
-  label,
-  description,
-  value,
-  disabled,
-  onChange,
-}: {
-  label: string;
-  description: string;
-  value: boolean;
-  disabled?: boolean;
-  onChange: (next: boolean) => void;
-}) {
-  return (
-    <View style={styles.toggleRow}>
-      <View style={styles.toggleMeta}>
-        <Text style={styles.toggleLabel}>{label}</Text>
-        <Text style={styles.toggleDesc}>{description}</Text>
-      </View>
-      <Switch
-        value={value}
-        disabled={disabled}
-        onValueChange={onChange}
-        trackColor={{ false: colors.slate700, true: colors.cyan600 }}
-        thumbColor={colors.white}
-      />
-    </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
   scroll: { padding: 24, paddingBottom: 40, gap: 16 },
-  inboxHeader: { flexDirection: 'row', gap: 12, marginBottom: 12 },
+  inboxHeader: { flexDirection: 'row', gap: 12, marginBottom: 8 },
   inboxMeta: { flex: 1 },
   sectionTitle: {
     fontFamily: fonts.heading,
@@ -214,6 +174,25 @@ const styles = StyleSheet.create({
     color: colors.slate400,
     marginBottom: 8,
   },
+  actions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 8,
+  },
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    backgroundColor: 'rgba(30, 41, 59, 0.7)',
+  },
+  actionText: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    color: colors.slate300,
+  },
   emptyBox: {
     borderRadius: 10,
     borderWidth: 1,
@@ -224,18 +203,59 @@ const styles = StyleSheet.create({
   },
   emptyTitle: { fontFamily: fonts.medium, fontSize: 15, color: colors.slate200 },
   emptyBody: { fontFamily: fonts.regular, fontSize: 13, color: colors.slate500 },
-  toggleRow: {
+  row: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
+    gap: 4,
     paddingVertical: 12,
     borderTopWidth: 1,
     borderTopColor: 'rgba(71, 85, 105, 0.35)',
   },
-  toggleMeta: { flex: 1, gap: 2 },
-  toggleLabel: { fontFamily: fonts.medium, fontSize: 14, color: colors.slate200 },
-  toggleDesc: { fontFamily: fonts.regular, fontSize: 12, color: colors.slate500 },
-  comingRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
-  comingText: { fontFamily: fonts.regular, fontSize: 13, color: colors.slate400 },
+  rowUnread: {
+    backgroundColor: 'rgba(6, 182, 212, 0.05)',
+    marginHorizontal: -8,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  rowMain: { flex: 1, minWidth: 0 },
+  rowTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  severityBadge: {
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  severityText: {
+    fontFamily: fonts.medium,
+    fontSize: 10,
+    textTransform: 'capitalize',
+  },
+  unreadDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.cyan400,
+  },
+  alertTitle: {
+    marginTop: 6,
+    fontFamily: fonts.semibold,
+    fontSize: 14,
+    color: colors.slate200,
+  },
+  alertBody: {
+    marginTop: 2,
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+  alertWhen: {
+    marginTop: 6,
+    fontFamily: fonts.regular,
+    fontSize: 10,
+    color: colors.slate500,
+  },
+  dismissBtn: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
