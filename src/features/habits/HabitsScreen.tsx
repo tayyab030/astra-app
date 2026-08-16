@@ -12,20 +12,27 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { InsightHorizonBadge } from '@/components/insights/InsightHorizonBadge';
 import { colors, fonts } from '@/constants/theme';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
+import { useDashboard } from '@/features/dashboard/hooks/useDashboard';
 import { FormModal } from '@/features/wealth/FormModal';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
 import { WealthEmptyState } from '@/features/wealth/WealthEmptyState';
+import { useAiInsight } from '@/hooks/useAiInsight';
+import { useSession } from '@/hooks/useSession';
+import { buildLifeOsInsightExtras } from '@/lib/insights/lifeOsContext';
 
 import { HabitDateNav } from './components/HabitDateNav';
 import { HabitFormModal } from './components/HabitFormModal';
 import { HabitRow } from './components/HabitRow';
+import { HabitsOverview } from './components/HabitsOverview';
 import { useHabits } from './hooks/useHabits';
+import { useHabitsWeek } from './hooks/useHabitsWeek';
 import type { Habit } from './types/habits.types';
 import { TIME_OF_DAY_OPTIONS } from './types/habits.types';
 
-type HabitsTab = 'habits' | 'missed';
+type HabitsTab = 'overview' | 'habits' | 'missed';
 
 function habitOccurrenceDate(habit: Habit, fallback: string) {
   return habit.occurrenceDate || habit.overdueFrom || fallback;
@@ -40,6 +47,8 @@ function shouldPromptDelayReason(habit: Habit, today: string, selectedDate: stri
 export function HabitsScreen() {
   const router = useRouter();
   const { action } = useLocalSearchParams<{ action?: string }>();
+  const { user } = useSession();
+  const { dashboard: lifeOs } = useDashboard();
   const {
     habits,
     dayHabits,
@@ -57,6 +66,7 @@ export function HabitsScreen() {
     toggleHabit,
     adjustHabit,
     createHabit,
+    createPack,
     updateHabit,
     deleteHabit,
   } = useHabits();
@@ -64,6 +74,61 @@ export function HabitsScreen() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<HabitsTab>('habits');
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+
+  const {
+    weeklyConsistency,
+    achievements,
+    isLoading: isWeekLoading,
+  } = useHabitsWeek(activeTab === 'overview');
+
+  const insightContext = useMemo(
+    () => ({
+      ...buildLifeOsInsightExtras(user, lifeOs),
+      total: dayHabits.length,
+      completed: completedCount,
+      highCompleted,
+      highTotal,
+      longestStreak,
+      longestStreakHabitName: longestStreakHabitName ?? null,
+      habits: habits.slice(0, 12).map((habit) => ({
+        name: habit.name,
+        streak: habit.streak,
+        completed: habit.completed,
+        priority: habit.priority,
+        groupName: habit.groupName,
+        missBehavior: habit.missBehavior,
+      })),
+      dayHabits: dayHabits.slice(0, 12).map((habit) => ({
+        name: habit.name,
+        completed: habit.completed,
+        priority: habit.priority,
+        status: habit.status ?? null,
+        streak: habit.streak,
+      })),
+    }),
+    [
+      completedCount,
+      dayHabits,
+      habits,
+      highCompleted,
+      highTotal,
+      lifeOs,
+      longestStreak,
+      longestStreakHabitName,
+      user,
+    ],
+  );
+
+  const {
+    data: insightData,
+    hasInsight,
+    isLoading: insightLoading,
+    enabled: insightsEnabled,
+  } = useAiInsight('habits', insightContext, {
+    enabled: activeTab === 'overview' && !isLoading,
+  });
+
+  const showInsights = insightsEnabled && (hasInsight || insightLoading);
   const [delayHabit, setDelayHabit] = useState<Habit | null>(null);
   const [delayReason, setDelayReason] = useState('');
   const [pendingAdjust, setPendingAdjust] = useState<{
@@ -352,6 +417,11 @@ export function HabitsScreen() {
       <View style={styles.tabs}>
         {(
           [
+            {
+              id: 'overview' as const,
+              label: 'Overview',
+              icon: 'stats-chart-outline' as const,
+            },
             { id: 'habits' as const, label: 'Habits', icon: 'list-outline' as const },
             {
               id: 'missed' as const,
@@ -384,16 +454,53 @@ export function HabitsScreen() {
         })}
       </View>
 
-      <DashboardCard>
-        <HabitDateNav
-          date={selectedDate}
-          today={dayView?.today}
-          relative={dayView?.relative}
-          onChange={setSelectedDate}
-        />
-      </DashboardCard>
+      {activeTab !== 'overview' ? (
+        <DashboardCard>
+          <HabitDateNav
+            date={selectedDate}
+            today={dayView?.today}
+            relative={dayView?.relative}
+            onChange={setSelectedDate}
+          />
+        </DashboardCard>
+      ) : null}
 
-      {activeTab === 'missed' ? (
+      {activeTab === 'overview' ? (
+        <View style={styles.list}>
+          {showInsights ? (
+            <DashboardCard>
+              <View style={styles.insightHeader}>
+                <Ionicons name="sparkles" size={18} color="#facc15" />
+                <Text style={styles.insightTitle}>AI Habit Insights</Text>
+              </View>
+              {insightLoading && !hasInsight ? (
+                <>
+                  <View style={styles.skeleton} />
+                  <View style={styles.skeleton} />
+                </>
+              ) : (
+                (insightData?.items ?? []).map((insight, i) => (
+                  <View key={`${insight.message}-${i}`} style={styles.insightItem}>
+                    <InsightHorizonBadge horizon={insight.horizon} />
+                    <Text style={styles.insightText}>{insight.message}</Text>
+                  </View>
+                ))
+              )}
+            </DashboardCard>
+          ) : null}
+          <HabitsOverview
+            habits={dayHabits}
+            completedCount={completedCount}
+            highCompleted={highCompleted}
+            highTotal={highTotal}
+            longestStreak={longestStreak}
+            longestStreakHabitName={longestStreakHabitName}
+            weeklyConsistency={weeklyConsistency}
+            achievements={achievements}
+            isLoading={isDayLoading || isWeekLoading}
+          />
+        </View>
+      ) : activeTab === 'missed' ? (
         isDayLoading ? (
           <View style={styles.loading}>
             <ActivityIndicator color={colors.cyan400} size="large" />
@@ -458,6 +565,7 @@ export function HabitsScreen() {
         isSaving={isSaving}
         onClose={() => setDialogOpen(false)}
         onCreate={createHabit}
+        onCreatePack={createPack}
         onUpdate={updateHabit}
       />
       <HabitFormModal
@@ -662,5 +770,37 @@ const styles = StyleSheet.create({
   textarea: {
     minHeight: 96,
     paddingTop: 10,
+  },
+  insightHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  insightTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.cyan300,
+  },
+  insightItem: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.3)',
+    backgroundColor: 'rgba(6, 182, 212, 0.12)',
+    padding: 12,
+    gap: 8,
+    marginBottom: 10,
+  },
+  insightText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate200,
+    lineHeight: 18,
+  },
+  skeleton: {
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: 'rgba(51, 65, 85, 0.45)',
+    marginBottom: 10,
   },
 });

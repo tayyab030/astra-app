@@ -37,6 +37,11 @@ export async function fetchDailyQuote() {
   return response.data;
 }
 
+export async function fetchGoalsQuote() {
+  const response = await authApi.get<DailyQuoteResponse>(ASSISTANT.GOALS_QUOTE);
+  return response.data;
+}
+
 export async function sendAssistantMessage(options: {
   message: string;
   conversationId?: string | null;

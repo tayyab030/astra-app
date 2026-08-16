@@ -81,31 +81,6 @@ export function getCategoryLabel(value: string) {
   return WEALTH_CATEGORIES.find((category) => category.value === value)?.label ?? value;
 }
 
-export type AiInsightType = 'success' | 'warning' | 'tip' | 'prediction';
-
-export interface AiInsight {
-  type: AiInsightType;
-  message: string;
-}
-
-export function getAiInsights(formatCurrency: (amount: number) => string): AiInsight[] {
-  return [
-    { type: 'success', message: '🎉 You saved 20% more than last month! Keep up the great work.' },
-    {
-      type: 'warning',
-      message: '⚠️ Your shopping expenses are 50% over budget. Consider reducing non-essential purchases.',
-    },
-    {
-      type: 'tip',
-      message: `💡 You spent ${formatCurrency(125)} on coffee this month. Making coffee at home could save you ${formatCurrency(90)}/month.`,
-    },
-    {
-      type: 'prediction',
-      message: "📈 At your current savings rate, you'll reach your emergency fund goal 2 months early!",
-    },
-  ];
-}
-
 export const CATEGORY_CHART_COLORS: Record<string, string> = {
   food: '#22d3ee',
   transport: '#60a5fa',

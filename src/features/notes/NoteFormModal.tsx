@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { format, parseISO } from 'date-fns';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { colors, fonts } from '@/constants/theme';
@@ -32,6 +33,7 @@ type NoteFormModalProps = {
   note?: Note | null;
   defaultType?: NoteType;
   onSubmit: (values: NoteFormValues) => Promise<void>;
+  onRestoreVersion?: (noteId: string, versionId: string) => Promise<void>;
   loading?: boolean;
 };
 
@@ -57,6 +59,7 @@ export function NoteFormModal({
   note,
   defaultType = 'quick-notes',
   onSubmit,
+  onRestoreVersion,
   loading,
 }: NoteFormModalProps) {
   const {
@@ -222,6 +225,49 @@ export function NoteFormModal({
         <Text style={styles.favoriteLabel}>Mark as favorite</Text>
       </Pressable>
 
+      {mode === 'edit' && note && note.versions.length > 0 && onRestoreVersion ? (
+        <View style={styles.field}>
+          <Text style={styles.fieldLabel}>Versions</Text>
+          {note.versions.slice(0, 5).map((version) => {
+            let label = 'Earlier version';
+            try {
+              label = format(parseISO(version.createdAt), 'MMM d, yyyy · HH:mm');
+            } catch {
+              // keep fallback
+            }
+            return (
+              <Pressable
+                key={version.id}
+                style={styles.versionRow}
+                onPress={() => {
+                  Alert.alert(
+                    'Restore this version?',
+                    'Current content will be replaced with the selected version.',
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      {
+                        text: 'Restore',
+                        onPress: () => {
+                          void onRestoreVersion(note.id, version.id).then(() => onClose());
+                        },
+                      },
+                    ],
+                  );
+                }}
+              >
+                <View style={styles.versionMeta}>
+                  <Text style={styles.versionTitle} numberOfLines={1}>
+                    {version.title || 'Untitled'}
+                  </Text>
+                  <Text style={styles.versionDate}>{label}</Text>
+                </View>
+                <Text style={styles.versionAction}>Restore</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      ) : null}
+
       <PrimaryButton
         label={mode === 'edit' ? 'Save Changes' : 'Create Note'}
         loading={loading}
@@ -277,5 +323,34 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 14,
     color: colors.slate300,
+  },
+  versionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(71, 85, 105, 0.4)',
+  },
+  versionMeta: {
+    flex: 1,
+    gap: 2,
+    minWidth: 0,
+  },
+  versionTitle: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.slate200,
+  },
+  versionDate: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: colors.slate500,
+  },
+  versionAction: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    color: colors.cyan400,
   },
 });

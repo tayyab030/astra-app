@@ -8,19 +8,27 @@ import {
   View,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { InsightHorizonBadge } from '@/components/insights/InsightHorizonBadge';
 import { colors, fonts } from '@/constants/theme';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
+import { useDashboard } from '@/features/dashboard/hooks/useDashboard';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
 import { WealthEmptyState } from '@/features/wealth/WealthEmptyState';
 import { WealthFilters } from '@/features/wealth/WealthFilters';
+import { useAiInsight } from '@/hooks/useAiInsight';
+import { useSession } from '@/hooks/useSession';
 import type { Goal, GoalsFilter } from '@/lib/api/goals';
 import type { WealthFilter } from '@/lib/api/wealth';
+import { buildLifeOsInsightExtras } from '@/lib/insights/lifeOsContext';
 
 import { GoalCard } from './components/GoalCard';
 import { GoalFormModal } from './components/GoalFormModal';
+import { LifeBalanceWheel } from './components/LifeBalanceWheel';
 import { STATUS_FILTERS, type StatusFilter } from './constants';
 import { useGoals } from './hooks/useGoals';
+import { useGoalsQuote } from './hooks/useGoalsQuote';
 
 function getInitialFilter(): GoalsFilter {
   const now = new Date();
@@ -34,6 +42,9 @@ function getInitialFilter(): GoalsFilter {
 export function GoalsScreen() {
   const router = useRouter();
   const { action } = useLocalSearchParams<{ action?: string }>();
+  const { user } = useSession();
+  const { dashboard: lifeOs } = useDashboard();
+  const { quote } = useGoalsQuote();
   const [filter, setFilter] = useState<GoalsFilter>(getInitialFilter);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
@@ -65,8 +76,10 @@ export function GoalsScreen() {
     isUpdatingMilestone,
   } = useGoals(filter);
 
+  const goals = dashboard?.goals ?? [];
+  const summary = dashboard?.summary;
+
   const filteredGoals = useMemo(() => {
-    const goals = dashboard?.goals ?? [];
     if (statusFilter === 'in_progress') {
       return goals.filter((goal) => goal.progress < 100);
     }
@@ -74,9 +87,42 @@ export function GoalsScreen() {
       return goals.filter((goal) => goal.progress >= 100);
     }
     return goals;
-  }, [dashboard?.goals, statusFilter]);
+  }, [goals, statusFilter]);
 
-  const summary = dashboard?.summary;
+  const insightContext = useMemo(() => {
+    if (!dashboard) return undefined;
+    return {
+      ...buildLifeOsInsightExtras(user, lifeOs),
+      activeCount: summary?.active_goals ?? goals.filter((g) => g.progress < 100).length,
+      avgProgress: summary?.avg_progress ?? 0,
+      longestStreak: summary?.longest_streak ?? 0,
+      completedGoals: summary?.completed_goals ?? 0,
+      highPriorityActive: summary?.high_priority_active ?? 0,
+      goals: goals.slice(0, 10).map((g) => ({
+        title: g.title,
+        category: g.category,
+        progress: g.progress,
+        priority: g.priority,
+        streak: g.streak,
+        target_date: g.target_date,
+        motivation: g.motivation || null,
+        milestones: g.milestones?.slice(0, 5).map((m) => ({
+          title: m.title,
+          completed: m.completed,
+          due_date: m.due_date,
+        })),
+      })),
+    };
+  }, [dashboard, goals, lifeOs, summary, user]);
+
+  const {
+    data: insightData,
+    hasInsight,
+    isLoading: insightLoading,
+    enabled: insightsEnabled,
+  } = useAiInsight('goals', insightContext, { enabled: Boolean(dashboard) });
+
+  const showInsights = insightsEnabled && (hasInsight || insightLoading);
 
   const summaryCards = [
     {
@@ -110,7 +156,7 @@ export function GoalsScreen() {
       <View style={styles.header}>
         <View style={styles.headerText}>
           <Text style={styles.title}>Goals Dashboard</Text>
-          <Text style={styles.subtitle}>Track progress, milestones, and streaks.</Text>
+          <Text style={styles.subtitle}>"{quote}"</Text>
         </View>
         <PrimaryButton label="Add Goal" icon="add" onPress={openAddGoal} />
       </View>
@@ -132,6 +178,30 @@ export function GoalsScreen() {
           </DashboardCard>
         ))}
       </View>
+
+      {showInsights ? (
+        <DashboardCard>
+          <View style={styles.insightHeader}>
+            <Ionicons name="sparkles" size={18} color="#facc15" />
+            <Text style={styles.sectionTitle}>AI Goal Insights</Text>
+          </View>
+          {insightLoading && !hasInsight ? (
+            <>
+              <View style={styles.skeleton} />
+              <View style={styles.skeleton} />
+            </>
+          ) : (
+            (insightData?.items ?? []).map((insight, i) => (
+              <View key={`${insight.message}-${i}`} style={styles.insightItem}>
+                <InsightHorizonBadge horizon={insight.horizon} />
+                <Text style={styles.insightText}>{insight.message}</Text>
+              </View>
+            ))
+          )}
+        </DashboardCard>
+      ) : null}
+
+      <LifeBalanceWheel goals={goals} isLoading={isLoading} />
 
       <View style={styles.listHeader}>
         <Text style={styles.sectionTitle}>Your Goals</Text>
@@ -232,6 +302,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 14,
     color: colors.slate400,
+    fontStyle: 'italic',
   },
   summaryGrid: {
     flexDirection: 'row',
@@ -259,6 +330,33 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.slate400,
     marginTop: 4,
+  },
+  insightHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  insightItem: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.3)',
+    backgroundColor: 'rgba(6, 182, 212, 0.12)',
+    padding: 12,
+    gap: 8,
+    marginBottom: 10,
+  },
+  insightText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate200,
+    lineHeight: 18,
+  },
+  skeleton: {
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: 'rgba(51, 65, 85, 0.45)',
+    marginBottom: 10,
   },
   listHeader: {
     gap: 10,

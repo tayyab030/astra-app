@@ -1,28 +1,36 @@
-export type FormatCurrencyOptions = {
-  minimumFractionDigits?: number;
-  maximumFractionDigits?: number;
-  showSign?: boolean;
-};
+import { useCallback, useMemo } from 'react';
 
-export function formatCurrency(amountInUsd: number, options?: FormatCurrencyOptions) {
-  const formatted = new Intl.NumberFormat('en', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: options?.minimumFractionDigits ?? 0,
-    maximumFractionDigits: options?.maximumFractionDigits ?? 2,
-  }).format(Math.abs(amountInUsd));
+import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { useSession } from '@/hooks/useSession';
+import {
+  formatCurrencyAmount,
+  type FormatCurrencyOptions,
+} from '@/lib/currency/format';
+import { BASE_CURRENCY } from '@/lib/currency/types';
 
-  if (options?.showSign && amountInUsd > 0) {
-    return `+${formatted}`;
-  }
-
-  if (amountInUsd < 0) {
-    return `-${formatted}`;
-  }
-
-  return formatted;
-}
+export type { FormatCurrencyOptions };
 
 export function useCurrency() {
-  return { formatCurrency };
+  const { user } = useSession();
+  const { data } = useExchangeRates();
+
+  const currency = useMemo(() => {
+    const code = (user?.currency || BASE_CURRENCY).trim().toUpperCase();
+    return code || BASE_CURRENCY;
+  }, [user?.currency]);
+
+  const rates = data?.rates ?? { [BASE_CURRENCY]: 1 };
+
+  const formatCurrency = useCallback(
+    (amountInUsd: number, options?: FormatCurrencyOptions) =>
+      formatCurrencyAmount(amountInUsd, currency, rates, options),
+    [currency, rates],
+  );
+
+  return {
+    currency,
+    baseCurrency: BASE_CURRENCY,
+    rates,
+    formatCurrency,
+  };
 }

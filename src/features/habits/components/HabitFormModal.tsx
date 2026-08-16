@@ -1,18 +1,25 @@
-import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { colors, fonts } from '@/constants/theme';
 import { getLocalDateString } from '@/features/health/utils/date';
 import { FormModal } from '@/features/wealth/FormModal';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
 import { SelectField } from '@/features/wealth/SelectField';
-import type { CreateHabitPayload, UpdateHabitPayload } from '@/lib/api/habits';
+import type {
+  CreateHabitPackPayload,
+  CreateHabitPayload,
+  UpdateHabitPayload,
+} from '@/lib/api/habits';
 
 import type {
   Habit,
+  HabitCreateMode,
   HabitFrequency,
   HabitMetricType,
   HabitMissBehavior,
+  HabitPackItemDraft,
   HabitPriority,
   HabitTimeOfDay,
 } from '../types/habits.types';
@@ -54,6 +61,15 @@ function schedulePayload(schedule: HabitScheduleValue) {
   };
 }
 
+function newPackItem(): HabitPackItemDraft {
+  return {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    name: '',
+    priority: 'medium',
+    missBehavior: 'carry',
+  };
+}
+
 type HabitFormModalProps = {
   visible: boolean;
   mode: 'add' | 'edit';
@@ -61,6 +77,7 @@ type HabitFormModalProps = {
   isSaving?: boolean;
   onClose: () => void;
   onCreate: (payload: CreateHabitPayload) => Promise<unknown>;
+  onCreatePack?: (payload: CreateHabitPackPayload) => Promise<unknown>;
   onUpdate: (id: string, payload: UpdateHabitPayload) => Promise<unknown>;
 };
 
@@ -71,9 +88,16 @@ export function HabitFormModal({
   isSaving,
   onClose,
   onCreate,
+  onCreatePack,
   onUpdate,
 }: HabitFormModalProps) {
+  const [createMode, setCreateMode] = useState<HabitCreateMode>('single');
   const [name, setName] = useState('');
+  const [packName, setPackName] = useState('');
+  const [packItems, setPackItems] = useState<HabitPackItemDraft[]>([
+    newPackItem(),
+    newPackItem(),
+  ]);
   const [schedule, setSchedule] = useState<HabitScheduleValue>(defaultSchedule);
   const [target, setTarget] = useState('1');
   const [metricType, setMetricType] = useState<HabitMetricType>('boolean');
@@ -84,6 +108,7 @@ export function HabitFormModal({
   useEffect(() => {
     if (!visible) return;
     if (mode === 'edit' && habit) {
+      setCreateMode('single');
       setName(habit.name);
       setSchedule({
         frequency: (habit.frequency === 'custom' ? 'daily' : habit.frequency) as HabitFrequency,
@@ -102,7 +127,10 @@ export function HabitFormModal({
       setMissBehavior(habit.missBehavior ?? 'carry');
       return;
     }
+    setCreateMode('single');
     setName('');
+    setPackName('');
+    setPackItems([newPackItem(), newPackItem()]);
     setSchedule(defaultSchedule());
     setTarget('1');
     setMetricType('boolean');
@@ -111,13 +139,22 @@ export function HabitFormModal({
     setMissBehavior('carry');
   }, [visible, mode, habit]);
 
+  const validPackItems = useMemo(
+    () => packItems.filter((item) => item.name.trim()),
+    [packItems],
+  );
+
+  const isPack = mode === 'add' && createMode === 'pack';
+
   const disabled =
     Boolean(isSaving) ||
-    !name.trim() ||
     !schedule.startDate ||
     (schedule.frequency === 'daily' && schedule.repeatDays.length === 0) ||
-    (mode === 'add' && metricType !== 'boolean' && Number(target) <= 0) ||
-    Boolean(schedule.endDate && schedule.endDate < schedule.startDate);
+    Boolean(schedule.endDate && schedule.endDate < schedule.startDate) ||
+    (isPack
+      ? !packName.trim() || validPackItems.length === 0 || !onCreatePack
+      : !name.trim() ||
+        (mode === 'add' && metricType !== 'boolean' && Number(target) <= 0));
 
   const handleSubmit = async () => {
     if (disabled) return;
@@ -129,6 +166,18 @@ export function HabitFormModal({
         ...timing,
         target: Number(target) || habit.target,
         priority,
+        miss_behavior: missBehavior,
+      });
+    } else if (isPack && onCreatePack) {
+      const { end_date: _endDate, ...packTiming } = timing;
+      await onCreatePack({
+        name: packName.trim(),
+        ...packTiming,
+        items: validPackItems.map((item) => ({
+          name: item.name.trim(),
+          priority: item.priority,
+          miss_behavior: item.missBehavior,
+        })),
         miss_behavior: missBehavior,
       });
     } else {
@@ -153,99 +202,234 @@ export function HabitFormModal({
     <FormModal
       visible={visible}
       onClose={onClose}
-      title={mode === 'edit' ? 'Edit Habit' : 'Add habit'}
+      title={
+        mode === 'edit' ? 'Edit Habit' : isPack ? 'Add habit pack' : 'Add habit'
+      }
       description={
         mode === 'edit'
           ? 'Update name, schedule, priority, or miss behavior'
-          : 'Daily weekdays, weekly/monthly targets, interval, time of day, and optional reminder.'
+          : isPack
+            ? 'Shared schedule for multiple habits created together.'
+            : 'Daily weekdays, weekly/monthly targets, interval, time of day, and optional reminder.'
       }
     >
-      <View style={styles.field}>
-        <Text style={styles.label}>Habit name</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="e.g., Drink water, Read 20 pages"
-          placeholderTextColor={colors.slate500}
-          value={name}
-          onChangeText={setName}
-        />
-      </View>
-
       {mode === 'add' ? (
-        <View style={styles.field}>
-          <Text style={styles.label}>Track as</Text>
-          <SelectField
-            value={metricType}
-            options={[
-              { value: 'boolean', label: 'Checkbox (done / not done)' },
-              { value: 'count', label: 'Count (pages, reps, etc.)' },
-              { value: 'duration', label: 'Time (minutes)' },
-            ]}
-            onChange={(value) => {
-              const next = value as HabitMetricType;
-              setMetricType(next);
-              if (next === 'boolean') setTarget('1');
-              else if (next === 'duration') {
-                setTarget('30');
-                setUnit('minutes');
-              } else {
-                setTarget('20');
-                setUnit('');
-              }
-            }}
-          />
+        <View style={styles.modeRow}>
+          {(
+            [
+              { id: 'single' as const, label: 'Single habit' },
+              { id: 'pack' as const, label: 'Habit pack' },
+            ] as const
+          ).map((option) => {
+            const active = createMode === option.id;
+            return (
+              <Pressable
+                key={option.id}
+                onPress={() => setCreateMode(option.id)}
+                style={[styles.modeChip, active && styles.modeChipActive]}
+              >
+                <Text style={[styles.modeChipText, active && styles.modeChipTextActive]}>
+                  {option.label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
       ) : null}
 
-      {(mode === 'add' && metricType !== 'boolean') ||
-      (mode === 'edit' && habit && habit.metricType !== 'boolean') ? (
-        <View style={styles.row}>
-          <View style={[styles.field, styles.half]}>
-            <Text style={styles.label}>
-              {mode === 'edit' ? 'Target' : 'Daily target'}
-            </Text>
+      {isPack ? (
+        <>
+          <View style={styles.field}>
+            <Text style={styles.label}>Pack name</Text>
             <TextInput
               style={styles.input}
-              keyboardType="number-pad"
-              value={target}
-              onChangeText={setTarget}
+              placeholder="e.g., Morning routine"
+              placeholderTextColor={colors.slate500}
+              value={packName}
+              onChangeText={setPackName}
             />
           </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Habits in pack</Text>
+            {packItems.map((item, index) => (
+              <View key={item.id} style={styles.packItem}>
+                <TextInput
+                  style={styles.input}
+                  placeholder={`Habit ${index + 1}`}
+                  placeholderTextColor={colors.slate500}
+                  value={item.name}
+                  onChangeText={(value) =>
+                    setPackItems((prev) =>
+                      prev.map((row) =>
+                        row.id === item.id ? { ...row, name: value } : row,
+                      ),
+                    )
+                  }
+                />
+                <View style={styles.row}>
+                  <View style={[styles.field, styles.half]}>
+                    <SelectField
+                      value={item.priority}
+                      options={PRIORITY_OPTIONS.map((o) => ({
+                        value: o.value,
+                        label: o.label,
+                      }))}
+                      onChange={(value) =>
+                        setPackItems((prev) =>
+                          prev.map((row) =>
+                            row.id === item.id
+                              ? { ...row, priority: value as HabitPriority }
+                              : row,
+                          ),
+                        )
+                      }
+                    />
+                  </View>
+                  <View style={[styles.field, styles.half]}>
+                    <SelectField
+                      value={item.missBehavior}
+                      options={MISS_BEHAVIOR_OPTIONS.map((o) => ({
+                        value: o.value,
+                        label: o.label,
+                      }))}
+                      onChange={(value) =>
+                        setPackItems((prev) =>
+                          prev.map((row) =>
+                            row.id === item.id
+                              ? { ...row, missBehavior: value as HabitMissBehavior }
+                              : row,
+                          ),
+                        )
+                      }
+                    />
+                  </View>
+                </View>
+                {packItems.length > 1 ? (
+                  <Pressable
+                    onPress={() =>
+                      setPackItems((prev) => prev.filter((row) => row.id !== item.id))
+                    }
+                    style={styles.removePackItem}
+                  >
+                    <Ionicons name="trash-outline" size={16} color={colors.red400} />
+                    <Text style={styles.removePackText}>Remove</Text>
+                  </Pressable>
+                ) : null}
+              </View>
+            ))}
+            <PrimaryButton
+              label="Add another habit"
+              icon="add"
+              onPress={() => setPackItems((prev) => [...prev, newPackItem()])}
+            />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Default if missed</Text>
+            <SelectField
+              value={missBehavior}
+              options={MISS_BEHAVIOR_OPTIONS.map((o) => ({
+                value: o.value,
+                label: o.label,
+              }))}
+              onChange={(value) => setMissBehavior(value as HabitMissBehavior)}
+            />
+          </View>
+        </>
+      ) : (
+        <>
+          <View style={styles.field}>
+            <Text style={styles.label}>Habit name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="e.g., Drink water, Read 20 pages"
+              placeholderTextColor={colors.slate500}
+              value={name}
+              onChangeText={setName}
+            />
+          </View>
+
           {mode === 'add' ? (
-            <View style={[styles.field, styles.half]}>
-              <Text style={styles.label}>Unit</Text>
-              <TextInput
-                style={styles.input}
-                placeholder={metricType === 'duration' ? 'minutes' : 'pages'}
-                placeholderTextColor={colors.slate500}
-                value={unit}
-                onChangeText={setUnit}
+            <View style={styles.field}>
+              <Text style={styles.label}>Track as</Text>
+              <SelectField
+                value={metricType}
+                options={[
+                  { value: 'boolean', label: 'Checkbox (done / not done)' },
+                  { value: 'count', label: 'Count (pages, reps, etc.)' },
+                  { value: 'duration', label: 'Time (minutes)' },
+                ]}
+                onChange={(value) => {
+                  const next = value as HabitMetricType;
+                  setMetricType(next);
+                  if (next === 'boolean') setTarget('1');
+                  else if (next === 'duration') {
+                    setTarget('30');
+                    setUnit('minutes');
+                  } else {
+                    setTarget('20');
+                    setUnit('');
+                  }
+                }}
               />
             </View>
           ) : null}
-        </View>
-      ) : null}
 
-      <View style={styles.field}>
-        <Text style={styles.label}>Priority</Text>
-        <SelectField
-          value={priority}
-          options={PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-          onChange={(value) => setPriority(value as HabitPriority)}
-        />
-      </View>
+          {(mode === 'add' && metricType !== 'boolean') ||
+          (mode === 'edit' && habit && habit.metricType !== 'boolean') ? (
+            <View style={styles.row}>
+              <View style={[styles.field, styles.half]}>
+                <Text style={styles.label}>
+                  {mode === 'edit' ? 'Target' : 'Daily target'}
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  keyboardType="number-pad"
+                  value={target}
+                  onChangeText={setTarget}
+                />
+              </View>
+              {mode === 'add' ? (
+                <View style={[styles.field, styles.half]}>
+                  <Text style={styles.label}>Unit</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder={metricType === 'duration' ? 'minutes' : 'pages'}
+                    placeholderTextColor={colors.slate500}
+                    value={unit}
+                    onChangeText={setUnit}
+                  />
+                </View>
+              ) : null}
+            </View>
+          ) : null}
 
-      <View style={styles.field}>
-        <Text style={styles.label}>If missed</Text>
-        <SelectField
-          value={missBehavior}
-          options={MISS_BEHAVIOR_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
-          onChange={(value) => setMissBehavior(value as HabitMissBehavior)}
-        />
-        <Text style={styles.hint}>
-          {MISS_BEHAVIOR_OPTIONS.find((o) => o.value === missBehavior)?.hint}
-        </Text>
-      </View>
+          <View style={styles.field}>
+            <Text style={styles.label}>Priority</Text>
+            <SelectField
+              value={priority}
+              options={PRIORITY_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+              onChange={(value) => setPriority(value as HabitPriority)}
+            />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>If missed</Text>
+            <SelectField
+              value={missBehavior}
+              options={MISS_BEHAVIOR_OPTIONS.map((o) => ({
+                value: o.value,
+                label: o.label,
+              }))}
+              onChange={(value) => setMissBehavior(value as HabitMissBehavior)}
+            />
+            <Text style={styles.hint}>
+              {MISS_BEHAVIOR_OPTIONS.find((o) => o.value === missBehavior)?.hint}
+            </Text>
+          </View>
+        </>
+      )}
 
       <HabitScheduleFields
         value={schedule}
@@ -253,7 +437,13 @@ export function HabitFormModal({
       />
 
       <PrimaryButton
-        label={mode === 'edit' ? 'Save Changes' : 'Create habit'}
+        label={
+          mode === 'edit'
+            ? 'Save Changes'
+            : isPack
+              ? 'Create pack'
+              : 'Create habit'
+        }
         onPress={() => void handleSubmit()}
         loading={isSaving}
         disabled={disabled}
@@ -263,6 +453,30 @@ export function HabitFormModal({
 }
 
 const styles = StyleSheet.create({
+  modeRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  modeChip: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.55)',
+    alignItems: 'center',
+  },
+  modeChipActive: {
+    borderColor: colors.cyan500,
+    backgroundColor: 'rgba(6, 182, 212, 0.12)',
+  },
+  modeChipText: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.slate400,
+  },
+  modeChipTextActive: {
+    color: colors.cyan300,
+  },
   field: {
     gap: 6,
   },
@@ -274,6 +488,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
+  },
+  packItem: {
+    gap: 8,
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.45)',
+    backgroundColor: 'rgba(15, 23, 42, 0.35)',
+    marginBottom: 8,
+  },
+  removePackItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+  },
+  removePackText: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.red400,
   },
   label: {
     fontFamily: fonts.medium,

@@ -1,10 +1,10 @@
-import { AuthPlaceholder } from '@/features/auth/AuthPlaceholder';
+import { AuthPageShell } from '@/features/auth/AuthPageShell';
+import { ForgotPasswordForm } from '@/features/auth/ForgotPasswordForm';
 
 export default function ForgotPasswordPage() {
   return (
-    <AuthPlaceholder
-      title="Forgot neural pathway?"
-      description="Password recovery is next. This screen will match the ASTRA web form."
-    />
+    <AuthPageShell>
+      <ForgotPasswordForm />
+    </AuthPageShell>
   );
 }

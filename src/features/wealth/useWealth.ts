@@ -15,10 +15,9 @@ import {
   type UpdateCategoryBudgetPayload,
   type UpdateTransactionPayload,
 } from '@/lib/api/wealth';
+import { showToast } from '@/lib/ui/toastStore';
 
-type WealthToastHandler = (type: 'success' | 'error', message: string) => void;
-
-export function useWealth(filter: WealthFilter, onToast?: WealthToastHandler) {
+export function useWealth(filter: WealthFilter) {
   const queryClient = useQueryClient();
 
   const invalidateWealth = async () => {
@@ -33,11 +32,11 @@ export function useWealth(filter: WealthFilter, onToast?: WealthToastHandler) {
   const createTransactionMutation = useMutation({
     mutationFn: (payload: CreateTransactionPayload) => createWealthTransaction(payload),
     onSuccess: () => {
-      onToast?.('success', 'Transaction added');
-      invalidateWealth();
+      showToast('success', 'Transaction added');
+      void invalidateWealth();
     },
     onError: (error) => {
-      onToast?.('error', getWealthErrorMessage(error, 'Failed to add transaction'));
+      showToast('error', getWealthErrorMessage(error, 'Failed to add transaction'));
     },
   });
 
@@ -45,33 +44,33 @@ export function useWealth(filter: WealthFilter, onToast?: WealthToastHandler) {
     mutationFn: ({ id, payload }: { id: string; payload: UpdateTransactionPayload }) =>
       updateWealthTransaction(id, payload),
     onSuccess: () => {
-      onToast?.('success', 'Transaction updated');
-      invalidateWealth();
+      showToast('success', 'Transaction updated');
+      void invalidateWealth();
     },
     onError: (error) => {
-      onToast?.('error', getWealthErrorMessage(error, 'Failed to update transaction'));
+      showToast('error', getWealthErrorMessage(error, 'Failed to update transaction'));
     },
   });
 
   const deleteTransactionMutation = useMutation({
     mutationFn: (id: string) => deleteWealthTransaction(id),
     onSuccess: () => {
-      onToast?.('success', 'Transaction deleted');
-      invalidateWealth();
+      showToast('success', 'Transaction deleted');
+      void invalidateWealth();
     },
     onError: (error) => {
-      onToast?.('error', getWealthErrorMessage(error, 'Failed to delete transaction'));
+      showToast('error', getWealthErrorMessage(error, 'Failed to delete transaction'));
     },
   });
 
   const createBudgetMutation = useMutation({
     mutationFn: (payload: CreateCategoryBudgetPayload) => createWealthCategoryBudget(payload),
     onSuccess: () => {
-      onToast?.('success', 'Budget limit added');
-      invalidateWealth();
+      showToast('success', 'Budget limit added');
+      void invalidateWealth();
     },
     onError: (error) => {
-      onToast?.('error', getWealthErrorMessage(error, 'Failed to add budget limit'));
+      showToast('error', getWealthErrorMessage(error, 'Failed to add budget limit'));
     },
   });
 
@@ -79,22 +78,22 @@ export function useWealth(filter: WealthFilter, onToast?: WealthToastHandler) {
     mutationFn: ({ id, payload }: { id: string; payload: UpdateCategoryBudgetPayload }) =>
       updateWealthCategoryBudget(id, payload),
     onSuccess: () => {
-      onToast?.('success', 'Budget limit updated');
-      invalidateWealth();
+      showToast('success', 'Budget limit updated');
+      void invalidateWealth();
     },
     onError: (error) => {
-      onToast?.('error', getWealthErrorMessage(error, 'Failed to update budget limit'));
+      showToast('error', getWealthErrorMessage(error, 'Failed to update budget limit'));
     },
   });
 
   const deleteBudgetMutation = useMutation({
     mutationFn: (id: string) => deleteWealthCategoryBudget(id),
     onSuccess: () => {
-      onToast?.('success', 'Budget limit deleted');
-      invalidateWealth();
+      showToast('success', 'Budget limit deleted');
+      void invalidateWealth();
     },
     onError: (error) => {
-      onToast?.('error', getWealthErrorMessage(error, 'Failed to delete budget limit'));
+      showToast('error', getWealthErrorMessage(error, 'Failed to delete budget limit'));
     },
   });
 

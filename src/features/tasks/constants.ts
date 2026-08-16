@@ -40,6 +40,31 @@ export const TASK_STATUS_OPTIONS = [
   { value: 'done', label: 'Done' },
 ] as const;
 
+export type TaskStatusValue = (typeof TASK_STATUS_OPTIONS)[number]['value'];
+
+export const TASK_SECTIONS = [
+  { id: 'todo', name: 'To Do', status: 'todo' as const },
+  { id: 'in-progress', name: 'In Progress', status: 'in_progress' as const },
+  { id: 'review', name: 'Review', status: 'review' as const },
+  { id: 'done', name: 'Done', status: 'done' as const },
+] as const;
+
+export const DETAIL_VIEW_TABS = [
+  { id: 'list', label: 'List', icon: 'list-outline' as const },
+  { id: 'board', label: 'Board', icon: 'grid-outline' as const },
+  { id: 'calendar', label: 'Calendar', icon: 'calendar-outline' as const },
+  { id: 'dashboard', label: 'Dashboard', icon: 'pie-chart-outline' as const },
+] as const;
+
+export type DetailViewTab = (typeof DETAIL_VIEW_TABS)[number]['id'];
+
+export const SECTION_STATUS_COLORS: Record<TaskStatusValue, string> = {
+  todo: '#94a3b8',
+  in_progress: '#3b82f6',
+  review: '#a855f7',
+  done: '#22c55e',
+};
+
 export const PROJECT_FILTER_OPTIONS = [
   { value: 'all', label: 'All' },
   { value: 'starred', label: 'Starred' },

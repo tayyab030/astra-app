@@ -9,6 +9,8 @@ export const ROUTES = {
   APP: {
     DASHBOARD: '/app/dashboard',
     TASKS: '/app/tasks',
+    TASK_PROJECT: (projectId: string) => `/app/tasks/${projectId}`,
+    TASK_GOAL: (goalId: string) => `/app/tasks/goals/${goalId}`,
     TIME_TRACK: '/app/time-track',
     GOALS: '/app/goals',
     WEALTH: '/app/wealth',

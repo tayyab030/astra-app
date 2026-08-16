@@ -72,13 +72,19 @@ export function NotesScreen() {
     restoreNote,
     archiveNote,
     duplicateNote,
+    bulkArchive,
+    bulkDelete,
+    restoreVersion,
     isCreating,
     isUpdating,
+    isBulkPending,
   } = notesApi;
 
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<'add' | 'edit'>('add');
   const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const defaultType = TAB_TO_NOTE_TYPE[activeTab] ?? 'quick-notes';
   const sortValue = `${sortField}:${sortOrder}`;
@@ -186,7 +192,17 @@ export function NotesScreen() {
               Your personal second brain — capture, organize, and connect ideas
             </Text>
           </View>
-          <PrimaryButton label="New Note" icon="add" onPress={openCreate} />
+          <View style={styles.headerActions}>
+            <PrimaryButton
+              label={selectionMode ? 'Done' : 'Select'}
+              icon={selectionMode ? 'checkmark' : 'checkbox-outline'}
+              onPress={() => {
+                setSelectionMode((prev) => !prev);
+                setSelectedIds([]);
+              }}
+            />
+            <PrimaryButton label="New Note" icon="add" onPress={openCreate} />
+          </View>
         </View>
 
         <ScrollView
@@ -315,11 +331,52 @@ export function NotesScreen() {
           </DashboardCard>
         ) : null}
 
+        {selectionMode && selectedIds.length > 0 ? (
+          <DashboardCard>
+            <Text style={styles.bulkLabel}>{selectedIds.length} selected</Text>
+            <View style={styles.bulkRow}>
+              <PrimaryButton
+                label="Archive"
+                loading={isBulkPending}
+                onPress={() => {
+                  void bulkArchive(selectedIds).then(() => {
+                    setSelectedIds([]);
+                    setSelectionMode(false);
+                  });
+                }}
+              />
+              <PrimaryButton
+                label="Delete"
+                loading={isBulkPending}
+                onPress={() => {
+                  void bulkDelete(selectedIds, sidebarFilter === 'trash').then(() => {
+                    setSelectedIds([]);
+                    setSelectionMode(false);
+                  });
+                }}
+              />
+              <PrimaryButton
+                label="Clear"
+                onPress={() => setSelectedIds([])}
+              />
+            </View>
+          </DashboardCard>
+        ) : null}
+
         <View style={styles.list}>
           {notes.map((note) => (
             <NoteCard
               key={note.id}
               note={note}
+              selectionMode={selectionMode}
+              selected={selectedIds.includes(note.id)}
+              onToggleSelect={(item) => {
+                setSelectedIds((prev) =>
+                  prev.includes(item.id)
+                    ? prev.filter((id) => id !== item.id)
+                    : [...prev, item.id],
+                );
+              }}
               onEdit={openEdit}
               onToggleFavorite={(item) => {
                 void updateNote(item.id, { isFavorite: !item.isFavorite });
@@ -338,6 +395,13 @@ export function NotesScreen() {
               }}
               onDuplicate={(item) => {
                 void duplicateNote(item.id);
+              }}
+              onRestoreVersion={(item, versionId) => {
+                void restoreVersion(item.id, versionId).then((updated) => {
+                  if (editingNote?.id === item.id) {
+                    setEditingNote(updated);
+                  }
+                });
               }}
             />
           ))}
@@ -360,6 +424,10 @@ export function NotesScreen() {
         defaultType={defaultType}
         loading={isCreating || isUpdating}
         onSubmit={handleFormSubmit}
+        onRestoreVersion={async (noteId, versionId) => {
+          const updated = await restoreVersion(noteId, versionId);
+          setEditingNote(updated);
+        }}
       />
     </View>
   );
@@ -388,8 +456,24 @@ const styles = StyleSheet.create({
   header: {
     gap: 12,
   },
+  headerActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
   headingWrap: {
     gap: 4,
+  },
+  bulkLabel: {
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.slate200,
+    marginBottom: 10,
+  },
+  bulkRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
   },
   title: {
     fontFamily: fonts.headingBold,

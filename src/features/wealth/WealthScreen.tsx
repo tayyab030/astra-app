@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -26,11 +27,23 @@ function getInitialFilter(): WealthFilter {
   };
 }
 
+function isWealthTab(value: string | undefined): value is WealthTabValue {
+  return WEALTH_TABS.some((tab) => tab.value === value);
+}
+
 export function WealthScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams<{ tab?: string; action?: string }>();
+  const tabParam = Array.isArray(params.tab) ? params.tab[0] : params.tab;
+  const actionParam = Array.isArray(params.action) ? params.action[0] : params.action;
+
   const { formatCurrency } = useCurrency();
   const [filter, setFilter] = useState<WealthFilter>(getInitialFilter);
-  const [tab, setTab] = useState<WealthTabValue>('overview');
-  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [tab, setTab] = useState<WealthTabValue>(() =>
+    isWealthTab(tabParam) ? tabParam : 'overview',
+  );
+  const [openAddTransaction, setOpenAddTransaction] = useState(false);
+  const [openSetBudgetLimit, setOpenSetBudgetLimit] = useState(false);
 
   const {
     dashboard,
@@ -50,13 +63,23 @@ export function WealthScreen() {
     isCreatingBudget,
     isUpdatingBudget,
     isDeletingBudget,
-  } = useWealth(filter, (type, message) => setToast({ type, message }));
+  } = useWealth(filter);
 
   useEffect(() => {
-    if (!toast) return;
-    const timeout = setTimeout(() => setToast(null), 2800);
-    return () => clearTimeout(timeout);
-  }, [toast]);
+    if (isWealthTab(tabParam)) setTab(tabParam);
+  }, [tabParam]);
+
+  useEffect(() => {
+    if (actionParam === 'add') {
+      setTab('transactions');
+      setOpenAddTransaction(true);
+      router.setParams({ action: undefined });
+    } else if (actionParam === 'set-limit') {
+      setTab('budget');
+      setOpenSetBudgetLimit(true);
+      router.setParams({ action: undefined });
+    }
+  }, [actionParam, router]);
 
   const resolvedFilter =
     dashboard?.filter ??
@@ -120,17 +143,6 @@ export function WealthScreen() {
 
   return (
     <View style={styles.root}>
-      {toast ? (
-        <View
-          style={[
-            styles.toast,
-            toast.type === 'success' ? styles.toastSuccess : styles.toastError,
-          ]}
-        >
-          <Text style={styles.toastText}>{toast.message}</Text>
-        </View>
-      ) : null}
-
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.headingWrap}>
@@ -214,6 +226,7 @@ export function WealthScreen() {
             wasteSpending={dashboard?.waste_spending ?? 0}
             transactions={dashboard?.transactions ?? []}
             categoryTotals={dashboard?.category_totals ?? []}
+            categoryBudgets={dashboard?.category_budgets ?? []}
             filter={resolvedFilter}
             isLoading={isLoading}
           />
@@ -230,6 +243,8 @@ export function WealthScreen() {
             isCreatingBudget={isCreatingBudget}
             isUpdatingBudget={isUpdatingBudget}
             isDeletingBudget={isDeletingBudget}
+            openSetLimit={openSetBudgetLimit}
+            onOpenSetLimitConsumed={() => setOpenSetBudgetLimit(false)}
           />
         ) : null}
 
@@ -247,6 +262,8 @@ export function WealthScreen() {
             isCreatingTransaction={isCreatingTransaction}
             isUpdatingTransaction={isUpdatingTransaction}
             isDeletingTransaction={isDeletingTransaction}
+            openAdd={openAddTransaction}
+            onOpenAddConsumed={() => setOpenAddTransaction(false)}
           />
         ) : null}
       </ScrollView>
@@ -262,28 +279,6 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 40,
     gap: 24,
-  },
-  toast: {
-    position: 'absolute',
-    top: 12,
-    left: 24,
-    right: 24,
-    zIndex: 20,
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  toastSuccess: {
-    backgroundColor: 'rgba(6, 95, 70, 0.95)',
-  },
-  toastError: {
-    backgroundColor: 'rgba(127, 29, 29, 0.95)',
-  },
-  toastText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-    textAlign: 'center',
   },
   header: {
     gap: 16,

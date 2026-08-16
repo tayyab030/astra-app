@@ -81,7 +81,7 @@ export function GoalsSection() {
             return (
               <Pressable
                 key={goal.id}
-                onPress={() => router.push(ROUTES.APP.GOALS as never)}
+                onPress={() => router.push(ROUTES.APP.TASK_GOAL(goal.id) as never)}
                 style={styles.card}
               >
                 <View style={[styles.iconWrap, { backgroundColor: `${categoryColor}33` }]}>

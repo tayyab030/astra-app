@@ -33,6 +33,12 @@ export function mapNoteFromApi(note: NoteApi): Note {
     isLocked: note.is_locked,
     isAiGenerated: note.is_ai_generated,
     metadata: note.metadata ?? {},
+    versions: (note.versions ?? []).map((version) => ({
+      id: version.id,
+      title: version.title,
+      content: version.content,
+      createdAt: version.created_at,
+    })),
   };
 }
 

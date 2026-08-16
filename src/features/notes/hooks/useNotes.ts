@@ -3,12 +3,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
   archiveNoteApi,
+  bulkNotesAction,
   createNoteApi,
   deleteNoteApi,
   duplicateNoteApi,
   fetchNotesDashboard,
   getNotesErrorMessage,
   restoreNoteApi,
+  restoreNoteVersionApi,
   updateNoteApi,
 } from '@/lib/api/notes';
 import { showToast } from '@/lib/ui/toastStore';
@@ -194,6 +196,37 @@ export function useNotes() {
     },
   });
 
+  const bulkMutation = useMutation({
+    mutationFn: bulkNotesAction,
+    onSuccess: (result, variables) => {
+      const label =
+        variables.action === 'archive'
+          ? 'archived'
+          : variables.action === 'delete'
+            ? 'deleted'
+            : variables.action === 'favorite'
+              ? 'updated'
+              : 'tagged';
+      showToast('success', `${result.count ?? variables.ids.length} notes ${label}`);
+      invalidateNotes();
+    },
+    onError: (error) => {
+      showToast('error', getNotesErrorMessage(error, 'Bulk action failed'));
+    },
+  });
+
+  const restoreVersionMutation = useMutation({
+    mutationFn: ({ noteId, versionId }: { noteId: string; versionId: string }) =>
+      restoreNoteVersionApi(noteId, versionId),
+    onSuccess: () => {
+      showToast('success', 'Version restored');
+      invalidateNotes();
+    },
+    onError: (error) => {
+      showToast('error', getNotesErrorMessage(error, 'Failed to restore version'));
+    },
+  });
+
   return {
     notes,
     stats,
@@ -232,7 +265,17 @@ export function useNotes() {
     restoreNote: (id: string) => restoreMutation.mutateAsync(id),
     archiveNote: (id: string) => archiveMutation.mutateAsync(id),
     duplicateNote: (id: string) => duplicateMutation.mutateAsync(id),
+    bulkArchive: (ids: string[]) =>
+      bulkMutation.mutateAsync({ ids, action: 'archive' }),
+    bulkDelete: (ids: string[], permanent = false) =>
+      bulkMutation.mutateAsync({ ids, action: 'delete', permanent }),
+    restoreVersion: async (noteId: string, versionId: string) => {
+      const result = await restoreVersionMutation.mutateAsync({ noteId, versionId });
+      return mapNoteFromApi(result);
+    },
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
+    isBulkPending: bulkMutation.isPending,
+    isRestoringVersion: restoreVersionMutation.isPending,
   };
 }

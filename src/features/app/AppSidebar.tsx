@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { usePathname, useRouter } from 'expo-router';
@@ -5,7 +6,12 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { ROUTES } from '@/constants/routes';
 import { colors, fonts } from '@/constants/theme';
+import { useSession } from '@/hooks/useSession';
 import { logoutSession } from '@/lib/auth/tokenManager';
+import {
+  normalizeModuleSettings,
+  SIDEBAR_MODULE_TOGGLE,
+} from '@/lib/module-settings';
 
 type SidebarItem = {
   id: string;
@@ -36,6 +42,16 @@ type AppSidebarProps = {
 export function AppSidebar({ onNavigate }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { user } = useSession();
+
+  const visibleItems = useMemo(() => {
+    const enabled = normalizeModuleSettings(user?.module_settings).enabled;
+    return sidebarItems.filter((item) => {
+      const toggleKey = SIDEBAR_MODULE_TOGGLE[item.id];
+      if (!toggleKey) return true;
+      return enabled[toggleKey];
+    });
+  }, [user?.module_settings]);
 
   const go = (href: string) => {
     router.push(href as never);
@@ -63,7 +79,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
 
   return (
     <View style={styles.nav}>
-      {sidebarItems.map((item) => {
+      {visibleItems.map((item) => {
         const isActive = pathname.includes(item.href);
         return (
           <SidebarButton

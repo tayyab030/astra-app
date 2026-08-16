@@ -36,6 +36,13 @@ export interface NoteAttachment {
   url?: string;
 }
 
+export interface NoteVersion {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+}
+
 export interface LinkedItem {
   id: string;
   type: string;
@@ -74,6 +81,7 @@ export interface Note {
   isLocked?: boolean;
   isAiGenerated?: boolean;
   metadata: Record<string, unknown>;
+  versions: NoteVersion[];
 }
 
 export interface NotesStats {

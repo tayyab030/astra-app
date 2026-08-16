@@ -13,6 +13,7 @@ import {
 import { DEFAULT_AI_INSIGHTS, aiSettingsFingerprint } from '@/lib/ai-settings';
 import { readInsightCache, writeInsightCache } from '@/lib/insights/insightStorage';
 import { withCurrencyInsightContext } from '@/lib/insights/withCurrencyContext';
+import { useCurrency } from '@/hooks/useCurrency';
 import { useSession } from '@/hooks/useSession';
 
 function stableContextKey(context: Record<string, unknown> | undefined) {
@@ -29,7 +30,7 @@ export function useAiInsight(
   options?: { enabled?: boolean; period?: InsightPeriod },
 ) {
   const { user } = useSession();
-  const currencyCode = user?.currency || 'USD';
+  const { currency: currencyCode, rates } = useCurrency();
   const userId = user?.id ?? '';
   const period = options?.period ?? DEFAULT_INSIGHT_PERIOD;
   const smartInsightsEnabled =
@@ -41,8 +42,13 @@ export function useAiInsight(
   });
 
   const enrichedContext = useMemo(
-    () => withCurrencyInsightContext(context, currencyCode || user?.currency || 'USD'),
-    [context, currencyCode, user?.currency],
+    () =>
+      withCurrencyInsightContext(
+        context,
+        currencyCode || user?.currency || 'USD',
+        rates,
+      ),
+    [context, currencyCode, rates, user?.currency],
   );
 
   const enabled =

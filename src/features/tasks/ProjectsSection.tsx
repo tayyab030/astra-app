@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { ROUTES } from '@/constants/routes';
 import { colors, fonts } from '@/constants/theme';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
@@ -14,6 +16,7 @@ import { useProjects } from './hooks/useProjects';
 import { ProjectFormModal } from './ProjectFormModal';
 
 export function ProjectsSection() {
+  const router = useRouter();
   const [filter, setFilter] = useState('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -69,20 +72,8 @@ export function ProjectsSection() {
     );
   };
 
-  const openMenu = (project: Project) => {
-    Alert.alert(project.title, undefined, [
-      {
-        text: project.starred ? 'Unstar' : 'Star',
-        onPress: () => toggleStar(project),
-      },
-      { text: 'Edit', onPress: () => openEdit(project) },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => confirmDelete(project),
-      },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
+  const openProject = (project: Project) => {
+    router.push(ROUTES.APP.TASK_PROJECT(project.id) as never);
   };
 
   return (
@@ -129,7 +120,7 @@ export function ProjectsSection() {
               return (
                 <Pressable
                   key={project.id}
-                  onPress={() => openMenu(project)}
+                  onPress={() => openProject(project)}
                   disabled={isPatchingProject || isDeletingProject}
                   style={styles.card}
                 >

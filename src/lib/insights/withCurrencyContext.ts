@@ -1,6 +1,5 @@
-import { formatCurrency } from '@/hooks/useCurrency';
-
-const BASE_CURRENCY = 'USD';
+import { formatCurrencyAmount } from '@/lib/currency/format';
+import { BASE_CURRENCY } from '@/lib/currency/types';
 
 /** Context keys that hold USD base amounts (or nested money fields). */
 const MONEY_KEYS = new Set([
@@ -62,7 +61,7 @@ function transformValue(
     const converted = convertUsdAmount(value, currencyCode, rates);
     return {
       amount: converted,
-      formatted: formatCurrency(value, {
+      formatted: formatCurrencyAmount(value, currencyCode, rates, {
         minimumFractionDigits: 0,
         maximumFractionDigits: 2,
       }),

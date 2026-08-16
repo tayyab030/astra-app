@@ -1,10 +1,10 @@
-import { AuthPlaceholder } from '@/features/auth/AuthPlaceholder';
+import { AuthPageShell } from '@/features/auth/AuthPageShell';
+import { VerifyOtpForm } from '@/features/auth/VerifyOtpForm';
 
 export default function VerifyOtpPage() {
   return (
-    <AuthPlaceholder
-      title="Verify OTP"
-      description="Email verification is next. This screen will match the ASTRA web flow."
-    />
+    <AuthPageShell>
+      <VerifyOtpForm />
+    </AuthPageShell>
   );
 }

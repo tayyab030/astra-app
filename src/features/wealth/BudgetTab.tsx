@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Alert,
   Pressable,
@@ -65,6 +65,8 @@ type BudgetTabProps = {
   isCreatingBudget?: boolean;
   isUpdatingBudget?: boolean;
   isDeletingBudget?: boolean;
+  openSetLimit?: boolean;
+  onOpenSetLimitConsumed?: () => void;
 };
 
 export function BudgetTab({
@@ -76,11 +78,19 @@ export function BudgetTab({
   onDeleteBudget,
   isCreatingBudget,
   isUpdatingBudget,
+  openSetLimit = false,
+  onOpenSetLimitConsumed,
 }: BudgetTabProps) {
   const { formatCurrency } = useCurrency();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingBudget, setEditingBudget] = useState<WealthCategoryBudget | null>(null);
+
+  useEffect(() => {
+    if (!openSetLimit) return;
+    setShowAddDialog(true);
+    onOpenSetLimitConsumed?.();
+  }, [openSetLimit]);
 
   const addForm = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetSchema),

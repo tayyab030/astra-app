@@ -206,3 +206,20 @@ export async function duplicateNoteApi(id: string) {
   const response = await authApi.post<NoteApi>(NOTES.DUPLICATE(id));
   return response.data;
 }
+
+export async function bulkNotesAction(payload: {
+  ids: string[];
+  action: 'archive' | 'delete' | 'favorite' | 'tag';
+  tag?: string;
+  permanent?: boolean;
+}) {
+  const response = await authApi.post<{ message: string; count: number }>(NOTES.BULK, payload);
+  return response.data;
+}
+
+export async function restoreNoteVersionApi(noteId: string, versionId: string) {
+  const response = await authApi.post<NoteApi>(NOTES.RESTORE_VERSION(noteId), {
+    version_id: versionId,
+  });
+  return response.data;
+}

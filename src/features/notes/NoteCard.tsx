@@ -11,6 +11,9 @@ import { noteToPlainText } from './utils/plainText';
 
 type NoteCardProps = {
   note: Note;
+  selected?: boolean;
+  selectionMode?: boolean;
+  onToggleSelect?: (note: Note) => void;
   onEdit: (note: Note) => void;
   onToggleFavorite: (note: Note) => void;
   onTogglePin: (note: Note) => void;
@@ -18,10 +21,14 @@ type NoteCardProps = {
   onDelete: (note: Note) => void;
   onRestore?: (note: Note) => void;
   onDuplicate: (note: Note) => void;
+  onRestoreVersion?: (note: Note, versionId: string) => void;
 };
 
 export function NoteCard({
   note,
+  selected = false,
+  selectionMode = false,
+  onToggleSelect,
   onEdit,
   onToggleFavorite,
   onTogglePin,
@@ -29,10 +36,12 @@ export function NoteCard({
   onDelete,
   onRestore,
   onDuplicate,
+  onRestoreVersion,
 }: NoteCardProps) {
   const priority = NOTE_PRIORITIES.find((item) => item.value === note.priority);
   const preview = noteToPlainText(note.content);
   const isTrash = note.status === 'deleted';
+  const versions = note.versions?.slice(0, 5) ?? [];
   const updatedLabel = (() => {
     try {
       return format(parseISO(note.updatedAt), 'MMM d, yyyy');
@@ -71,6 +80,24 @@ export function NoteCard({
         },
         { text: 'Duplicate', onPress: () => onDuplicate(note) },
         { text: 'Archive', onPress: () => onArchive(note) },
+      );
+
+      if (versions.length > 0 && onRestoreVersion) {
+        for (const version of versions) {
+          let versionLabel = 'Earlier version';
+          try {
+            versionLabel = `Restore · ${format(parseISO(version.createdAt), 'MMM d, HH:mm')}`;
+          } catch {
+            // keep fallback
+          }
+          buttons.push({
+            text: versionLabel,
+            onPress: () => onRestoreVersion(note, version.id),
+          });
+        }
+      }
+
+      buttons.push(
         {
           text: 'Delete',
           style: 'destructive',
@@ -83,11 +110,34 @@ export function NoteCard({
     Alert.alert(note.title || 'Note', undefined, buttons);
   };
 
+  const onPressCard = () => {
+    if (selectionMode) {
+      onToggleSelect?.(note);
+      return;
+    }
+    if (isTrash) {
+      openActions();
+      return;
+    }
+    onEdit(note);
+  };
+
   return (
-    <Pressable onPress={() => (isTrash ? openActions() : onEdit(note))} onLongPress={openActions}>
-      <DashboardCard borderColor="rgba(6, 182, 212, 0.2)">
+    <Pressable onPress={onPressCard} onLongPress={openActions}>
+      <DashboardCard
+        borderColor={
+          selected ? 'rgba(6, 182, 212, 0.65)' : 'rgba(6, 182, 212, 0.2)'
+        }
+      >
         <View style={styles.header}>
           <View style={styles.titleRow}>
+            {selectionMode ? (
+              <Ionicons
+                name={selected ? 'checkbox' : 'square-outline'}
+                size={18}
+                color={selected ? colors.cyan400 : colors.slate500}
+              />
+            ) : null}
             {note.isPinned ? (
               <Ionicons name="pin" size={14} color="#facc15" />
             ) : null}
@@ -116,6 +166,11 @@ export function NoteCard({
           {priority ? (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>{priority.label}</Text>
+            </View>
+          ) : null}
+          {versions.length > 0 ? (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{versions.length} versions</Text>
             </View>
           ) : null}
           {updatedLabel ? <Text style={styles.date}>{updatedLabel}</Text> : null}

@@ -13,11 +13,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { colors, fonts } from '@/constants/theme';
-import { DashboardCard } from '@/features/dashboard/DashboardCard';
 
 import { TIME_TRACK_TABS, type TimeTrackTabId } from './constants/tabs';
 import { useTimeTrackContext } from './context/TimeTrackProvider';
 import { DashboardTab } from './components/DashboardTab';
+import { PatternsTab } from './components/PatternsTab';
 import { ReportsTab } from './components/ReportsTab';
 import { SettingsTab } from './components/SettingsTab';
 import { TimerTab } from './components/TimerTab';
@@ -29,15 +29,6 @@ import {
 
 function isTimeTrackTab(value: string | undefined): value is TimeTrackTabId {
   return TIME_TRACK_TABS.some((tab) => tab.id === value);
-}
-
-function PatternsPlaceholder() {
-  return (
-    <DashboardCard>
-      <Text style={styles.placeholderTitle}>Patterns</Text>
-      <Text style={styles.placeholderBody}>Patterns coming soon.</Text>
-    </DashboardCard>
-  );
 }
 
 export function TimeTrackScreen() {
@@ -138,7 +129,7 @@ export function TimeTrackScreen() {
         ) : null}
         {currentView === 'dashboard' ? <DashboardTab timeTrack={timeTrack} /> : null}
         {currentView === 'reports' ? <ReportsTab timeTrack={timeTrack} /> : null}
-        {currentView === 'patterns' ? <PatternsPlaceholder /> : null}
+        {currentView === 'patterns' ? <PatternsTab /> : null}
         {currentView === 'weekly' ? <WeeklyTab timeTrack={timeTrack} /> : null}
         {currentView === 'settings' ? <SettingsTab timeTrack={timeTrack} /> : null}
       </ScrollView>
@@ -204,15 +195,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.slate400,
   },
-  placeholderTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.white,
-    marginBottom: 8,
-  },
-  placeholderBody: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-  },
 });
+

@@ -24,6 +24,15 @@ export const CATEGORY_ICONS: Record<
   relationships: 'people-outline',
 };
 
+/** Bar fill colors for Life Balance (cyan/blue family, matching app theme). */
+export const CATEGORY_BAR_COLORS: Record<GoalCategoryValue, string> = {
+  wealth: '#06b6d4',
+  health: '#22d3ee',
+  work: '#3b82f6',
+  knowledge: '#0ea5e9',
+  relationships: '#38bdf8',
+};
+
 export const STATUS_FILTERS = [
   { value: 'all', label: 'All' },
   { value: 'in_progress', label: 'In Progress' },

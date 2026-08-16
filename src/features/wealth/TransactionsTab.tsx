@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Alert,
   Pressable,
@@ -49,6 +49,8 @@ type TransactionsTabProps = {
   isCreatingTransaction?: boolean;
   isUpdatingTransaction?: boolean;
   isDeletingTransaction?: boolean;
+  openAdd?: boolean;
+  onOpenAddConsumed?: () => void;
 };
 
 export function TransactionsTab({
@@ -59,6 +61,8 @@ export function TransactionsTab({
   onDeleteTransaction,
   isCreatingTransaction,
   isUpdatingTransaction,
+  openAdd = false,
+  onOpenAddConsumed,
 }: TransactionsTabProps) {
   const { formatCurrency } = useCurrency();
   const [showDialog, setShowDialog] = useState(false);
@@ -100,6 +104,12 @@ export function TransactionsTab({
     setDialogMode('add');
     setShowDialog(true);
   };
+
+  useEffect(() => {
+    if (!openAdd) return;
+    openAddDialog();
+    onOpenAddConsumed?.();
+  }, [openAdd]);
 
   const openEditDialog = (transaction: WealthTransaction) => {
     setDialogMode('edit');

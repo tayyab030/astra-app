@@ -25,8 +25,8 @@ const DEFAULT_PREFS: CommPrefs = {
 };
 
 /**
- * Communication is not a real backend module on astra-frontend yet.
- * This screen is a polished shell with local channel preferences only.
+ * Device-only notification prefs (no Communication backend on astra).
+ * Copy and UX make that explicit — do not imply server sync.
  */
 export function CommunicationScreen() {
   const router = useRouter();
@@ -66,26 +66,40 @@ export function CommunicationScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Communication</Text>
+        <Text style={styles.title}>Device preferences</Text>
         <Text style={styles.subtitle}>
-          Channel preferences for how Astra reaches you. Server messaging is not available yet.
+          Local notification prefs only — nothing here syncs to the server yet.
         </Text>
       </View>
+
+      <DashboardCard borderColor="rgba(250, 204, 21, 0.35)">
+        <View style={styles.inboxHeader}>
+          <Ionicons name="phone-portrait-outline" size={22} color="#facc15" />
+          <View style={styles.inboxMeta}>
+            <Text style={styles.sectionTitle}>On this device</Text>
+            <Text style={styles.sectionDesc}>
+              Toggles save to AsyncStorage. Email digests and a real inbox need a
+              future backend — Astra does not send messages from this screen today.
+            </Text>
+          </View>
+        </View>
+      </DashboardCard>
 
       <DashboardCard>
         <View style={styles.inboxHeader}>
           <Ionicons name="mail-unread-outline" size={22} color={colors.cyan400} />
           <View style={styles.inboxMeta}>
-            <Text style={styles.sectionTitle}>Inbox</Text>
+            <Text style={styles.sectionTitle}>Inbox (placeholder)</Text>
             <Text style={styles.sectionDesc}>
-              No messages yet — there is no communication API on the backend.
+              No communication API — this list will stay empty until server messaging ships.
             </Text>
           </View>
         </View>
         <View style={styles.emptyBox}>
-          <Text style={styles.emptyTitle}>Your inbox is empty</Text>
+          <Text style={styles.emptyTitle}>No messages on this device</Text>
           <Text style={styles.emptyBody}>
-            When Astra adds email digests or in-app notices, they will appear here.
+            Prefer Settings for AI and account options. Use the toggles below only as
+            personal reminders of how you want alerts to work later.
           </Text>
         </View>
       </DashboardCard>
@@ -93,34 +107,34 @@ export function CommunicationScreen() {
       <DashboardCard>
         <Text style={styles.sectionTitle}>Channel preferences</Text>
         <Text style={styles.sectionDesc}>
-          Saved on this device only. Delivery still depends on future backend support.
+          Device-only. Preference saved for later — delivery is not wired.
         </Text>
 
         <ToggleRow
           label="Email digest"
-          description="Weekly summary to your account email (not sent yet)"
+          description="Preference only — email is not sent from the app yet"
           value={prefs.emailDigest}
           disabled={!loaded}
           onChange={(emailDigest) =>
-            void persist({ ...prefs, emailDigest }, 'Email digest preference saved')
+            void persist({ ...prefs, emailDigest }, 'Saved on this device (email not sent)')
           }
         />
         <ToggleRow
           label="Push alerts"
-          description="Device notifications when Astra has something urgent"
+          description="Device preference for when push becomes available"
           value={prefs.pushAlerts}
           disabled={!loaded}
           onChange={(pushAlerts) =>
-            void persist({ ...prefs, pushAlerts }, 'Push preference saved')
+            void persist({ ...prefs, pushAlerts }, 'Push preference saved on this device')
           }
         />
         <ToggleRow
           label="In-app inbox"
-          description="Show notices inside the Communication screen"
+          description="Show a local inbox UI when notices exist (none yet)"
           value={prefs.inAppInbox}
           disabled={!loaded}
           onChange={(inAppInbox) =>
-            void persist({ ...prefs, inAppInbox }, 'In-app preference saved')
+            void persist({ ...prefs, inAppInbox }, 'In-app preference saved on this device')
           }
         />
       </DashboardCard>
