@@ -1,19 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
 import { ROUTES } from '@/constants/routes';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { AUTH, publicApi } from '@/lib/api';
 import { formatCountdown } from './authErrors';
 import { GlassCard } from './GlassCard';
@@ -32,6 +26,142 @@ function paramValue(value: string | string[] | undefined) {
 }
 
 export function VerifyOtpForm() {
+  const { tokens, colors } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  loading: {
+    padding: 32,
+    alignItems: 'center',
+    gap: 12,
+  },
+  loadingText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate300,
+  },
+  header: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    gap: 8,
+  },
+  title: {
+    fontFamily: fonts.semibold,
+    fontSize: 30,
+    color: colors.cyan100,
+    textAlign: 'center',
+  },
+  description: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate300,
+    textAlign: 'center',
+  },
+  content: {
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+    gap: 24,
+  },
+  toast: {
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+  },
+  toastError: {
+    backgroundColor: 'rgba(248, 113, 113, 0.12)',
+    borderColor: 'rgba(248, 113, 113, 0.35)',
+  },
+  toastSuccess: {
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    borderColor: 'rgba(16, 185, 129, 0.35)',
+  },
+  toastText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.white,
+  },
+  otpRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  otpInput: {
+    width: 44,
+    height: 48,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.3)',
+    backgroundColor: 'rgba(51, 65, 85, 0.5)',
+    color: colors.white,
+    fontFamily: fonts.semibold,
+    fontSize: 20,
+    textAlign: 'center',
+  },
+  inputFocused: {
+    borderColor: colors.cyan400,
+  },
+  timerBlock: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  timerText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+  },
+  timerAccent: {
+    color: colors.cyan400,
+  },
+  expired: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.red400,
+  },
+  submitWrap: {
+    borderRadius: 6,
+    overflow: 'hidden',
+    shadowColor: colors.cyan500,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  submit: {
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  submitText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+  },
+  footer: {
+    alignItems: 'center',
+    gap: 16,
+  },
+  footerText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+    textAlign: 'center',
+  },
+  link: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.cyan400,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  pressed: {
+    opacity: 0.85,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+}));
+
   const router = useRouter();
   const params = useLocalSearchParams<{ otp_token?: string | string[] }>();
   const [token, setToken] = useState(paramValue(params.otp_token));
@@ -290,7 +420,7 @@ export function VerifyOtpForm() {
           ]}
         >
           <LinearGradient
-            colors={[colors.cyan600, colors.blue600]}
+            colors={tokens.accentGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.submit}
@@ -334,138 +464,3 @@ export function VerifyOtpForm() {
     </GlassCard>
   );
 }
-
-const styles = StyleSheet.create({
-  loading: {
-    padding: 32,
-    alignItems: 'center',
-    gap: 12,
-  },
-  loadingText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate300,
-  },
-  header: {
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    gap: 8,
-  },
-  title: {
-    fontFamily: fonts.semibold,
-    fontSize: 30,
-    color: colors.cyan100,
-    textAlign: 'center',
-  },
-  description: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate300,
-    textAlign: 'center',
-  },
-  content: {
-    paddingHorizontal: 24,
-    paddingBottom: 16,
-    gap: 24,
-  },
-  toast: {
-    borderRadius: 8,
-    padding: 12,
-    borderWidth: 1,
-  },
-  toastError: {
-    backgroundColor: 'rgba(248, 113, 113, 0.12)',
-    borderColor: 'rgba(248, 113, 113, 0.35)',
-  },
-  toastSuccess: {
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    borderColor: 'rgba(16, 185, 129, 0.35)',
-  },
-  toastText: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.white,
-  },
-  otpRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  otpInput: {
-    width: 44,
-    height: 48,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(6, 182, 212, 0.3)',
-    backgroundColor: 'rgba(51, 65, 85, 0.5)',
-    color: colors.white,
-    fontFamily: fonts.semibold,
-    fontSize: 20,
-    textAlign: 'center',
-  },
-  inputFocused: {
-    borderColor: colors.cyan400,
-  },
-  timerBlock: {
-    alignItems: 'center',
-    gap: 6,
-  },
-  timerText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-  },
-  timerAccent: {
-    color: colors.cyan400,
-  },
-  expired: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.red400,
-  },
-  submitWrap: {
-    borderRadius: 6,
-    overflow: 'hidden',
-    shadowColor: colors.cyan500,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  submit: {
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  submitText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-  },
-  footer: {
-    alignItems: 'center',
-    gap: 16,
-  },
-  footerText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-    textAlign: 'center',
-  },
-  link: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.cyan400,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-});

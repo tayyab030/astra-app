@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useThemedStyles } from '@/features/theme/AppThemeProvider';
 
 type PageHeaderProps = {
   title: string;
@@ -10,6 +11,27 @@ type PageHeaderProps = {
 };
 
 export function PageHeader({ title, subtitle, right }: PageHeaderProps) {
+  const styles = useThemedStyles((c, t) => ({
+    root: {
+      gap: 16,
+    },
+    textBlock: {
+      gap: 4,
+    },
+    title: {
+      fontFamily: fonts.headingBold,
+      fontSize: 30,
+      color: t.primary,
+      lineHeight: 36,
+    },
+    subtitle: {
+      fontFamily: fonts.regular,
+      fontSize: 16,
+      color: c.slate300,
+      marginTop: 4,
+    },
+  }));
+
   return (
     <View style={styles.root}>
       <View style={styles.textBlock}>
@@ -22,24 +44,3 @@ export function PageHeader({ title, subtitle, right }: PageHeaderProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    gap: 16,
-  },
-  textBlock: {
-    gap: 4,
-  },
-  title: {
-    fontFamily: fonts.headingBold,
-    fontSize: 30,
-    color: colors.cyan300,
-    lineHeight: 36,
-  },
-  subtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 16,
-    color: colors.slate300,
-    marginTop: 4,
-  },
-});

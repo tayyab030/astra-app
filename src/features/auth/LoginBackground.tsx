@@ -1,7 +1,18 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Animated, Easing, StyleSheet, useWindowDimensions, View, type ViewStyle } from 'react-native';
 
-function GridOverlay() {
+import { useAppTheme } from '@/features/theme/AppThemeProvider';
+
+function hexToRgba(hex: string, alpha: number): string {
+  const raw = hex.replace('#', '');
+  if (raw.length !== 6) return `rgba(34, 211, 238, ${alpha})`;
+  const r = Number.parseInt(raw.slice(0, 2), 16);
+  const g = Number.parseInt(raw.slice(2, 4), 16);
+  const b = Number.parseInt(raw.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function GridOverlay({ color }: { color: string }) {
   const { width, height } = useWindowDimensions();
   const pulse = useRef(new Animated.Value(0.2)).current;
   const cols = Math.ceil(width / 50) + 1;
@@ -31,10 +42,10 @@ function GridOverlay() {
   return (
     <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity: pulse }]}>
       {Array.from({ length: cols }, (_, i) => (
-        <View key={`v-${i}`} style={[styles.gridV, { left: i * 50 }]} />
+        <View key={`v-${i}`} style={[styles.gridV, { left: i * 50, backgroundColor: color }]} />
       ))}
       {Array.from({ length: rows }, (_, i) => (
-        <View key={`h-${i}`} style={[styles.gridH, { top: i * 50 }]} />
+        <View key={`h-${i}`} style={[styles.gridH, { top: i * 50, backgroundColor: color }]} />
       ))}
     </Animated.View>
   );
@@ -148,11 +159,13 @@ function Particle({
   top,
   delay,
   duration,
+  color,
 }: {
   left: number;
   top: number;
   delay: number;
   duration: number;
+  color: string;
 }) {
   const translateY = useRef(new Animated.Value(0)).current;
   const translateX = useRef(new Animated.Value(0)).current;
@@ -215,6 +228,7 @@ function Particle({
           left: `${left}%`,
           top: `${top}%`,
           opacity,
+          backgroundColor: color,
           transform: [{ translateY }, { translateX }],
         },
       ]}
@@ -223,6 +237,9 @@ function Particle({
 }
 
 export function LoginBackground() {
+  const { tokens } = useAppTheme();
+  const fx = tokens.fxOpacity;
+
   const particles = useMemo(
     () =>
       Array.from({ length: 20 }, (_, i) => ({
@@ -235,44 +252,53 @@ export function LoginBackground() {
     [],
   );
 
+  if (fx <= 0) {
+    return <View pointerEvents="none" style={StyleSheet.absoluteFill} />;
+  }
+
+  const primary = tokens.glowPrimary;
+  const secondary = tokens.accentGradient[1];
+  const gridColor = hexToRgba(primary, 0.1);
+  const particleColor = hexToRgba(primary, 0.6);
+
   return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <GridOverlay />
+    <View pointerEvents="none" style={[StyleSheet.absoluteFill, { opacity: fx }]}>
+      <GridOverlay color={gridColor} />
 
       <Orb
         size={176}
         style={{ top: 56, left: 56 }}
-        glow="radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, rgba(59, 130, 246, 0.2) 45%, transparent 70%)"
+        glow={`radial-gradient(circle, ${hexToRgba(primary, 0.2)} 0%, ${hexToRgba(secondary, 0.2)} 45%, transparent 70%)`}
       />
       <Orb
         size={208}
         delay={1000}
         style={{ bottom: 48, right: 48 }}
-        glow="radial-gradient(circle, rgba(168, 85, 247, 0.2) 0%, rgba(236, 72, 153, 0.2) 45%, transparent 70%)"
+        glow={`radial-gradient(circle, rgba(168, 85, 247, ${0.2 * fx}) 0%, rgba(236, 72, 153, ${0.2 * fx}) 45%, transparent 70%)`}
       />
       <Orb
         size={144}
         delay={2000}
         style={{ top: '42%', left: 16 }}
-        glow="radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(20, 184, 166, 0.2) 45%, transparent 70%)"
+        glow={`radial-gradient(circle, rgba(16, 185, 129, ${0.2 * fx}) 0%, rgba(20, 184, 166, ${0.2 * fx}) 45%, transparent 70%)`}
       />
 
       <Ring
         size={256}
-        color="rgba(6, 182, 212, 0.3)"
+        color={hexToRgba(primary, 0.3)}
         duration={20000}
         style={styles.ringTopRight}
       />
       <Ring
         size={192}
-        color="rgba(59, 130, 246, 0.3)"
+        color={hexToRgba(secondary, 0.3)}
         duration={25000}
         reverse
         style={styles.ringBottomLeft}
       />
 
       {particles.map((particle) => (
-        <Particle key={particle.id} {...particle} />
+        <Particle key={particle.id} {...particle} color={particleColor} />
       ))}
     </View>
   );
@@ -284,14 +310,12 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 1,
-    backgroundColor: 'rgba(6, 182, 212, 0.1)',
   },
   gridH: {
     position: 'absolute',
     left: 0,
     right: 0,
     height: 1,
-    backgroundColor: 'rgba(6, 182, 212, 0.1)',
   },
   ring: {
     position: 'absolute',
@@ -311,6 +335,5 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: 'rgba(34, 211, 238, 0.6)',
   },
 });

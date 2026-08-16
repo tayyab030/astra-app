@@ -1,7 +1,8 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 
 import { DETAIL_VIEW_TABS, type DetailViewTab } from '../constants';
 
@@ -11,36 +12,8 @@ type DetailNavigationTabsProps = {
 };
 
 export function DetailNavigationTabs({ activeTab, onTabChange }: DetailNavigationTabsProps) {
-  return (
-    <View style={styles.wrap}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.row}
-      >
-        {DETAIL_VIEW_TABS.map((tab) => {
-          const active = activeTab === tab.id;
-          return (
-            <Pressable
-              key={tab.id}
-              onPress={() => onTabChange(tab.id)}
-              style={[styles.tab, active && styles.tabActive]}
-            >
-              <Ionicons
-                name={tab.icon}
-                size={16}
-                color={active ? colors.white : colors.slate400}
-              />
-              <Text style={[styles.label, active && styles.labelActive]}>{tab.label}</Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
   wrap: {
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(71, 85, 105, 0.5)',
@@ -74,4 +47,34 @@ const styles = StyleSheet.create({
   labelActive: {
     color: colors.white,
   },
-});
+}));
+
+  return (
+    <View style={styles.wrap}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.row}
+      >
+        {DETAIL_VIEW_TABS.map((tab) => {
+          const active = activeTab === tab.id;
+          return (
+            <Pressable
+              key={tab.id}
+              onPress={() => onTabChange(tab.id)}
+              style={[styles.tab, active && styles.tabActive]}
+            >
+              <Ionicons
+                name={tab.icon}
+                size={16}
+                color={active ? colors.white : colors.slate400}
+              />
+              <Text style={[styles.label, active && styles.labelActive]}>{tab.label}</Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+

@@ -1,15 +1,9 @@
 import { useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { FormModal } from '@/features/wealth/FormModal';
 
 import type { AvailableTask } from '../types/timeTrack.types';
@@ -31,6 +25,59 @@ export function AddTaskModal({
   isAdding = false,
   isLoading = false,
 }: AddTaskModalProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  searchWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    paddingHorizontal: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+    paddingVertical: 8,
+  },
+  loader: {
+    marginVertical: 24,
+  },
+  empty: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+    textAlign: 'center',
+    paddingVertical: 24,
+  },
+  taskRow: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.35)',
+    padding: 12,
+    gap: 4,
+  },
+  taskDisabled: {
+    opacity: 0.5,
+  },
+  taskTitle: {
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.white,
+  },
+  taskMeta: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+}));
+
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
@@ -99,54 +146,3 @@ export function AddTaskModal({
   );
 }
 
-const styles = StyleSheet.create({
-  searchWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    paddingHorizontal: 12,
-  },
-  searchInput: {
-    flex: 1,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-    paddingVertical: 8,
-  },
-  loader: {
-    marginVertical: 24,
-  },
-  empty: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-    textAlign: 'center',
-    paddingVertical: 24,
-  },
-  taskRow: {
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.35)',
-    padding: 12,
-    gap: 4,
-  },
-  taskDisabled: {
-    opacity: 0.5,
-  },
-  taskTitle: {
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.white,
-  },
-  taskMeta: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-});

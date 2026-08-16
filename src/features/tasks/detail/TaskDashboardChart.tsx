@@ -1,7 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 
 import { SECTION_STATUS_COLORS, type TaskStatusValue } from '../constants';
@@ -24,102 +25,7 @@ type TaskDashboardChartProps = {
 };
 
 export function TaskDashboardChart({ sections, totalTasks }: TaskDashboardChartProps) {
-  const chartData = sections
-    .map((section) => ({
-      status: section.status,
-      label: section.name,
-      count: section.tasks.length,
-      fill: SECTION_STATUS_COLORS[section.status] ?? '#64748b',
-    }))
-    .filter((entry) => entry.count > 0);
-
-  const doneCount = sections.find((section) => section.status === 'done')?.tasks.length ?? 0;
-  const completionRate = totalTasks > 0 ? Math.round((doneCount / totalTasks) * 100) : 0;
-  const chartTotal = chartData.reduce((sum, entry) => sum + entry.count, 0);
-
-  if (totalTasks === 0) {
-    return (
-      <DashboardCard>
-        <Text style={styles.heading}>Task Dashboard</Text>
-        <View style={styles.empty}>
-          <Text style={styles.emptyText}>No tasks yet — create one to see progress here.</Text>
-        </View>
-      </DashboardCard>
-    );
-  }
-
-  let offset = 0;
-
-  return (
-    <DashboardCard>
-      <Text style={styles.heading}>Task Dashboard</Text>
-
-      <View style={styles.statsGrid}>
-        {sections.map((section) => (
-          <View key={section.id} style={styles.statCard}>
-            <Text style={styles.statLabel}>{section.name}</Text>
-            <Text style={styles.statValue}>{section.tasks.length}</Text>
-          </View>
-        ))}
-      </View>
-
-      <View style={styles.completionCard}>
-        <View style={styles.completionHeader}>
-          <Text style={styles.statLabel}>Completion rate</Text>
-          <Text style={styles.completionRate}>{completionRate}%</Text>
-        </View>
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: `${completionRate}%` }]} />
-        </View>
-        <Text style={styles.completionMeta}>
-          {doneCount} of {totalTasks} tasks done
-        </Text>
-      </View>
-
-      {chartData.length > 0 && chartTotal > 0 ? (
-        <View style={styles.chartWrap}>
-          <Text style={styles.statLabel}>Tasks by status</Text>
-          <Svg width={SIZE} height={SIZE}>
-            {chartData.map((entry) => {
-              const dash = (entry.count / chartTotal) * CIRCUMFERENCE;
-              const currentOffset = offset;
-              offset += dash;
-
-              return (
-                <Circle
-                  key={entry.status}
-                  cx={SIZE / 2}
-                  cy={SIZE / 2}
-                  r={RADIUS}
-                  stroke={entry.fill}
-                  strokeWidth={STROKE}
-                  strokeDasharray={`${dash} ${CIRCUMFERENCE - dash}`}
-                  strokeDashoffset={-currentOffset}
-                  originX={SIZE / 2}
-                  originY={SIZE / 2}
-                  rotation={-90}
-                  fill="none"
-                  strokeLinecap="butt"
-                />
-              );
-            })}
-          </Svg>
-          <View style={styles.legend}>
-            {chartData.map((entry) => (
-              <View key={entry.status} style={styles.legendRow}>
-                <View style={[styles.swatch, { backgroundColor: entry.fill }]} />
-                <Text style={styles.legendLabel}>{entry.label}</Text>
-                <Text style={styles.legendValue}>{entry.count}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-      ) : null}
-    </DashboardCard>
-  );
-}
-
-const styles = StyleSheet.create({
+  const styles = useThemedStyles((colors, tokens) => ({
   heading: {
     fontFamily: fonts.heading,
     fontSize: 18,
@@ -226,4 +132,100 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.slate200,
   },
-});
+}));
+
+  const chartData = sections
+    .map((section) => ({
+      status: section.status,
+      label: section.name,
+      count: section.tasks.length,
+      fill: SECTION_STATUS_COLORS[section.status] ?? '#64748b',
+    }))
+    .filter((entry) => entry.count > 0);
+
+  const doneCount = sections.find((section) => section.status === 'done')?.tasks.length ?? 0;
+  const completionRate = totalTasks > 0 ? Math.round((doneCount / totalTasks) * 100) : 0;
+  const chartTotal = chartData.reduce((sum, entry) => sum + entry.count, 0);
+
+  if (totalTasks === 0) {
+    return (
+      <DashboardCard>
+        <Text style={styles.heading}>Task Dashboard</Text>
+        <View style={styles.empty}>
+          <Text style={styles.emptyText}>No tasks yet — create one to see progress here.</Text>
+        </View>
+      </DashboardCard>
+    );
+  }
+
+  let offset = 0;
+
+  return (
+    <DashboardCard>
+      <Text style={styles.heading}>Task Dashboard</Text>
+
+      <View style={styles.statsGrid}>
+        {sections.map((section) => (
+          <View key={section.id} style={styles.statCard}>
+            <Text style={styles.statLabel}>{section.name}</Text>
+            <Text style={styles.statValue}>{section.tasks.length}</Text>
+          </View>
+        ))}
+      </View>
+
+      <View style={styles.completionCard}>
+        <View style={styles.completionHeader}>
+          <Text style={styles.statLabel}>Completion rate</Text>
+          <Text style={styles.completionRate}>{completionRate}%</Text>
+        </View>
+        <View style={styles.progressTrack}>
+          <View style={[styles.progressFill, { width: `${completionRate}%` }]} />
+        </View>
+        <Text style={styles.completionMeta}>
+          {doneCount} of {totalTasks} tasks done
+        </Text>
+      </View>
+
+      {chartData.length > 0 && chartTotal > 0 ? (
+        <View style={styles.chartWrap}>
+          <Text style={styles.statLabel}>Tasks by status</Text>
+          <Svg width={SIZE} height={SIZE}>
+            {chartData.map((entry) => {
+              const dash = (entry.count / chartTotal) * CIRCUMFERENCE;
+              const currentOffset = offset;
+              offset += dash;
+
+              return (
+                <Circle
+                  key={entry.status}
+                  cx={SIZE / 2}
+                  cy={SIZE / 2}
+                  r={RADIUS}
+                  stroke={entry.fill}
+                  strokeWidth={STROKE}
+                  strokeDasharray={`${dash} ${CIRCUMFERENCE - dash}`}
+                  strokeDashoffset={-currentOffset}
+                  originX={SIZE / 2}
+                  originY={SIZE / 2}
+                  rotation={-90}
+                  fill="none"
+                  strokeLinecap="butt"
+                />
+              );
+            })}
+          </Svg>
+          <View style={styles.legend}>
+            {chartData.map((entry) => (
+              <View key={entry.status} style={styles.legendRow}>
+                <View style={[styles.swatch, { backgroundColor: entry.fill }]} />
+                <Text style={styles.legendLabel}>{entry.label}</Text>
+                <Text style={styles.legendValue}>{entry.count}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      ) : null}
+    </DashboardCard>
+  );
+}
+

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
 
@@ -12,6 +13,43 @@ type QuickNoteCaptureProps = {
 };
 
 export function QuickNoteCapture({ onSave, loading }: QuickNoteCaptureProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  title: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.cyan300,
+  },
+  input: {
+    minHeight: 100,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    color: colors.white,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    textAlignVertical: 'top',
+  },
+  footer: {
+    marginTop: 12,
+    gap: 10,
+  },
+  hint: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate500,
+  },
+}));
+
   const [content, setContent] = useState('');
 
   const handleSave = async () => {
@@ -51,38 +89,3 @@ export function QuickNoteCapture({ onSave, loading }: QuickNoteCaptureProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
-  title: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.cyan300,
-  },
-  input: {
-    minHeight: 100,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    color: colors.white,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    textAlignVertical: 'top',
-  },
-  footer: {
-    marginTop: 12,
-    gap: 10,
-  },
-  hint: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate500,
-  },
-});

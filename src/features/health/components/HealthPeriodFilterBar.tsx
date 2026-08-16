@@ -1,6 +1,7 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 
 import type { HealthPeriodFilter, HealthPeriodMode } from '../types/health.types';
 
@@ -17,25 +18,7 @@ type HealthPeriodFilterBarProps = {
 };
 
 export function HealthPeriodFilterBar({ filter, onChange }: HealthPeriodFilterBarProps) {
-  return (
-    <View style={styles.wrap}>
-      {MODES.map((mode) => {
-        const active = filter.mode === mode.id;
-        return (
-          <Pressable
-            key={mode.id}
-            onPress={() => onChange({ ...filter, mode: mode.id })}
-            style={[styles.chip, active && styles.chipActive]}
-          >
-            <Text style={[styles.label, active && styles.labelActive]}>{mode.label}</Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
+  const styles = useThemedStyles((colors, tokens) => ({
   wrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -61,4 +44,23 @@ const styles = StyleSheet.create({
   labelActive: {
     color: colors.cyan300,
   },
-});
+}));
+
+  return (
+    <View style={styles.wrap}>
+      {MODES.map((mode) => {
+        const active = filter.mode === mode.id;
+        return (
+          <Pressable
+            key={mode.id}
+            onPress={() => onChange({ ...filter, mode: mode.id })}
+            style={[styles.chip, active && styles.chipActive]}
+          >
+            <Text style={[styles.label, active && styles.labelActive]}>{mode.label}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+

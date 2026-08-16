@@ -1,3 +1,4 @@
+/** Neon fallback palette for rare module-level StyleSheets. Prefer `useAppTheme().colors`. */
 export const colors = {
   slate900: '#0f172a',
   slate800: '#1e293b',

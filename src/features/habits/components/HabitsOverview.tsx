@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 
 import type { Habit } from '../types/habits.types';
@@ -34,6 +35,170 @@ export function HabitsOverview({
   achievements,
   isLoading,
 }: HabitsOverviewProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  wrap: {
+    gap: 12,
+  },
+  summaryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  summaryCard: {
+    width: '47%',
+    flexGrow: 1,
+    minWidth: 140,
+    alignItems: 'center',
+  },
+  summaryValue: {
+    fontFamily: fonts.headingBold,
+    fontSize: 22,
+    color: colors.cyan300,
+  },
+  summaryTitle: {
+    marginTop: 4,
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.slate200,
+  },
+  summarySubtitle: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: colors.slate500,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.cyan300,
+  },
+  weekRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 4,
+  },
+  weekCol: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+  },
+  weekBarTrack: {
+    width: '70%',
+    height: 72,
+    borderRadius: 6,
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
+    justifyContent: 'flex-end',
+    overflow: 'hidden',
+  },
+  weekBarFill: {
+    width: '100%',
+    backgroundColor: colors.cyan500,
+    borderRadius: 6,
+    minHeight: 0,
+  },
+  weekLabel: {
+    fontFamily: fonts.medium,
+    fontSize: 11,
+    color: colors.slate300,
+  },
+  weekPct: {
+    fontFamily: fonts.regular,
+    fontSize: 10,
+    color: colors.slate500,
+  },
+  streakRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(71, 85, 105, 0.35)',
+  },
+  streakName: {
+    flex: 1,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate200,
+  },
+  streakValue: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: '#fb923c',
+  },
+  packRow: {
+    gap: 6,
+    marginBottom: 12,
+  },
+  packMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  packName: {
+    flex: 1,
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.slate200,
+  },
+  packCount: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+  track: {
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: 'rgba(15, 23, 42, 0.7)',
+    overflow: 'hidden',
+  },
+  fill: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: colors.cyan500,
+  },
+  achievement: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
+    padding: 12,
+    marginBottom: 8,
+    gap: 4,
+  },
+  achievementEarned: {
+    borderColor: 'rgba(250, 204, 21, 0.45)',
+    backgroundColor: 'rgba(250, 204, 21, 0.08)',
+  },
+  achievementTitle: {
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.slate200,
+  },
+  achievementDesc: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+  achievementStatus: {
+    fontFamily: fonts.medium,
+    fontSize: 11,
+    color: colors.cyan400,
+    marginTop: 2,
+  },
+  empty: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate500,
+  },
+}));
+
   const completionRate = habits.length
     ? Math.round((completedCount / habits.length) * 100)
     : 0;
@@ -201,165 +366,3 @@ export function HabitsOverview({
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    gap: 12,
-  },
-  summaryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  summaryCard: {
-    width: '47%',
-    flexGrow: 1,
-    minWidth: 140,
-    alignItems: 'center',
-  },
-  summaryValue: {
-    fontFamily: fonts.headingBold,
-    fontSize: 22,
-    color: colors.cyan300,
-  },
-  summaryTitle: {
-    marginTop: 4,
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.slate200,
-  },
-  summarySubtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 11,
-    color: colors.slate500,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.cyan300,
-  },
-  weekRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 4,
-  },
-  weekCol: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 4,
-  },
-  weekBarTrack: {
-    width: '70%',
-    height: 72,
-    borderRadius: 6,
-    backgroundColor: 'rgba(15, 23, 42, 0.7)',
-    justifyContent: 'flex-end',
-    overflow: 'hidden',
-  },
-  weekBarFill: {
-    width: '100%',
-    backgroundColor: colors.cyan500,
-    borderRadius: 6,
-    minHeight: 0,
-  },
-  weekLabel: {
-    fontFamily: fonts.medium,
-    fontSize: 11,
-    color: colors.slate300,
-  },
-  weekPct: {
-    fontFamily: fonts.regular,
-    fontSize: 10,
-    color: colors.slate500,
-  },
-  streakRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(71, 85, 105, 0.35)',
-  },
-  streakName: {
-    flex: 1,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate200,
-  },
-  streakValue: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: '#fb923c',
-  },
-  packRow: {
-    gap: 6,
-    marginBottom: 12,
-  },
-  packMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  packName: {
-    flex: 1,
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.slate200,
-  },
-  packCount: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  track: {
-    height: 6,
-    borderRadius: 999,
-    backgroundColor: 'rgba(15, 23, 42, 0.7)',
-    overflow: 'hidden',
-  },
-  fill: {
-    height: '100%',
-    borderRadius: 999,
-    backgroundColor: colors.cyan500,
-  },
-  achievement: {
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.4)',
-    padding: 12,
-    marginBottom: 8,
-    gap: 4,
-  },
-  achievementEarned: {
-    borderColor: 'rgba(250, 204, 21, 0.45)',
-    backgroundColor: 'rgba(250, 204, 21, 0.08)',
-  },
-  achievementTitle: {
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.slate200,
-  },
-  achievementDesc: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  achievementStatus: {
-    fontFamily: fonts.medium,
-    fontSize: 11,
-    color: colors.cyan400,
-    marginTop: 2,
-  },
-  empty: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate500,
-  },
-});

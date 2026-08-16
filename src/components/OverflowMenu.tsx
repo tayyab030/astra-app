@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 
 export type OverflowMenuItem = {
   key: string;
@@ -29,7 +30,6 @@ type OverflowMenuProps = {
   disabled?: boolean;
   hitSlop?: number;
   accessibilityLabel?: string;
-  /** Controlled open state (e.g. open from long-press on a parent card). */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 };
@@ -44,13 +44,76 @@ export function OverflowMenu({
   items,
   icon = 'ellipsis-vertical',
   iconSize = 18,
-  iconColor = colors.slate400,
+  iconColor,
   disabled = false,
   hitSlop = 10,
   accessibilityLabel = 'More actions',
   open: controlledOpen,
   onOpenChange,
 }: OverflowMenuProps) {
+  const { colors } = useAppTheme();
+  const styles = useThemedStyles((c, t) => ({
+    trigger: {
+      flexShrink: 0,
+    },
+    triggerHit: {
+      width: 36,
+      height: 36,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      borderRadius: 8,
+    },
+    overlay: {
+      flex: 1,
+    },
+    menu: {
+      position: 'absolute' as const,
+      width: MENU_WIDTH,
+      maxHeight: MENU_MAX_HEIGHT,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: t.border,
+      backgroundColor: c.slate800,
+      shadowColor: '#000',
+      shadowOpacity: 0.4,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 12,
+      overflow: 'hidden' as const,
+    },
+    list: {
+      maxHeight: MENU_MAX_HEIGHT,
+    },
+    item: {
+      minHeight: 48,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 12,
+    },
+    itemBorder: {
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: 'rgba(71, 85, 105, 0.55)',
+    },
+    itemPressed: {
+      backgroundColor: t.primaryMuted,
+    },
+    itemDisabled: {
+      opacity: 0.4,
+    },
+    itemLabel: {
+      flex: 1,
+      fontFamily: fonts.medium,
+      fontSize: 15,
+      color: c.slate200,
+    },
+    itemLabelDestructive: {
+      color: c.red400,
+    },
+  }));
+
+  const resolvedIconColor = iconColor ?? colors.slate400;
   const triggerRef = useRef<View>(null);
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
@@ -114,7 +177,7 @@ export function OverflowMenu({
           accessibilityLabel={accessibilityLabel}
           style={styles.triggerHit}
         >
-          <Ionicons name={icon} size={iconSize} color={iconColor} />
+          <Ionicons name={icon} size={iconSize} color={resolvedIconColor} />
         </Pressable>
       </View>
 
@@ -135,7 +198,6 @@ export function OverflowMenu({
                   accessibilityRole="menuitem"
                   onPress={() => {
                     close();
-                    // Defer so the modal can close before another modal/alert opens.
                     requestAnimationFrame(() => item.onPress());
                   }}
                   style={({ pressed }) => [
@@ -170,64 +232,3 @@ export function OverflowMenu({
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  trigger: {
-    flexShrink: 0,
-  },
-  triggerHit: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 8,
-  },
-  overlay: {
-    flex: 1,
-  },
-  menu: {
-    position: 'absolute',
-    width: MENU_WIDTH,
-    maxHeight: MENU_MAX_HEIGHT,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(6, 182, 212, 0.35)',
-    backgroundColor: colors.slate800,
-    shadowColor: '#000',
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 12,
-    overflow: 'hidden',
-  },
-  list: {
-    maxHeight: MENU_MAX_HEIGHT,
-  },
-  item: {
-    minHeight: 48,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  itemBorder: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(71, 85, 105, 0.55)',
-  },
-  itemPressed: {
-    backgroundColor: 'rgba(6, 182, 212, 0.14)',
-  },
-  itemDisabled: {
-    opacity: 0.4,
-  },
-  itemLabel: {
-    flex: 1,
-    fontFamily: fonts.medium,
-    fontSize: 15,
-    color: colors.slate200,
-  },
-  itemLabelDestructive: {
-    color: colors.red400,
-  },
-});

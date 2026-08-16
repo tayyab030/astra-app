@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { PageHeader } from '@/components/PageHeader';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { useCurrency } from '@/hooks/useCurrency';
 import type { WealthFilter } from '@/lib/api/wealth';
@@ -33,6 +34,92 @@ function isWealthTab(value: string | undefined): value is WealthTabValue {
 }
 
 export function WealthScreen() {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  root: {
+    flex: 1,
+  },
+  scroll: {
+    padding: 24,
+    paddingBottom: 40,
+    gap: 24,
+  },
+  errorTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.red300,
+    marginBottom: 8,
+  },
+  errorBody: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate300,
+    marginBottom: 16,
+  },
+  summary: {
+    gap: 16,
+  },
+  summaryTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  summaryTitle: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+  },
+  summaryValue: {
+    fontFamily: fonts.headingBold,
+    fontSize: 24,
+  },
+  summaryHint: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    marginTop: 4,
+  },
+  skeletonValue: {
+    height: 28,
+    width: 112,
+    borderRadius: 6,
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    marginBottom: 8,
+  },
+  skeletonHint: {
+    height: 12,
+    width: 144,
+    borderRadius: 6,
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+  },
+  tabs: {
+    alignSelf: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(30, 41, 59, 0.5)',
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    borderRadius: 8,
+    padding: 4,
+    gap: 4,
+  },
+  tab: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  tabActive: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.white,
+  },
+  tabInactive: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate300,
+  },
+}));
+
   const router = useRouter();
   const params = useLocalSearchParams<{ tab?: string; action?: string }>();
   const tabParam = Array.isArray(params.tab) ? params.tab[0] : params.tab;
@@ -198,7 +285,7 @@ export function WealthScreen() {
               return (
                 <Pressable key={item.value} onPress={() => setTab(item.value)}>
                   <LinearGradient
-                    colors={[colors.cyan500, colors.blue600]}
+                    colors={tokens.accentGradient}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.tab}
@@ -270,87 +357,3 @@ export function WealthScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  scroll: {
-    padding: 24,
-    paddingBottom: 40,
-    gap: 24,
-  },
-  errorTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.red300,
-    marginBottom: 8,
-  },
-  errorBody: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate300,
-    marginBottom: 16,
-  },
-  summary: {
-    gap: 16,
-  },
-  summaryTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  summaryTitle: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-  },
-  summaryValue: {
-    fontFamily: fonts.headingBold,
-    fontSize: 24,
-  },
-  summaryHint: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    marginTop: 4,
-  },
-  skeletonValue: {
-    height: 28,
-    width: 112,
-    borderRadius: 6,
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    marginBottom: 8,
-  },
-  skeletonHint: {
-    height: 12,
-    width: 144,
-    borderRadius: 6,
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-  },
-  tabs: {
-    alignSelf: 'center',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(30, 41, 59, 0.5)',
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    borderRadius: 8,
-    padding: 4,
-    gap: 4,
-  },
-  tab: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-  },
-  tabActive: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.white,
-  },
-  tabInactive: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate300,
-  },
-});

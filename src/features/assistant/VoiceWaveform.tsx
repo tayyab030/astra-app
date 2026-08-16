@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-
-import { colors } from '@/constants/theme';
+import { useThemedStyles } from '@/features/theme/AppThemeProvider';
+import { View } from 'react-native';
 
 const BAR_COUNT = 36;
 const MIN_HEIGHT = 4;
@@ -23,6 +22,34 @@ type VoiceWaveformProps = {
  * ChatGPT-style live voice bars driven by mic metering.
  */
 export function VoiceWaveform({ active, level }: VoiceWaveformProps) {
+  const styles = useThemedStyles((colors, tokens) => ({
+  wrap: {
+    flex: 1,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    borderWidth: 1,
+    borderColor: 'rgba(34, 211, 238, 0.25)',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+    height: MAX_HEIGHT + 4,
+    width: '100%',
+  },
+  bar: {
+    flex: 1,
+    maxWidth: 4,
+    borderRadius: 999,
+    backgroundColor: colors.cyan400,
+  },
+}));
+
   const [bars, setBars] = useState<number[]>(() => Array.from({ length: BAR_COUNT }, () => 0.08));
   const historyRef = useRef<number[]>(Array.from({ length: BAR_COUNT }, () => 0.08));
   const phaseRef = useRef(0);
@@ -77,30 +104,3 @@ export function VoiceWaveform({ active, level }: VoiceWaveformProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    flex: 1,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    backgroundColor: 'rgba(15, 23, 42, 0.65)',
-    borderWidth: 1,
-    borderColor: 'rgba(34, 211, 238, 0.25)',
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 3,
-    height: MAX_HEIGHT + 4,
-    width: '100%',
-  },
-  bar: {
-    flex: 1,
-    maxWidth: 4,
-    borderRadius: 999,
-    backgroundColor: colors.cyan400,
-  },
-});

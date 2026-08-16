@@ -1,10 +1,11 @@
 import { useEffect, useMemo } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { FormFieldError } from '@/features/wealth/FormFieldError';
 import { FormModal } from '@/features/wealth/FormModal';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
@@ -117,6 +118,37 @@ export function TaskFormModal({
   fixedGoalId,
   fixedProjectId,
 }: TaskFormModalProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  field: {
+    gap: 8,
+  },
+  fieldLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.cyan200,
+  },
+  input: {
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    color: colors.white,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  textarea: {
+    minHeight: 88,
+    textAlignVertical: 'top',
+  },
+  inputError: {
+    borderColor: 'rgba(248, 113, 113, 0.7)',
+  },
+}));
+
   const { projects } = useProjects();
   const { createTask, updateTask, isCreatingTask, isUpdatingTask } = useTasks('all');
 
@@ -359,32 +391,3 @@ export function TaskFormModal({
   );
 }
 
-const styles = StyleSheet.create({
-  field: {
-    gap: 8,
-  },
-  fieldLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.cyan200,
-  },
-  input: {
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    color: colors.white,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  textarea: {
-    minHeight: 88,
-    textAlignVertical: 'top',
-  },
-  inputError: {
-    borderColor: 'rgba(248, 113, 113, 0.7)',
-  },
-});

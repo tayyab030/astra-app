@@ -1,8 +1,9 @@
 import type { ComponentProps } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 
 type WealthEmptyStateProps = {
   icon: ComponentProps<typeof Ionicons>['name'];
@@ -11,18 +12,8 @@ type WealthEmptyStateProps = {
 };
 
 export function WealthEmptyState({ icon, title, description }: WealthEmptyStateProps) {
-  return (
-    <View style={styles.wrap}>
-      <View style={styles.iconWrap}>
-        <Ionicons name={icon} size={48} color={colors.slate400} />
-      </View>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.description}>{description}</Text>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
   wrap: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -51,4 +42,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     maxWidth: 360,
   },
-});
+}));
+
+  return (
+    <View style={styles.wrap}>
+      <View style={styles.iconWrap}>
+        <Ionicons name={icon} size={48} color={colors.slate400} />
+      </View>
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.description}>{description}</Text>
+    </View>
+  );
+}
+

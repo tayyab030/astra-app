@@ -1,18 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { InsightHorizonBadge } from '@/components/insights/InsightHorizonBadge';
 import { PageHeader } from '@/components/PageHeader';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { useDashboard } from '@/features/dashboard/hooks/useDashboard';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
@@ -41,6 +35,111 @@ function getInitialFilter(): GoalsFilter {
 }
 
 export function GoalsScreen() {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  root: {
+    flex: 1,
+  },
+  scroll: {
+    padding: 24,
+    paddingBottom: 40,
+    gap: 16,
+  },
+  summaryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  summaryCard: {
+    width: '47%',
+    flexGrow: 1,
+    minWidth: 140,
+  },
+  summaryTitle: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.cyan300,
+    marginBottom: 8,
+  },
+  summaryValue: {
+    fontFamily: fonts.headingBold,
+    fontSize: 22,
+    color: colors.cyan300,
+  },
+  summarySubtitle: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+    marginTop: 4,
+  },
+  insightHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  insightItem: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.3)',
+    backgroundColor: 'rgba(6, 182, 212, 0.12)',
+    padding: 12,
+    gap: 8,
+    marginBottom: 10,
+  },
+  insightText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate200,
+    lineHeight: 18,
+  },
+  skeleton: {
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: 'rgba(51, 65, 85, 0.45)',
+    marginBottom: 10,
+  },
+  listHeader: {
+    gap: 10,
+  },
+  sectionTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 18,
+    color: colors.slate200,
+  },
+  chips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  chipActive: {
+    borderColor: 'rgba(71, 85, 105, 0.8)',
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
+  },
+  chipText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+  },
+  chipTextActive: {
+    color: colors.slate200,
+  },
+  list: {
+    gap: 12,
+  },
+  loading: {
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+}));
+
   const router = useRouter();
   const { action } = useLocalSearchParams<{ action?: string }>();
   const { user } = useSession();
@@ -277,106 +376,3 @@ export function GoalsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  scroll: {
-    padding: 24,
-    paddingBottom: 40,
-    gap: 16,
-  },
-  summaryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  summaryCard: {
-    width: '47%',
-    flexGrow: 1,
-    minWidth: 140,
-  },
-  summaryTitle: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.cyan300,
-    marginBottom: 8,
-  },
-  summaryValue: {
-    fontFamily: fonts.headingBold,
-    fontSize: 22,
-    color: colors.cyan300,
-  },
-  summarySubtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-    marginTop: 4,
-  },
-  insightHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
-  insightItem: {
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(6, 182, 212, 0.3)',
-    backgroundColor: 'rgba(6, 182, 212, 0.12)',
-    padding: 12,
-    gap: 8,
-    marginBottom: 10,
-  },
-  insightText: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate200,
-    lineHeight: 18,
-  },
-  skeleton: {
-    height: 48,
-    borderRadius: 8,
-    backgroundColor: 'rgba(51, 65, 85, 0.45)',
-    marginBottom: 10,
-  },
-  listHeader: {
-    gap: 10,
-  },
-  sectionTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 18,
-    color: colors.slate200,
-  },
-  chips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  chip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  chipActive: {
-    borderColor: 'rgba(71, 85, 105, 0.8)',
-    backgroundColor: 'rgba(15, 23, 42, 0.4)',
-  },
-  chipText: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-  },
-  chipTextActive: {
-    color: colors.slate200,
-  },
-  list: {
-    gap: 12,
-  },
-  loading: {
-    paddingVertical: 40,
-    alignItems: 'center',
-  },
-});

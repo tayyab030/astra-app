@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
 import { WealthEmptyState } from '@/features/wealth/WealthEmptyState';
@@ -34,6 +35,66 @@ export function MyTasksSection({
   activeTimerTaskId,
   isTimerRunning,
 }: MyTasksSectionProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  heading: {
+    fontFamily: fonts.heading,
+    fontSize: 18,
+    color: colors.slate200,
+    marginBottom: 12,
+  },
+  filters: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
+  },
+  chip: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(51, 65, 85, 0.35)',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  chipActive: {
+    backgroundColor: 'rgba(71, 85, 105, 0.85)',
+    borderColor: 'rgba(148, 163, 184, 0.45)',
+  },
+  chipText: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate300,
+  },
+  chipTextActive: {
+    color: colors.white,
+  },
+  addRow: {
+    marginBottom: 8,
+    alignItems: 'flex-start',
+  },
+  list: {
+    gap: 10,
+  },
+  skeleton: {
+    height: 56,
+    borderRadius: 8,
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+  },
+  moreButton: {
+    marginTop: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  moreText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.blue400,
+  },
+}));
+
   const router = useRouter();
   const { action } = useLocalSearchParams<{ action?: string }>();
   const [activeFilter, setActiveFilter] = useState<TaskFilterChip>('upcoming');
@@ -180,61 +241,3 @@ export function MyTasksSection({
   );
 }
 
-const styles = StyleSheet.create({
-  heading: {
-    fontFamily: fonts.heading,
-    fontSize: 18,
-    color: colors.slate200,
-    marginBottom: 12,
-  },
-  filters: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 12,
-  },
-  chip: {
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(51, 65, 85, 0.35)',
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
-  chipActive: {
-    backgroundColor: 'rgba(71, 85, 105, 0.85)',
-    borderColor: 'rgba(148, 163, 184, 0.45)',
-  },
-  chipText: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate300,
-  },
-  chipTextActive: {
-    color: colors.white,
-  },
-  addRow: {
-    marginBottom: 8,
-    alignItems: 'flex-start',
-  },
-  list: {
-    gap: 10,
-  },
-  skeleton: {
-    height: 56,
-    borderRadius: 8,
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-  },
-  moreButton: {
-    marginTop: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  moreText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.blue400,
-  },
-});

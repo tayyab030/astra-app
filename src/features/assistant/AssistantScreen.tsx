@@ -1,22 +1,10 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  Animated,
-  KeyboardAvoidingView,
-  LayoutAnimation,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  UIManager,
-  View,
-} from "react-native";
+import { ActivityIndicator, Animated, KeyboardAvoidingView, LayoutAnimation, Platform, Pressable, ScrollView, Text, TextInput, UIManager, View } from 'react-native';
 
-import { colors, fonts } from "@/constants/theme";
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { PageHeader } from "@/components/PageHeader";
 import { ConversationDrawer } from "./ConversationDrawer";
 import { MessageList } from "./MessageBubble";
@@ -25,6 +13,116 @@ import { useVoiceInput } from "./useVoiceInput";
 import { VoiceWaveform } from "./VoiceWaveform";
 
 export function AssistantScreen() {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  root: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 16,
+    gap: 12,
+  },
+  headerActions: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  iconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(30, 41, 59, 0.8)",
+    borderWidth: 1,
+    borderColor: "rgba(71, 85, 105, 0.6)",
+  },
+  iconBtnActive: {
+    backgroundColor: "rgba(6, 182, 212, 0.35)",
+    borderColor: "rgba(34, 211, 238, 0.45)",
+  },
+  banner: {
+    borderRadius: 10,
+    padding: 12,
+    backgroundColor: "rgba(185, 28, 28, 0.2)",
+    borderWidth: 1,
+    borderColor: "rgba(248, 113, 113, 0.35)",
+  },
+  bannerText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.red300,
+  },
+  thinking: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  thinkingText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+  },
+  error: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.red400,
+  },
+  composer: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 10,
+  },
+  micSlot: {
+    height: 44,
+  },
+  micBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.blue600,
+    borderWidth: 1,
+    borderColor: "rgba(34, 211, 238, 0.35)",
+  },
+  micDisabled: {
+    opacity: 0.5,
+  },
+  middle: {
+    flex: 1,
+    minHeight: 44,
+    justifyContent: "center",
+  },
+  voiceSlot: {
+    flex: 1,
+    minHeight: 44,
+  },
+  input: {
+    minHeight: 44,
+    maxHeight: 120,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: "rgba(30, 41, 59, 0.85)",
+    borderWidth: 1,
+    borderColor: "rgba(71, 85, 105, 0.7)",
+    color: colors.slate200,
+    fontFamily: fonts.regular,
+    fontSize: 15,
+  },
+  sendBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sendBtnListening: {
+    borderWidth: 1,
+    borderColor: "rgba(34, 211, 238, 0.55)",
+  },
+}));
+
   const listRef = useRef<ScrollView>(null);
   const textMode = useRef(new Animated.Value(1)).current;
   const voiceMode = useRef(new Animated.Value(0)).current;
@@ -257,7 +355,7 @@ export function AssistantScreen() {
             colors={
               sendDisabled
                 ? [colors.slate700, colors.slate600]
-                : [colors.cyan500, colors.blue600]
+                : tokens.accentGradient
             }
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -275,111 +373,3 @@ export function AssistantScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 16,
-    gap: 12,
-  },
-  headerActions: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  iconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(30, 41, 59, 0.8)",
-    borderWidth: 1,
-    borderColor: "rgba(71, 85, 105, 0.6)",
-  },
-  iconBtnActive: {
-    backgroundColor: "rgba(6, 182, 212, 0.35)",
-    borderColor: "rgba(34, 211, 238, 0.45)",
-  },
-  banner: {
-    borderRadius: 10,
-    padding: 12,
-    backgroundColor: "rgba(185, 28, 28, 0.2)",
-    borderWidth: 1,
-    borderColor: "rgba(248, 113, 113, 0.35)",
-  },
-  bannerText: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.red300,
-  },
-  thinking: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  thinkingText: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-  },
-  error: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.red400,
-  },
-  composer: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 10,
-  },
-  micSlot: {
-    height: 44,
-  },
-  micBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.blue600,
-    borderWidth: 1,
-    borderColor: "rgba(34, 211, 238, 0.35)",
-  },
-  micDisabled: {
-    opacity: 0.5,
-  },
-  middle: {
-    flex: 1,
-    minHeight: 44,
-    justifyContent: "center",
-  },
-  voiceSlot: {
-    flex: 1,
-    minHeight: 44,
-  },
-  input: {
-    minHeight: 44,
-    maxHeight: 120,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    backgroundColor: "rgba(30, 41, 59, 0.85)",
-    borderWidth: 1,
-    borderColor: "rgba(71, 85, 105, 0.7)",
-    color: colors.slate200,
-    fontFamily: fonts.regular,
-    fontSize: 15,
-  },
-  sendBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sendBtnListening: {
-    borderWidth: 1,
-    borderColor: "rgba(34, 211, 238, 0.55)",
-  },
-});

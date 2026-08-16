@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 import { eachDayOfInterval, format, parseISO } from 'date-fns';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { FormModal } from '@/features/wealth/FormModal';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
@@ -55,6 +56,129 @@ function buildWeeklyDays(entries: TimeEntry[], weekStart: string, weekEnd: strin
 }
 
 export function WeeklyTab({ timeTrack }: WeeklyTabProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  root: {
+    gap: 16,
+  },
+  targetRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  targetInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  label: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+  targetValue: {
+    fontFamily: fonts.heading,
+    fontSize: 18,
+    color: colors.white,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  progressText: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.white,
+  },
+  progressTrack: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(51, 65, 85, 0.7)',
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 4,
+    backgroundColor: colors.cyan500,
+  },
+  progressHint: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate500,
+    marginTop: 8,
+  },
+  stats: {
+    gap: 12,
+  },
+  statCard: {
+    gap: 6,
+  },
+  statTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  statTitle: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+  },
+  statValue: {
+    fontFamily: fonts.headingBold,
+    fontSize: 22,
+  },
+  sectionTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.white,
+    marginBottom: 12,
+  },
+  list: {
+    gap: 8,
+  },
+  dayRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.45)',
+    backgroundColor: 'rgba(15, 23, 42, 0.35)',
+    padding: 12,
+  },
+  dayBody: {
+    flex: 1,
+    gap: 4,
+  },
+  dayTitle: {
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.white,
+  },
+  dayMeta: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate500,
+  },
+  dayValue: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.cyan300,
+  },
+  input: {
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    paddingHorizontal: 12,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+  },
+}));
+
   const {
     weekEntries,
     weekTotalSeconds,
@@ -186,124 +310,3 @@ export function WeeklyTab({ timeTrack }: WeeklyTabProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    gap: 16,
-  },
-  targetRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  targetInfo: {
-    flex: 1,
-    gap: 4,
-  },
-  label: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  targetValue: {
-    fontFamily: fonts.heading,
-    fontSize: 18,
-    color: colors.white,
-  },
-  progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  progressText: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.white,
-  },
-  progressTrack: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(51, 65, 85, 0.7)',
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 4,
-    backgroundColor: colors.cyan500,
-  },
-  progressHint: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate500,
-    marginTop: 8,
-  },
-  stats: {
-    gap: 12,
-  },
-  statCard: {
-    gap: 6,
-  },
-  statTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  statTitle: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-  },
-  statValue: {
-    fontFamily: fonts.headingBold,
-    fontSize: 22,
-  },
-  sectionTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.white,
-    marginBottom: 12,
-  },
-  list: {
-    gap: 8,
-  },
-  dayRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.45)',
-    backgroundColor: 'rgba(15, 23, 42, 0.35)',
-    padding: 12,
-  },
-  dayBody: {
-    flex: 1,
-    gap: 4,
-  },
-  dayTitle: {
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.white,
-  },
-  dayMeta: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate500,
-  },
-  dayValue: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.cyan300,
-  },
-  input: {
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    paddingHorizontal: 12,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-  },
-});

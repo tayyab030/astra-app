@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { ROUTES } from '@/constants/routes';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { SelectField } from '@/features/wealth/SelectField';
 import { WealthEmptyState } from '@/features/wealth/WealthEmptyState';
@@ -14,6 +15,102 @@ import { fetchGoalsDashboard } from '@/lib/api/goals';
 import { GOAL_CATEGORY_COLORS, GOALS_FILTER_OPTIONS } from './constants';
 
 export function GoalsSection() {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  header: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 16,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flexShrink: 1,
+  },
+  heading: {
+    fontFamily: fonts.heading,
+    fontSize: 18,
+    color: colors.slate200,
+  },
+  manageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  manageText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate200,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  skeleton: {
+    width: '47%',
+    height: 148,
+    borderRadius: 10,
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+  },
+  card: {
+    width: '47%',
+    minHeight: 148,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.35)',
+    padding: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  iconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardTitle: {
+    fontFamily: fonts.semibold,
+    fontSize: 13,
+    color: colors.white,
+    textAlign: 'center',
+  },
+  cardMeta: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: colors.slate400,
+  },
+  progressTrack: {
+    width: '100%',
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: 'rgba(71, 85, 105, 0.45)',
+    overflow: 'hidden',
+    marginTop: 4,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 999,
+  },
+  progressLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: colors.slate300,
+  },
+}));
+
   const router = useRouter();
   const [filter, setFilter] = useState('all');
   const now = useMemo(() => new Date(), []);
@@ -111,97 +208,3 @@ export function GoalsSection() {
   );
 }
 
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    marginBottom: 16,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flexShrink: 1,
-  },
-  heading: {
-    fontFamily: fonts.heading,
-    fontSize: 18,
-    color: colors.slate200,
-  },
-  manageButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  manageText: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate200,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  skeleton: {
-    width: '47%',
-    height: 148,
-    borderRadius: 10,
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-  },
-  card: {
-    width: '47%',
-    minHeight: 148,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.35)',
-    padding: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardTitle: {
-    fontFamily: fonts.semibold,
-    fontSize: 13,
-    color: colors.white,
-    textAlign: 'center',
-  },
-  cardMeta: {
-    fontFamily: fonts.regular,
-    fontSize: 11,
-    color: colors.slate400,
-  },
-  progressTrack: {
-    width: '100%',
-    height: 6,
-    borderRadius: 999,
-    backgroundColor: 'rgba(71, 85, 105, 0.45)',
-    overflow: 'hidden',
-    marginTop: 4,
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 999,
-  },
-  progressLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 11,
-    color: colors.slate300,
-  },
-});

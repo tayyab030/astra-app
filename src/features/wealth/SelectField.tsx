@@ -1,15 +1,9 @@
 import { useMemo, useState } from 'react';
-import {
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 
 export type SelectOption = {
   value: string;
@@ -35,6 +29,77 @@ export function SelectField({
   error,
   minWidth,
 }: SelectFieldProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  trigger: {
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  triggerError: {
+    borderColor: 'rgba(248, 113, 113, 0.7)',
+  },
+  triggerText: {
+    flex: 1,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+  },
+  placeholder: {
+    color: colors.slate500,
+  },
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(2, 6, 23, 0.65)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  sheet: {
+    maxHeight: 360,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: colors.slate800,
+    overflow: 'hidden',
+  },
+  list: {
+    maxHeight: 360,
+  },
+  group: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 4,
+  },
+  option: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  optionActive: {
+    backgroundColor: 'rgba(6, 182, 212, 0.15)',
+  },
+  optionDisabled: {
+    opacity: 0.4,
+  },
+  optionText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate200,
+  },
+  optionTextActive: {
+    color: colors.cyan300,
+  },
+}));
+
   const [open, setOpen] = useState(false);
   const selected = useMemo(
     () => options.find((option) => option.value === value),
@@ -109,72 +174,3 @@ export function SelectField({
   );
 }
 
-const styles = StyleSheet.create({
-  trigger: {
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    paddingHorizontal: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  triggerError: {
-    borderColor: 'rgba(248, 113, 113, 0.7)',
-  },
-  triggerText: {
-    flex: 1,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-  },
-  placeholder: {
-    color: colors.slate500,
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(2, 6, 23, 0.65)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  sheet: {
-    maxHeight: 360,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: colors.slate800,
-    overflow: 'hidden',
-  },
-  list: {
-    maxHeight: 360,
-  },
-  group: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 4,
-  },
-  option: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  optionActive: {
-    backgroundColor: 'rgba(6, 182, 212, 0.15)',
-  },
-  optionDisabled: {
-    opacity: 0.4,
-  },
-  optionText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate200,
-  },
-  optionTextActive: {
-    color: colors.cyan300,
-  },
-});

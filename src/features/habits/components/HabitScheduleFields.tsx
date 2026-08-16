@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 
 import {
   FREQUENCY_OPTIONS,
@@ -28,6 +29,86 @@ type HabitScheduleFieldsProps = {
 };
 
 export function HabitScheduleFields({ value, onChange }: HabitScheduleFieldsProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  wrap: {
+    gap: 14,
+  },
+  field: {
+    gap: 8,
+  },
+  half: {
+    flex: 1,
+    minWidth: 140,
+  },
+  row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  label: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.slate200,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  freqBtn: {
+    minWidth: '46%',
+    flexGrow: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    gap: 2,
+  },
+  timeBtn: {
+    minWidth: '22%',
+    flexGrow: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    alignItems: 'center',
+  },
+  freqActive: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.white,
+  },
+  freqInactive: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.slate300,
+  },
+  freqHint: {
+    fontFamily: fonts.regular,
+    fontSize: 10,
+    color: colors.slate400,
+  },
+  freqHintActive: {
+    fontFamily: fonts.regular,
+    fontSize: 10,
+    color: 'rgba(255,255,255,0.8)',
+  },
+  input: {
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    paddingHorizontal: 12,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+  },
+}));
+
   return (
     <View style={styles.wrap}>
       <View style={styles.field}>
@@ -39,7 +120,7 @@ export function HabitScheduleFields({ value, onChange }: HabitScheduleFieldsProp
               return (
                 <Pressable key={option.value} onPress={() => onChange({ frequency: option.value })}>
                   <LinearGradient
-                    colors={[colors.cyan500, colors.blue600]}
+                    colors={tokens.accentGradient}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.freqBtn}
@@ -159,7 +240,7 @@ export function HabitScheduleFields({ value, onChange }: HabitScheduleFieldsProp
                   onPress={() => onChange({ timeOfDay: option.value })}
                 >
                   <LinearGradient
-                    colors={[colors.cyan500, colors.blue600]}
+                    colors={tokens.accentGradient}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.timeBtn}
@@ -197,81 +278,3 @@ export function HabitScheduleFields({ value, onChange }: HabitScheduleFieldsProp
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    gap: 14,
-  },
-  field: {
-    gap: 8,
-  },
-  half: {
-    flex: 1,
-    minWidth: 140,
-  },
-  row: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  label: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.slate200,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  freqBtn: {
-    minWidth: '46%',
-    flexGrow: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    gap: 2,
-  },
-  timeBtn: {
-    minWidth: '22%',
-    flexGrow: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    alignItems: 'center',
-  },
-  freqActive: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.white,
-  },
-  freqInactive: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.slate300,
-  },
-  freqHint: {
-    fontFamily: fonts.regular,
-    fontSize: 10,
-    color: colors.slate400,
-  },
-  freqHintActive: {
-    fontFamily: fonts.regular,
-    fontSize: 10,
-    color: 'rgba(255,255,255,0.8)',
-  },
-  input: {
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    paddingHorizontal: 12,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-  },
-});

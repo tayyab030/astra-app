@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { FormModal } from '@/features/wealth/FormModal';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
@@ -25,6 +26,133 @@ function formatElapsed(ms: number) {
 }
 
 export function SleepScheduleCard() {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    gap: 8,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  title: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.cyan300,
+  },
+  addBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  addLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate200,
+  },
+  toggleBtn: {
+    minHeight: 52,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  toggleLabel: {
+    fontFamily: fonts.medium,
+    fontSize: 16,
+    color: colors.white,
+  },
+  activeWrap: {
+    marginTop: 12,
+    gap: 8,
+    alignItems: 'center',
+  },
+  activeText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: '#fcd34d',
+    textAlign: 'center',
+  },
+  cancelText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+  },
+  hint: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  sessionRow: {
+    marginTop: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(51, 65, 85, 0.3)',
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  sessionInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  sessionTime: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate200,
+  },
+  sessionHours: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+  sessionActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  total: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+    marginTop: 12,
+  },
+  field: {
+    gap: 6,
+  },
+  fieldLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+  input: {
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    paddingHorizontal: 12,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+  },
+}));
+
   const {
     today,
     sleepSessions,
@@ -219,128 +347,3 @@ export function SleepScheduleCard() {
   );
 }
 
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-    gap: 8,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  title: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.cyan300,
-  },
-  addBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  addLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate200,
-  },
-  toggleBtn: {
-    minHeight: 52,
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  toggleLabel: {
-    fontFamily: fonts.medium,
-    fontSize: 16,
-    color: colors.white,
-  },
-  activeWrap: {
-    marginTop: 12,
-    gap: 8,
-    alignItems: 'center',
-  },
-  activeText: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: '#fcd34d',
-    textAlign: 'center',
-  },
-  cancelText: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-  },
-  hint: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-    textAlign: 'center',
-    marginTop: 12,
-  },
-  sessionRow: {
-    marginTop: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(51, 65, 85, 0.3)',
-    padding: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  sessionInfo: {
-    flex: 1,
-    gap: 4,
-  },
-  sessionTime: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate200,
-  },
-  sessionHours: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  sessionActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  total: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-    marginTop: 12,
-  },
-  field: {
-    gap: 6,
-  },
-  fieldLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  input: {
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    paddingHorizontal: 12,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-  },
-});

@@ -1,17 +1,12 @@
 import { useEffect, useState } from 'react';
-import {
-  Alert,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, Text, TextInput, View } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { OverflowMenu } from '@/components/OverflowMenu';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { useCurrency } from '@/hooks/useCurrency';
 import type {
@@ -64,6 +59,127 @@ export function TransactionsTab({
   openAdd = false,
   onOpenAddConsumed,
 }: TransactionsTabProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  wrap: {
+    gap: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+  },
+  heading: {
+    fontFamily: fonts.headingBold,
+    fontSize: 20,
+    color: colors.slate200,
+  },
+  cardTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.slate200,
+  },
+  cardDescription: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  list: {
+    gap: 12,
+  },
+  skeleton: {
+    height: 64,
+    borderRadius: 8,
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+  },
+  row: {
+    flexDirection: 'column',
+    gap: 10,
+    paddingVertical: 12,
+    paddingLeft: 12,
+    paddingRight: 6,
+    borderRadius: 8,
+    backgroundColor: 'rgba(15, 23, 42, 0.3)',
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.3)',
+  },
+  rowTop: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  rowBody: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  icon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  incomeIcon: {
+    backgroundColor: 'rgba(34, 197, 94, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(34, 197, 94, 0.3)',
+  },
+  expenseIcon: {
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+  },
+  copy: {
+    flex: 1,
+    minWidth: 0,
+  },
+  description: {
+    fontFamily: fonts.semibold,
+    fontSize: 14,
+    color: colors.slate200,
+  },
+  meta: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+    marginTop: 2,
+  },
+  amount: {
+    fontFamily: fonts.semibold,
+    fontSize: 16,
+    paddingLeft: 42,
+  },
+  field: {
+    gap: 8,
+  },
+  fieldLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.cyan200,
+  },
+  input: {
+    height: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    color: colors.white,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    paddingHorizontal: 12,
+  },
+  inputError: {
+    borderColor: 'rgba(248, 113, 113, 0.7)',
+  },
+}));
+
   const { formatCurrency } = useCurrency();
   const [showDialog, setShowDialog] = useState(false);
   const [dialogMode, setDialogMode] = useState<DialogMode>('add');
@@ -350,122 +466,3 @@ export function TransactionsTab({
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    gap: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 12,
-  },
-  heading: {
-    fontFamily: fonts.headingBold,
-    fontSize: 20,
-    color: colors.slate200,
-  },
-  cardTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.slate200,
-  },
-  cardDescription: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-    marginTop: 4,
-    marginBottom: 16,
-  },
-  list: {
-    gap: 12,
-  },
-  skeleton: {
-    height: 64,
-    borderRadius: 8,
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-  },
-  row: {
-    flexDirection: 'column',
-    gap: 10,
-    paddingVertical: 12,
-    paddingLeft: 12,
-    paddingRight: 6,
-    borderRadius: 8,
-    backgroundColor: 'rgba(15, 23, 42, 0.3)',
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.3)',
-  },
-  rowTop: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-  },
-  rowBody: {
-    flex: 1,
-    minWidth: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  icon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  incomeIcon: {
-    backgroundColor: 'rgba(34, 197, 94, 0.2)',
-    borderWidth: 1,
-    borderColor: 'rgba(34, 197, 94, 0.3)',
-  },
-  expenseIcon: {
-    backgroundColor: 'rgba(239, 68, 68, 0.2)',
-    borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.3)',
-  },
-  copy: {
-    flex: 1,
-    minWidth: 0,
-  },
-  description: {
-    fontFamily: fonts.semibold,
-    fontSize: 14,
-    color: colors.slate200,
-  },
-  meta: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-    marginTop: 2,
-  },
-  amount: {
-    fontFamily: fonts.semibold,
-    fontSize: 16,
-    paddingLeft: 42,
-  },
-  field: {
-    gap: 8,
-  },
-  fieldLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.cyan200,
-  },
-  input: {
-    height: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    color: colors.white,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    paddingHorizontal: 12,
-  },
-  inputError: {
-    borderColor: 'rgba(248, 113, 113, 0.7)',
-  },
-});

@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { ROUTES } from '@/constants/routes';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
 import { SelectField } from '@/features/wealth/SelectField';
@@ -16,6 +17,81 @@ import { useProjects } from './hooks/useProjects';
 import { ProjectFormModal } from './ProjectFormModal';
 
 export function ProjectsSection() {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  header: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 16,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flexShrink: 1,
+  },
+  heading: {
+    fontFamily: fonts.heading,
+    fontSize: 18,
+    color: colors.slate200,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  skeleton: {
+    width: '47%',
+    height: 140,
+    borderRadius: 10,
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+  },
+  card: {
+    width: '47%',
+    minHeight: 148,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.35)',
+    padding: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  starBadge: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+  },
+  iconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardTitle: {
+    fontFamily: fonts.semibold,
+    fontSize: 13,
+    color: colors.white,
+    textAlign: 'center',
+  },
+  cardMeta: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: colors.slate400,
+  },
+  cardActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 4,
+  },
+}));
+
   const router = useRouter();
   const [filter, setFilter] = useState('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -189,76 +265,3 @@ export function ProjectsSection() {
   );
 }
 
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    marginBottom: 16,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flexShrink: 1,
-  },
-  heading: {
-    fontFamily: fonts.heading,
-    fontSize: 18,
-    color: colors.slate200,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  skeleton: {
-    width: '47%',
-    height: 140,
-    borderRadius: 10,
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-  },
-  card: {
-    width: '47%',
-    minHeight: 148,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.35)',
-    padding: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  starBadge: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-  },
-  iconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardTitle: {
-    fontFamily: fonts.semibold,
-    fontSize: 13,
-    color: colors.white,
-    textAlign: 'center',
-  },
-  cardMeta: {
-    fontFamily: fonts.regular,
-    fontSize: 11,
-    color: colors.slate400,
-  },
-  cardActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginTop: 4,
-  },
-});

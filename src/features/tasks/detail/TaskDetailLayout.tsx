@@ -1,15 +1,9 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
 import { SelectField } from '@/features/wealth/SelectField';
@@ -43,6 +37,108 @@ export function TaskDetailLayout({
   fixedGoalId,
   fixedProjectId,
 }: TaskDetailLayoutProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  root: {
+    flex: 1,
+  },
+  scroll: {
+    padding: 16,
+    paddingBottom: 40,
+  },
+  viewBlock: {
+    gap: 12,
+  },
+  createRow: {
+    alignItems: 'flex-start',
+  },
+  skeletonList: {
+    gap: 10,
+  },
+  skeleton: {
+    height: 64,
+    borderRadius: 10,
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+  },
+  boardSkeleton: {
+    height: 140,
+    borderRadius: 10,
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+  },
+  calendarSkeleton: {
+    height: 320,
+    borderRadius: 12,
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+  },
+  sectionCard: {
+    gap: 0,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  sectionTitle: {
+    fontFamily: fonts.semibold,
+    fontSize: 15,
+    color: colors.slate200,
+  },
+  countBadge: {
+    borderRadius: 6,
+    backgroundColor: 'rgba(71, 85, 105, 0.5)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  countText: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: colors.slate400,
+  },
+  boardColumn: {
+    gap: 10,
+  },
+  emptyColumn: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate500,
+    paddingVertical: 8,
+  },
+  boardCard: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.4)',
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
+    padding: 12,
+    gap: 10,
+  },
+  boardTitle: {
+    fontFamily: fonts.semibold,
+    fontSize: 14,
+    color: colors.slate200,
+  },
+  boardTitleDone: {
+    textDecorationLine: 'line-through',
+    color: colors.slate500,
+  },
+  boardMeta: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+    marginTop: 4,
+  },
+  boardActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+}));
+
   const [currentView, setCurrentView] = useState<DetailViewTab>('list');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(TASK_SECTIONS.map((section) => [section.id, true])),
@@ -290,103 +386,3 @@ export function TaskDetailLayout({
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  scroll: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  viewBlock: {
-    gap: 12,
-  },
-  createRow: {
-    alignItems: 'flex-start',
-  },
-  skeletonList: {
-    gap: 10,
-  },
-  skeleton: {
-    height: 64,
-    borderRadius: 10,
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-  },
-  boardSkeleton: {
-    height: 140,
-    borderRadius: 10,
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-  },
-  calendarSkeleton: {
-    height: 320,
-    borderRadius: 12,
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-  },
-  sectionCard: {
-    gap: 0,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  sectionTitle: {
-    fontFamily: fonts.semibold,
-    fontSize: 15,
-    color: colors.slate200,
-  },
-  countBadge: {
-    borderRadius: 6,
-    backgroundColor: 'rgba(71, 85, 105, 0.5)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  countText: {
-    fontFamily: fonts.regular,
-    fontSize: 11,
-    color: colors.slate400,
-  },
-  boardColumn: {
-    gap: 10,
-  },
-  emptyColumn: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate500,
-    paddingVertical: 8,
-  },
-  boardCard: {
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.4)',
-    backgroundColor: 'rgba(15, 23, 42, 0.4)',
-    padding: 12,
-    gap: 10,
-  },
-  boardTitle: {
-    fontFamily: fonts.semibold,
-    fontSize: 14,
-    color: colors.slate200,
-  },
-  boardTitleDone: {
-    textDecorationLine: 'line-through',
-    color: colors.slate500,
-  },
-  boardMeta: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-    marginTop: 4,
-  },
-  boardActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-});

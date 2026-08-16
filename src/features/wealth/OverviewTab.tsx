@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { InsightHorizonBadge } from '@/components/insights/InsightHorizonBadge';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { fetchAnalyticsBundle } from '@/features/analytics/hooks/fetchAnalyticsBundle';
 import { analyticsKeys } from '@/features/analytics/hooks/queryKeys';
@@ -45,6 +46,75 @@ export function OverviewTab({
   filter,
   isLoading,
 }: OverviewTabProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  wrap: {
+    gap: 24,
+  },
+  cardTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  cardTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.slate200,
+  },
+  skeleton: {
+    height: 256,
+    borderRadius: 8,
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+  },
+  skeletonSmall: {
+    height: 64,
+    borderRadius: 8,
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    flex: 1,
+    minWidth: '45%',
+  },
+  summaryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+  },
+  stat: {
+    width: '47%',
+    alignItems: 'center',
+    gap: 4,
+  },
+  statValue: {
+    fontFamily: fonts.bold,
+    fontSize: 22,
+  },
+  statLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+  },
+  insights: {
+    gap: 12,
+  },
+  insight: {
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    backgroundColor: 'rgba(6, 182, 212, 0.08)',
+    gap: 8,
+  },
+  insightText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate300,
+  },
+  insightSkeleton: {
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: 'rgba(51, 65, 85, 0.4)',
+  },
+}));
+
   const { formatCurrency } = useCurrency();
   const { user } = useSession();
   const today = getLocalDateString();
@@ -253,22 +323,7 @@ export function OverviewTab({
 }
 
 function SummaryStat({ value, label, color }: { value: string; label: string; color: string }) {
-  return (
-    <View style={styles.stat}>
-      <Text style={[styles.statValue, { color }]}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </View>
-  );
-}
-
-const insightBorders: Record<string, string> = {
-  success: 'rgba(34, 197, 94, 0.3)',
-  warning: 'rgba(249, 115, 22, 0.3)',
-  tip: 'rgba(59, 130, 246, 0.3)',
-  prediction: 'rgba(168, 85, 247, 0.3)',
-};
-
-const styles = StyleSheet.create({
+  const styles = useThemedStyles((colors, tokens) => ({
   wrap: {
     gap: 24,
   },
@@ -334,4 +389,20 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: 'rgba(51, 65, 85, 0.4)',
   },
-});
+}));
+
+  return (
+    <View style={styles.stat}>
+      <Text style={[styles.statValue, { color }]}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+}
+
+const insightBorders: Record<string, string> = {
+  success: 'rgba(34, 197, 94, 0.3)',
+  warning: 'rgba(249, 115, 22, 0.3)',
+  tip: 'rgba(59, 130, 246, 0.3)',
+  prediction: 'rgba(168, 85, 247, 0.3)',
+};
+

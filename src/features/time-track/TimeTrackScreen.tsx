@@ -1,19 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { format } from 'date-fns';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { PageHeader } from '@/components/PageHeader';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 
 import { TIME_TRACK_TABS, type TimeTrackTabId } from './constants/tabs';
 import { useTimeTrackContext } from './context/TimeTrackProvider';
@@ -33,6 +27,54 @@ function isTimeTrackTab(value: string | undefined): value is TimeTrackTabId {
 }
 
 export function TimeTrackScreen() {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  root: {
+    flex: 1,
+  },
+  scroll: {
+    padding: 24,
+    paddingBottom: 40,
+    gap: 20,
+  },
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  loadingText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+  },
+  tabs: {
+    gap: 8,
+    paddingRight: 8,
+  },
+  tab: {
+    minHeight: 36,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.35)',
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  tabActive: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.white,
+  },
+  tabInactive: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+  },
+}));
+
   const router = useRouter();
   const params = useLocalSearchParams<{ tab?: string; action?: string }>();
   const tabParam = Array.isArray(params.tab) ? params.tab[0] : params.tab;
@@ -96,7 +138,7 @@ export function TimeTrackScreen() {
               return (
                 <Pressable key={tab.id} onPress={() => setCurrentView(tab.id)}>
                   <LinearGradient
-                    colors={[colors.cyan500, colors.blue600]}
+                    colors={tokens.accentGradient}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.tab}
@@ -137,51 +179,4 @@ export function TimeTrackScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  scroll: {
-    padding: 24,
-    paddingBottom: 40,
-    gap: 20,
-  },
-  loading: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  loadingText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-  },
-  tabs: {
-    gap: 8,
-    paddingRight: 8,
-  },
-  tab: {
-    minHeight: 36,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.35)',
-    paddingHorizontal: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  tabActive: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.white,
-  },
-  tabInactive: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-  },
-});
 

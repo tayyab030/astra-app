@@ -1,7 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { useCurrency } from '@/hooks/useCurrency';
 import type { ExpenseSlice } from '@/features/analytics/utils/computeAnalytics';
 
@@ -19,6 +20,49 @@ export function WeeklyExpensesChart({
   slices,
   emptyLabel = 'No expenses this week',
 }: WeeklyExpensesChartProps) {
+  const styles = useThemedStyles((colors, tokens) => ({
+  empty: {
+    height: 192,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+  },
+  wrap: {
+    alignItems: 'center',
+    gap: 16,
+    minHeight: 192,
+  },
+  legend: {
+    width: '100%',
+    gap: 8,
+  },
+  legendRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  swatch: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  legendLabel: {
+    flex: 1,
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate300,
+  },
+  legendValue: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate200,
+  },
+}));
+
   const { formatCurrency } = useCurrency();
   const total = slices.reduce((sum, point) => sum + point.value, 0);
 
@@ -79,45 +123,3 @@ export function WeeklyExpensesChart({
   );
 }
 
-const styles = StyleSheet.create({
-  empty: {
-    height: 192,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-  },
-  wrap: {
-    alignItems: 'center',
-    gap: 16,
-    minHeight: 192,
-  },
-  legend: {
-    width: '100%',
-    gap: 8,
-  },
-  legendRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  swatch: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  legendLabel: {
-    flex: 1,
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate300,
-  },
-  legendValue: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate200,
-  },
-});

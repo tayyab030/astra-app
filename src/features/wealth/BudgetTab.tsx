@@ -1,18 +1,13 @@
 import { useEffect, useState } from 'react';
-import {
-  Alert,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, Text, TextInput, View } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { OverflowMenu } from '@/components/OverflowMenu';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { useCurrency } from '@/hooks/useCurrency';
 import type {
@@ -81,6 +76,144 @@ export function BudgetTab({
   openSetLimit = false,
   onOpenSetLimitConsumed,
 }: BudgetTabProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  wrap: {
+    gap: 16,
+  },
+  header: {
+    gap: 12,
+  },
+  headerText: {
+    gap: 4,
+  },
+  heading: {
+    fontFamily: fonts.headingBold,
+    fontSize: 20,
+    color: colors.slate200,
+  },
+  subheading: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+  },
+  list: {
+    gap: 16,
+  },
+  skeleton: {
+    height: 112,
+    borderRadius: 12,
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+  },
+  budgetCard: {
+    flexDirection: 'column',
+    gap: 10,
+    marginBottom: 12,
+  },
+  budgetHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  budgetMeta: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  icon: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  budgetCopy: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+  },
+  budgetTitle: {
+    fontFamily: fonts.semibold,
+    fontSize: 16,
+    color: colors.slate200,
+  },
+  budgetSpend: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+    paddingLeft: 48,
+  },
+  budgetPeriod: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate500,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    paddingLeft: 48,
+  },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
+  },
+  badgeText: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+  },
+  progressTrack: {
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: colors.slate700,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: colors.cyan500,
+    borderRadius: 6,
+  },
+  progressMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  progressHint: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate500,
+  },
+  field: {
+    gap: 8,
+  },
+  fieldLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.cyan200,
+  },
+  input: {
+    height: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    color: colors.white,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    paddingHorizontal: 12,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  flex: {
+    flex: 1,
+  },
+}));
+
   const { formatCurrency } = useCurrency();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -437,139 +570,3 @@ export function BudgetTab({
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    gap: 16,
-  },
-  header: {
-    gap: 12,
-  },
-  headerText: {
-    gap: 4,
-  },
-  heading: {
-    fontFamily: fonts.headingBold,
-    fontSize: 20,
-    color: colors.slate200,
-  },
-  subheading: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-  },
-  list: {
-    gap: 16,
-  },
-  skeleton: {
-    height: 112,
-    borderRadius: 12,
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-  },
-  budgetCard: {
-    flexDirection: 'column',
-    gap: 10,
-    marginBottom: 12,
-  },
-  budgetHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  budgetMeta: {
-    flex: 1,
-    minWidth: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  icon: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  budgetCopy: {
-    flex: 1,
-    minWidth: 0,
-    gap: 2,
-  },
-  budgetTitle: {
-    fontFamily: fonts.semibold,
-    fontSize: 16,
-    color: colors.slate200,
-  },
-  budgetSpend: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-    paddingLeft: 48,
-  },
-  budgetPeriod: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate500,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    paddingLeft: 48,
-  },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    backgroundColor: 'rgba(15, 23, 42, 0.4)',
-  },
-  badgeText: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-  },
-  progressTrack: {
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: colors.slate700,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.cyan500,
-    borderRadius: 6,
-  },
-  progressMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-  },
-  progressHint: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate500,
-  },
-  field: {
-    gap: 8,
-  },
-  fieldLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.cyan200,
-  },
-  input: {
-    height: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    color: colors.white,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    paddingHorizontal: 12,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  flex: {
-    flex: 1,
-  },
-});

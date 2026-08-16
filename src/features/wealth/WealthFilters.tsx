@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import type { WealthFilter, WealthFilterMode } from '@/lib/api/wealth';
 
 import { MONTHS } from './constants';
@@ -13,7 +14,54 @@ type WealthFiltersProps = {
   onChange?: (filter: WealthFilter) => void;
 };
 
+function useWealthFilterStyles() {
+  return useThemedStyles((colors) => ({
+    wrap: {
+      gap: 12,
+    },
+    toggle: {
+      alignSelf: 'flex-start' as const,
+      flexDirection: 'row' as const,
+      backgroundColor: 'rgba(15, 23, 42, 0.5)',
+      borderWidth: 1,
+      borderColor: 'rgba(71, 85, 105, 0.5)',
+      borderRadius: 6,
+      padding: 4,
+      gap: 4,
+    },
+    modeButton: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 4,
+    },
+    modeActive: {
+      fontFamily: fonts.regular,
+      fontSize: 12,
+      color: colors.white,
+    },
+    modeInactive: {
+      fontFamily: fonts.regular,
+      fontSize: 12,
+      color: colors.slate300,
+    },
+    row: {
+      flexDirection: 'row' as const,
+      flexWrap: 'wrap' as const,
+      gap: 12,
+    },
+    field: {
+      gap: 4,
+    },
+    label: {
+      fontFamily: fonts.regular,
+      fontSize: 12,
+      color: colors.slate400,
+    },
+  }));
+}
+
 export function WealthFilters({ onChange }: WealthFiltersProps) {
+  const styles = useWealthFilterStyles();
   const yearOptions = useMemo(getYearOptions, []);
   const currentYear = yearOptions[0];
   const currentMonth = new Date().getMonth() + 1;
@@ -121,11 +169,14 @@ function ModeButton({
   active: boolean;
   onPress: () => void;
 }) {
+  const { tokens } = useAppTheme();
+  const styles = useWealthFilterStyles();
+
   if (active) {
     return (
       <Pressable onPress={onPress}>
         <LinearGradient
-          colors={[colors.cyan500, colors.blue600]}
+          colors={tokens.accentGradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.modeButton}
@@ -142,47 +193,3 @@ function ModeButton({
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  wrap: {
-    gap: 12,
-  },
-  toggle: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    borderRadius: 6,
-    padding: 4,
-    gap: 4,
-  },
-  modeButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 4,
-  },
-  modeActive: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.white,
-  },
-  modeInactive: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate300,
-  },
-  row: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  field: {
-    gap: 4,
-  },
-  label: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-});

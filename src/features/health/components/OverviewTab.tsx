@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { useAiInsight } from '@/hooks/useAiInsight';
 import { InsightHorizonBadge } from '@/components/insights/InsightHorizonBadge';
@@ -12,6 +13,67 @@ import { ProgressBar } from './ProgressBar';
 import { SleepScheduleCard } from './SleepScheduleCard';
 
 export function OverviewTab() {
+  const styles = useThemedStyles((colors, tokens) => ({
+  wrap: {
+    gap: 16,
+  },
+  cardTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.cyan300,
+    marginBottom: 12,
+  },
+  progressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    gap: 12,
+  },
+  progressLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate200,
+    width: 72,
+  },
+  progressRight: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  progressBarWrap: {
+    flex: 1,
+  },
+  progressPct: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+    width: 40,
+    textAlign: 'right',
+  },
+  insightItem: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.3)',
+    backgroundColor: 'rgba(6, 182, 212, 0.12)',
+    padding: 12,
+    gap: 8,
+    marginBottom: 10,
+  },
+  insightText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate200,
+  },
+  skeleton: {
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: 'rgba(51, 65, 85, 0.4)',
+    marginBottom: 10,
+  },
+}));
+
   const {
     today,
     targets,
@@ -170,63 +232,3 @@ export function OverviewTab() {
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    gap: 16,
-  },
-  cardTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.cyan300,
-    marginBottom: 12,
-  },
-  progressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-    gap: 12,
-  },
-  progressLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate200,
-    width: 72,
-  },
-  progressRight: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  progressBarWrap: {
-    flex: 1,
-  },
-  progressPct: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-    width: 40,
-    textAlign: 'right',
-  },
-  insightItem: {
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(6, 182, 212, 0.3)',
-    backgroundColor: 'rgba(6, 182, 212, 0.12)',
-    padding: 12,
-    gap: 8,
-    marginBottom: 10,
-  },
-  insightText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate200,
-  },
-  skeleton: {
-    height: 48,
-    borderRadius: 8,
-    backgroundColor: 'rgba(51, 65, 85, 0.4)',
-    marginBottom: 10,
-  },
-});

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Switch, Text, TextInput, View } from 'react-native';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
 import { SelectField } from '@/features/wealth/SelectField';
 import { useSession } from '@/hooks/useSession';
@@ -30,7 +31,66 @@ type AlertsSettingsPanelProps = {
   compact?: boolean;
 };
 
+function useAlertsStyles() {
+  return useThemedStyles((colors) => ({
+    root: { gap: 16 },
+    sectionTitle: {
+      fontFamily: fonts.heading,
+      fontSize: 16,
+      color: colors.cyan300,
+      marginBottom: 4,
+    },
+    sectionDesc: {
+      fontFamily: fonts.regular,
+      fontSize: 13,
+      color: colors.slate400,
+      marginBottom: 8,
+    },
+    groupTitle: {
+      fontFamily: fonts.semibold,
+      fontSize: 14,
+      color: colors.cyan400,
+      marginTop: 4,
+      marginBottom: 4,
+    },
+    spaced: { marginTop: 20 },
+    toggleRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      gap: 12,
+      paddingVertical: 12,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(71, 85, 105, 0.35)',
+    },
+    toggleMeta: { flex: 1, gap: 2 },
+    toggleLabel: { fontFamily: fonts.medium, fontSize: 14, color: colors.slate200 },
+    toggleDesc: { fontFamily: fonts.regular, fontSize: 12, color: colors.slate500 },
+    quietRow: { flexDirection: 'row' as const, gap: 12 },
+    quietField: { flex: 1, gap: 6 },
+    fieldLabel: {
+      fontFamily: fonts.medium,
+      fontSize: 12,
+      color: colors.slate400,
+    },
+    input: {
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: 'rgba(71, 85, 105, 0.55)',
+      backgroundColor: 'rgba(15, 23, 42, 0.55)',
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontFamily: fonts.regular,
+      fontSize: 14,
+      color: colors.slate200,
+    },
+    resetWrap: { marginTop: 16 },
+  }));
+}
+
 export function AlertsSettingsPanel({ compact = false }: AlertsSettingsPanelProps) {
+  const { colors } = useAppTheme();
+  const styles = useAlertsStyles();
   const { user } = useSession();
   const userId = user?.id ?? '';
   const [settings, setSettings] = useState<NotificationSettings>(() =>
@@ -254,6 +314,8 @@ function ToggleRow({
   disabled?: boolean;
   onChange: (next: boolean) => void;
 }) {
+  const { colors } = useAppTheme();
+  const styles = useAlertsStyles();
   return (
     <View style={styles.toggleRow}>
       <View style={styles.toggleMeta}>
@@ -270,58 +332,3 @@ function ToggleRow({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { gap: 16 },
-  sectionTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.cyan300,
-    marginBottom: 4,
-  },
-  sectionDesc: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-    marginBottom: 8,
-  },
-  groupTitle: {
-    fontFamily: fonts.semibold,
-    fontSize: 14,
-    color: colors.cyan400,
-    marginTop: 4,
-    marginBottom: 4,
-  },
-  spaced: { marginTop: 20 },
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(71, 85, 105, 0.35)',
-  },
-  toggleMeta: { flex: 1, gap: 2 },
-  toggleLabel: { fontFamily: fonts.medium, fontSize: 14, color: colors.slate200 },
-  toggleDesc: { fontFamily: fonts.regular, fontSize: 12, color: colors.slate500 },
-  quietRow: { flexDirection: 'row', gap: 12 },
-  quietField: { flex: 1, gap: 6 },
-  fieldLabel: {
-    fontFamily: fonts.medium,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  input: {
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.55)',
-    backgroundColor: 'rgba(15, 23, 42, 0.55)',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate200,
-  },
-  resetWrap: { marginTop: 16 },
-});

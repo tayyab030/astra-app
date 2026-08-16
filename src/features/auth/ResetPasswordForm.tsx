@@ -1,12 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useLocalSearchParams, useRouter } from 'expo-router';
 import { Controller, useForm, useWatch } from 'react-hook-form';
@@ -15,7 +8,8 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { ROUTES } from '@/constants/routes';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { AUTH, publicApi } from '@/lib/api';
 import {
   collectApiErrorMessages,
@@ -39,6 +33,183 @@ function paramValue(value: string | string[] | undefined) {
 }
 
 export function ResetPasswordForm() {
+  const { tokens, colors } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  loading: {
+    padding: 32,
+    alignItems: 'center',
+    gap: 12,
+  },
+  loadingText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate300,
+  },
+  header: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    gap: 8,
+  },
+  title: {
+    fontFamily: fonts.semibold,
+    fontSize: 30,
+    color: colors.cyan100,
+    textAlign: 'center',
+  },
+  description: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate300,
+    textAlign: 'center',
+  },
+  content: {
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+    gap: 24,
+  },
+  toast: {
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+  },
+  toastError: {
+    backgroundColor: 'rgba(248, 113, 113, 0.12)',
+    borderColor: 'rgba(248, 113, 113, 0.35)',
+  },
+  toastSuccess: {
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    borderColor: 'rgba(16, 185, 129, 0.35)',
+  },
+  toastText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.white,
+  },
+  copy: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  linkInline: {
+    color: colors.cyan400,
+  },
+  form: {
+    gap: 16,
+  },
+  field: {
+    gap: 8,
+  },
+  label: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.cyan200,
+  },
+  input: {
+    height: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.3)',
+    backgroundColor: 'rgba(51, 65, 85, 0.5)',
+    color: colors.white,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    paddingHorizontal: 12,
+  },
+  inputFocused: {
+    borderColor: colors.cyan400,
+  },
+  passwordWrap: {
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  passwordInput: {
+    paddingRight: 40,
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: 12,
+    height: 40,
+    justifyContent: 'center',
+  },
+  rulesBox: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.2)',
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
+    padding: 12,
+    gap: 6,
+  },
+  ruleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  ruleText: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+  },
+  error: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.red400,
+  },
+  submitWrap: {
+    borderRadius: 6,
+    overflow: 'hidden',
+    shadowColor: colors.cyan500,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  submit: {
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  submitText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+  },
+  footer: {
+    alignItems: 'center',
+    gap: 16,
+  },
+  backRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  link: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.cyan400,
+  },
+  linkPressed: {
+    color: colors.cyan300,
+  },
+  footerText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+    textAlign: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  pressed: {
+    opacity: 0.85,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+}));
+
   const router = useRouter();
   const params = useLocalSearchParams<{ token?: string | string[] }>();
   const token = paramValue(params.token);
@@ -348,7 +519,7 @@ export function ResetPasswordForm() {
             ]}
           >
             <LinearGradient
-              colors={[colors.cyan600, colors.blue600]}
+              colors={tokens.accentGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.submit}
@@ -396,179 +567,3 @@ export function ResetPasswordForm() {
     </GlassCard>
   );
 }
-
-const styles = StyleSheet.create({
-  loading: {
-    padding: 32,
-    alignItems: 'center',
-    gap: 12,
-  },
-  loadingText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate300,
-  },
-  header: {
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    gap: 8,
-  },
-  title: {
-    fontFamily: fonts.semibold,
-    fontSize: 30,
-    color: colors.cyan100,
-    textAlign: 'center',
-  },
-  description: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate300,
-    textAlign: 'center',
-  },
-  content: {
-    paddingHorizontal: 24,
-    paddingBottom: 16,
-    gap: 24,
-  },
-  toast: {
-    borderRadius: 8,
-    padding: 12,
-    borderWidth: 1,
-  },
-  toastError: {
-    backgroundColor: 'rgba(248, 113, 113, 0.12)',
-    borderColor: 'rgba(248, 113, 113, 0.35)',
-  },
-  toastSuccess: {
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    borderColor: 'rgba(16, 185, 129, 0.35)',
-  },
-  toastText: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.white,
-  },
-  copy: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  linkInline: {
-    color: colors.cyan400,
-  },
-  form: {
-    gap: 16,
-  },
-  field: {
-    gap: 8,
-  },
-  label: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.cyan200,
-  },
-  input: {
-    height: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(6, 182, 212, 0.3)',
-    backgroundColor: 'rgba(51, 65, 85, 0.5)',
-    color: colors.white,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    paddingHorizontal: 12,
-  },
-  inputFocused: {
-    borderColor: colors.cyan400,
-  },
-  passwordWrap: {
-    position: 'relative',
-    justifyContent: 'center',
-  },
-  passwordInput: {
-    paddingRight: 40,
-  },
-  eyeButton: {
-    position: 'absolute',
-    right: 12,
-    height: 40,
-    justifyContent: 'center',
-  },
-  rulesBox: {
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(6, 182, 212, 0.2)',
-    backgroundColor: 'rgba(15, 23, 42, 0.4)',
-    padding: 12,
-    gap: 6,
-  },
-  ruleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  ruleText: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-  },
-  error: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.red400,
-  },
-  submitWrap: {
-    borderRadius: 6,
-    overflow: 'hidden',
-    shadowColor: colors.cyan500,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  submit: {
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  submitText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-  },
-  footer: {
-    alignItems: 'center',
-    gap: 16,
-  },
-  backRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  link: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.cyan400,
-  },
-  linkPressed: {
-    color: colors.cyan300,
-  },
-  footerText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-    textAlign: 'center',
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-});

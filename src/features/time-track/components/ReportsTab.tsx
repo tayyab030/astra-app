@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, Text, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { SelectField } from '@/features/wealth/SelectField';
 
@@ -57,6 +58,93 @@ function buildTaskReportSummaries(entries: TimeEntry[]): TaskReportSummary[] {
 }
 
 export function ReportsTab({ timeTrack }: ReportsTabProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  root: {
+    gap: 16,
+  },
+  label: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+    marginBottom: 8,
+  },
+  searchWrap: {
+    marginTop: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    paddingHorizontal: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+    paddingVertical: 8,
+  },
+  sectionTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.white,
+    marginBottom: 12,
+  },
+  empty: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+    textAlign: 'center',
+    paddingVertical: 16,
+  },
+  list: {
+    gap: 10,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'flex-start',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.45)',
+    backgroundColor: 'rgba(15, 23, 42, 0.35)',
+    padding: 12,
+  },
+  entryRow: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.45)',
+    backgroundColor: 'rgba(15, 23, 42, 0.35)',
+    padding: 12,
+  },
+  summaryBody: {
+    flex: 1,
+    gap: 4,
+  },
+  summaryTitle: {
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.white,
+  },
+  summaryMeta: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+  summaryTotal: {
+    fontFamily: fonts.semibold,
+    fontSize: 13,
+    color: colors.cyan300,
+  },
+}));
+
   const {
     filteredEntries,
     dateRange,
@@ -175,88 +263,3 @@ export function ReportsTab({ timeTrack }: ReportsTabProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    gap: 16,
-  },
-  label: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-    marginBottom: 8,
-  },
-  searchWrap: {
-    marginTop: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    paddingHorizontal: 12,
-  },
-  searchInput: {
-    flex: 1,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-    paddingVertical: 8,
-  },
-  sectionTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.white,
-    marginBottom: 12,
-  },
-  empty: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-    textAlign: 'center',
-    paddingVertical: 16,
-  },
-  list: {
-    gap: 10,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'flex-start',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.45)',
-    backgroundColor: 'rgba(15, 23, 42, 0.35)',
-    padding: 12,
-  },
-  entryRow: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.45)',
-    backgroundColor: 'rgba(15, 23, 42, 0.35)',
-    padding: 12,
-  },
-  summaryBody: {
-    flex: 1,
-    gap: 4,
-  },
-  summaryTitle: {
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.white,
-  },
-  summaryMeta: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  summaryTotal: {
-    fontFamily: fonts.semibold,
-    fontSize: 13,
-    color: colors.cyan300,
-  },
-});

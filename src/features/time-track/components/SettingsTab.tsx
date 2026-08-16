@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
 import { SelectField } from '@/features/wealth/SelectField';
@@ -14,6 +15,37 @@ type SettingsTabProps = {
 };
 
 export function SettingsTab({ timeTrack }: SettingsTabProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  root: {
+    gap: 16,
+  },
+  sectionTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.white,
+    marginBottom: 8,
+  },
+  description: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+    marginBottom: 12,
+  },
+  input: {
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    paddingHorizontal: 12,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+    marginBottom: 12,
+  },
+}));
+
   const { settings, updateWeeklyTarget, updateActivityBarVisible, updateSettingsMutation } =
     timeTrack;
 
@@ -73,32 +105,3 @@ export function SettingsTab({ timeTrack }: SettingsTabProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    gap: 16,
-  },
-  sectionTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.white,
-    marginBottom: 8,
-  },
-  description: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-    marginBottom: 12,
-  },
-  input: {
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    paddingHorizontal: 12,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-    marginBottom: 12,
-  },
-});

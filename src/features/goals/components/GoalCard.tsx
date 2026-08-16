@@ -1,9 +1,10 @@
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { format, parseISO } from 'date-fns';
 
 import { OverflowMenu } from '@/components/OverflowMenu';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import type { Goal, UpdateMilestonePayload } from '@/lib/api/goals';
 
@@ -39,6 +40,184 @@ export function GoalCard({
   isDeleting,
   isUpdatingMilestone,
 }: GoalCardProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 12,
+  },
+  headerMain: {
+    flex: 1,
+    gap: 8,
+    minWidth: 0,
+  },
+  badges: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  categoryBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: 'rgba(6, 182, 212, 0.35)',
+  },
+  categoryText: {
+    fontFamily: fonts.medium,
+    fontSize: 11,
+    color: colors.white,
+  },
+  priorityBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  priorityHigh: {
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+  },
+  priorityMedium: {
+    backgroundColor: 'rgba(6, 182, 212, 0.2)',
+    borderColor: 'rgba(6, 182, 212, 0.3)',
+  },
+  priorityLow: {
+    backgroundColor: 'rgba(100, 116, 139, 0.2)',
+    borderColor: 'rgba(100, 116, 139, 0.3)',
+  },
+  priorityText: {
+    fontFamily: fonts.medium,
+    fontSize: 11,
+  },
+  priorityTextHigh: { color: colors.red300 },
+  priorityTextMedium: { color: colors.cyan300 },
+  priorityTextLow: { color: colors.slate300 },
+  title: {
+    fontFamily: fonts.heading,
+    fontSize: 17,
+    color: colors.cyan300,
+  },
+  motivation: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate300,
+  },
+  headerRight: {
+    flexShrink: 0,
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  progressWrap: {
+    alignItems: 'flex-end',
+  },
+  progressValue: {
+    fontFamily: fonts.headingBold,
+    fontSize: 22,
+    color: colors.cyan400,
+  },
+  progressLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: colors.slate400,
+  },
+  progressBarTrack: {
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(51, 65, 85, 0.6)',
+    overflow: 'hidden',
+    marginBottom: 14,
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: colors.cyan500,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 12,
+  },
+  metaItem: {
+    flex: 1,
+    gap: 4,
+  },
+  metaLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  metaLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+  metaValue: {
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.slate200,
+  },
+  milestones: {
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(71, 85, 105, 0.5)',
+    paddingTop: 12,
+    gap: 8,
+    marginBottom: 12,
+  },
+  milestoneRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.3)',
+    backgroundColor: 'rgba(15, 23, 42, 0.2)',
+  },
+  milestoneText: {
+    flex: 1,
+    gap: 2,
+  },
+  milestoneTitle: {
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.slate200,
+  },
+  milestoneDone: {
+    color: colors.slate400,
+    textDecorationLine: 'line-through',
+  },
+  milestoneDate: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate500,
+  },
+  footer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(71, 85, 105, 0.5)',
+    paddingTop: 12,
+  },
+  footerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  footerText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+  },
+}));
+
   const completedMilestones = goal.milestones.filter((m) => m.completed).length;
   const totalMilestones = goal.milestones.length;
   const priorityLabel = goal.priority.charAt(0).toUpperCase() + goal.priority.slice(1);
@@ -227,179 +406,3 @@ export function GoalCard({
   );
 }
 
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 12,
-    marginBottom: 12,
-  },
-  headerMain: {
-    flex: 1,
-    gap: 8,
-    minWidth: 0,
-  },
-  badges: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  categoryBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 999,
-    backgroundColor: 'rgba(6, 182, 212, 0.35)',
-  },
-  categoryText: {
-    fontFamily: fonts.medium,
-    fontSize: 11,
-    color: colors.white,
-  },
-  priorityBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 999,
-    borderWidth: 1,
-  },
-  priorityHigh: {
-    backgroundColor: 'rgba(239, 68, 68, 0.2)',
-    borderColor: 'rgba(239, 68, 68, 0.3)',
-  },
-  priorityMedium: {
-    backgroundColor: 'rgba(6, 182, 212, 0.2)',
-    borderColor: 'rgba(6, 182, 212, 0.3)',
-  },
-  priorityLow: {
-    backgroundColor: 'rgba(100, 116, 139, 0.2)',
-    borderColor: 'rgba(100, 116, 139, 0.3)',
-  },
-  priorityText: {
-    fontFamily: fonts.medium,
-    fontSize: 11,
-  },
-  priorityTextHigh: { color: colors.red300 },
-  priorityTextMedium: { color: colors.cyan300 },
-  priorityTextLow: { color: colors.slate300 },
-  title: {
-    fontFamily: fonts.heading,
-    fontSize: 17,
-    color: colors.cyan300,
-  },
-  motivation: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate300,
-  },
-  headerRight: {
-    flexShrink: 0,
-    alignItems: 'flex-end',
-    gap: 6,
-  },
-  progressWrap: {
-    alignItems: 'flex-end',
-  },
-  progressValue: {
-    fontFamily: fonts.headingBold,
-    fontSize: 22,
-    color: colors.cyan400,
-  },
-  progressLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 11,
-    color: colors.slate400,
-  },
-  progressBarTrack: {
-    height: 8,
-    borderRadius: 999,
-    backgroundColor: 'rgba(51, 65, 85, 0.6)',
-    overflow: 'hidden',
-    marginBottom: 14,
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 999,
-    backgroundColor: colors.cyan500,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    gap: 16,
-    marginBottom: 12,
-  },
-  metaItem: {
-    flex: 1,
-    gap: 4,
-  },
-  metaLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  metaLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  metaValue: {
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.slate200,
-  },
-  milestones: {
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(71, 85, 105, 0.5)',
-    paddingTop: 12,
-    gap: 8,
-    marginBottom: 12,
-  },
-  milestoneRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.3)',
-    backgroundColor: 'rgba(15, 23, 42, 0.2)',
-  },
-  milestoneText: {
-    flex: 1,
-    gap: 2,
-  },
-  milestoneTitle: {
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.slate200,
-  },
-  milestoneDone: {
-    color: colors.slate400,
-    textDecorationLine: 'line-through',
-  },
-  milestoneDate: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate500,
-  },
-  footer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(71, 85, 105, 0.5)',
-    paddingTop: 12,
-  },
-  footerItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  footerText: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-  },
-});

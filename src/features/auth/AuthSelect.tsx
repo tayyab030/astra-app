@@ -3,14 +3,14 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 
 export type AuthSelectOption = {
   value: string;
@@ -36,6 +36,86 @@ export function AuthSelect({
   focused,
   onFocusChange,
 }: AuthSelectProps) {
+  const { colors } = useAppTheme();
+  const styles = useThemedStyles((c) => ({
+    trigger: {
+      height: 40,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: 'rgba(6, 182, 212, 0.3)',
+      backgroundColor: 'rgba(51, 65, 85, 0.5)',
+      paddingHorizontal: 12,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      gap: 8,
+    },
+    triggerFocused: {
+      borderColor: c.cyan400,
+    },
+    triggerText: {
+      flex: 1,
+      fontFamily: fonts.regular,
+      fontSize: 14,
+      color: c.white,
+    },
+    placeholder: {
+      color: c.slate400,
+    },
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(2, 6, 23, 0.65)',
+      justifyContent: 'center' as const,
+      padding: 24,
+    },
+    sheet: {
+      maxHeight: 420,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: 'rgba(6, 182, 212, 0.3)',
+      backgroundColor: c.slate800,
+      overflow: 'hidden' as const,
+    },
+    search: {
+      height: 40,
+      margin: 12,
+      marginBottom: 0,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: 'rgba(6, 182, 212, 0.3)',
+      backgroundColor: 'rgba(51, 65, 85, 0.5)',
+      color: c.white,
+      fontFamily: fonts.regular,
+      fontSize: 14,
+      paddingHorizontal: 12,
+    },
+    list: {
+      maxHeight: 360,
+    },
+    option: {
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
+    optionActive: {
+      backgroundColor: 'rgba(6, 182, 212, 0.15)',
+    },
+    optionText: {
+      fontFamily: fonts.regular,
+      fontSize: 14,
+      color: c.slate200,
+    },
+    optionTextActive: {
+      color: c.cyan300,
+    },
+    empty: {
+      fontFamily: fonts.regular,
+      fontSize: 13,
+      color: c.slate400,
+      textAlign: 'center' as const,
+      padding: 24,
+    },
+  }));
+
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
 
@@ -126,82 +206,3 @@ export function AuthSelect({
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  trigger: {
-    height: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(6, 182, 212, 0.3)',
-    backgroundColor: 'rgba(51, 65, 85, 0.5)',
-    paddingHorizontal: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  triggerFocused: {
-    borderColor: colors.cyan400,
-  },
-  triggerText: {
-    flex: 1,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-  },
-  placeholder: {
-    color: colors.slate400,
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(2, 6, 23, 0.65)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  sheet: {
-    maxHeight: 420,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(6, 182, 212, 0.3)',
-    backgroundColor: colors.slate800,
-    overflow: 'hidden',
-  },
-  search: {
-    height: 40,
-    margin: 12,
-    marginBottom: 0,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(6, 182, 212, 0.3)',
-    backgroundColor: 'rgba(51, 65, 85, 0.5)',
-    color: colors.white,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    paddingHorizontal: 12,
-  },
-  list: {
-    maxHeight: 360,
-  },
-  option: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  optionActive: {
-    backgroundColor: 'rgba(6, 182, 212, 0.15)',
-  },
-  optionText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate200,
-  },
-  optionTextActive: {
-    color: colors.cyan300,
-  },
-  empty: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-    textAlign: 'center',
-    padding: 24,
-  },
-});

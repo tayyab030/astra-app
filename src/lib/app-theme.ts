@@ -13,6 +13,16 @@ export type AppTheme = (typeof APP_THEMES)[number];
 
 export const DEFAULT_THEME: AppTheme = 'neon';
 
+/** Themes that use dark surfaces (StatusBar light content). */
+export const DARK_SURFACE_THEMES: readonly AppTheme[] = [
+  'dark',
+  'neon',
+  'ocean',
+  'forest',
+  'ember',
+  'aurora',
+];
+
 export type ThemeOption = {
   value: AppTheme;
   label: string;

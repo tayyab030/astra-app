@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { useCurrency } from '@/hooks/useCurrency';
 import type { WealthCategoryTotal } from '@/lib/api/wealth';
@@ -13,45 +14,7 @@ type CategoriesTabProps = {
 };
 
 export function CategoriesTab({ categoryTotals, isLoading }: CategoriesTabProps) {
-  const { formatCurrency } = useCurrency();
-  const hasCategoryData = categoryTotals.some((category) => category.total !== 0);
-
-  return (
-    <View style={styles.wrap}>
-      <Text style={styles.heading}>Categories</Text>
-      <DashboardCard>
-        <Text style={styles.cardTitle}>Spending by Category</Text>
-        <Text style={styles.cardDescription}>Totals calculated from your transactions</Text>
-        {isLoading ? (
-          <View style={styles.list}>
-            {Array.from({ length: 7 }).map((_, index) => (
-              <View key={index} style={styles.skeleton} />
-            ))}
-          </View>
-        ) : !hasCategoryData ? (
-          <WealthEmptyState
-            icon="pricetags-outline"
-            title="No category data yet"
-            description="Add transactions with categories to see how your spending breaks down for this period."
-          />
-        ) : (
-          <View style={styles.list}>
-            {categoryTotals.map((cat) => (
-              <View key={cat.value} style={styles.row}>
-                <Text style={styles.label}>{cat.label}</Text>
-                <Text style={[styles.amount, cat.value === 'waste' ? styles.waste : styles.expense]}>
-                  {formatCurrency(cat.total)}
-                </Text>
-              </View>
-            ))}
-          </View>
-        )}
-      </DashboardCard>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
+  const styles = useThemedStyles((colors, tokens) => ({
   wrap: {
     gap: 16,
   },
@@ -107,4 +70,43 @@ const styles = StyleSheet.create({
   expense: {
     color: colors.red400,
   },
-});
+}));
+
+  const { formatCurrency } = useCurrency();
+  const hasCategoryData = categoryTotals.some((category) => category.total !== 0);
+
+  return (
+    <View style={styles.wrap}>
+      <Text style={styles.heading}>Categories</Text>
+      <DashboardCard>
+        <Text style={styles.cardTitle}>Spending by Category</Text>
+        <Text style={styles.cardDescription}>Totals calculated from your transactions</Text>
+        {isLoading ? (
+          <View style={styles.list}>
+            {Array.from({ length: 7 }).map((_, index) => (
+              <View key={index} style={styles.skeleton} />
+            ))}
+          </View>
+        ) : !hasCategoryData ? (
+          <WealthEmptyState
+            icon="pricetags-outline"
+            title="No category data yet"
+            description="Add transactions with categories to see how your spending breaks down for this period."
+          />
+        ) : (
+          <View style={styles.list}>
+            {categoryTotals.map((cat) => (
+              <View key={cat.value} style={styles.row}>
+                <Text style={styles.label}>{cat.label}</Text>
+                <Text style={[styles.amount, cat.value === 'waste' ? styles.waste : styles.expense]}>
+                  {formatCurrency(cat.total)}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </DashboardCard>
+    </View>
+  );
+}
+

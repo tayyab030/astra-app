@@ -1,16 +1,10 @@
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { InsightHorizonBadge } from '@/components/insights/InsightHorizonBadge';
 import { PageHeader } from '@/components/PageHeader';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
@@ -75,441 +69,8 @@ function buildAnalyticsInsightContext(analytics: AnalyticsComputed) {
 }
 
 export function AnalyticsScreen() {
-  const { formatCurrency } = useCurrency();
-  const [selectedPeriod, setSelectedPeriod] = useState<AnalyticsPeriod>('week');
-  const { analytics, isLoading, isError, refetch } = useAnalytics(selectedPeriod);
-
-  const insightContext = analytics ? buildAnalyticsInsightContext(analytics) : undefined;
-  const {
-    data: insightData,
-    hasInsight,
-    isLoading: insightLoading,
-    enabled: insightsEnabled,
-  } = useAiInsight('analytics', insightContext, {
-    enabled: Boolean(analytics),
-  });
-
-  const periodTitle =
-    selectedPeriod === 'day' ? 'Today' : selectedPeriod === 'week' ? 'This week' : 'This month';
-
-  if (isLoading || !analytics) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.cyan400} />
-        <Text style={styles.loadingText}>Loading analytics…</Text>
-      </View>
-    );
-  }
-
-  if (isError) {
-    return (
-      <View style={styles.centered}>
-        <DashboardCard style={styles.errorCard}>
-          <Text style={styles.errorText}>Couldn't load analytics.</Text>
-          <Pressable style={styles.retryButton} onPress={() => refetch()}>
-            <Text style={styles.retryText}>Retry</Text>
-          </Pressable>
-        </DashboardCard>
-      </View>
-    );
-  }
-
-  const snapshot = analytics.dailySnapshot;
-  const taskTotal = snapshot.tasksCompleted + snapshot.tasksPending;
-  const showAiSections = insightsEnabled && (hasInsight || insightLoading);
-
-  return (
-    <ScrollView
-      contentContainerStyle={styles.scroll}
-      showsVerticalScrollIndicator={false}
-    >
-      <PageHeader
-        title="Analytics"
-        subtitle="Your Personal Life Intelligence Report"
-        right={
-          <LinearGradient
-            colors={[colors.cyan500, colors.blue600]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.badge}
-          >
-            <Ionicons name="star" size={16} color={colors.white} />
-            <Text style={styles.badgeText}>Life Score: {analytics.lifeScoreOverall}</Text>
-          </LinearGradient>
-        }
-      />
-
-      <DashboardCard>
-        <View style={styles.sectionHeader}>
-          <Ionicons name="bar-chart-outline" size={18} color={colors.cyan400} />
-          <Text style={styles.cardTitle}>Life Score Breakdown</Text>
-        </View>
-        <Text style={styles.cardDescription}>
-          Calculated from tasks, health, wealth, notes, goals, and focus time
-        </Text>
-        <View style={styles.categories}>
-          {analytics.categories.map((category) => (
-            <View key={category.name} style={styles.categoryCard}>
-              <View style={styles.categoryHeader}>
-                <Text style={styles.categoryName}>{category.name}</Text>
-                {category.trend === 'up' ? (
-                  <Ionicons name="trending-up" size={14} color={colors.cyan400} />
-                ) : category.trend === 'down' ? (
-                  <Ionicons name="trending-down" size={14} color={colors.red400} />
-                ) : null}
-              </View>
-              <Text style={styles.categoryScore}>{category.score}</Text>
-              <View style={styles.progressTrack}>
-                <View
-                  style={[
-                    styles.progressFill,
-                    { width: `${Math.min(100, category.score)}%` },
-                  ]}
-                />
-              </View>
-            </View>
-          ))}
-        </View>
-      </DashboardCard>
-
-      <DashboardCard>
-        <View style={styles.sectionHeader}>
-          <Ionicons name="calendar-outline" size={18} color={colors.cyan400} />
-          <Text style={styles.cardTitle}>{periodTitle} Snapshot</Text>
-        </View>
-        <Text style={styles.cardDescription}>
-          Live totals for the selected {selectedPeriod}
-        </Text>
-        <View style={styles.snapshotGrid}>
-          <View style={styles.snapshotItem}>
-            <Ionicons name="checkbox-outline" size={28} color={colors.cyan400} />
-            <Text style={styles.snapshotValue}>
-              {snapshot.tasksCompleted}/{taskTotal || 0}
-            </Text>
-            <Text style={styles.snapshotLabel}>Tasks due</Text>
-          </View>
-          <View style={styles.snapshotItem}>
-            <Ionicons name="cash-outline" size={28} color={colors.cyan400} />
-            <Text style={styles.snapshotValue}>
-              {formatCurrency(snapshot.spending)}/{formatCurrency(snapshot.budget)}
-            </Text>
-            <Text style={styles.snapshotLabel}>Spending vs budget</Text>
-          </View>
-          <View style={styles.snapshotItem}>
-            <Ionicons name="fitness-outline" size={28} color={colors.cyan400} />
-            <Text style={styles.snapshotValue}>
-              {snapshot.exerciseMinutes}/{snapshot.exerciseGoal}
-            </Text>
-            <Text style={styles.snapshotLabel}>Exercise minutes</Text>
-          </View>
-          <View style={styles.snapshotItem}>
-            <Ionicons name="time-outline" size={28} color={colors.cyan400} />
-            <Text style={styles.snapshotValue}>{snapshot.focusHours}h</Text>
-            <Text style={styles.snapshotLabel}>Focus time</Text>
-          </View>
-        </View>
-        {showAiSections && (insightData?.daily || insightLoading) ? (
-          <View style={styles.insightPanel}>
-            <Ionicons name="sparkles" size={16} color={colors.cyan400} />
-            <Text style={styles.insightPanelText}>
-              <Text style={styles.insightStrong}>AI Insight: </Text>
-              {insightLoading && !insightData?.daily
-                ? 'Generating…'
-                : insightData?.daily}
-            </Text>
-          </View>
-        ) : null}
-      </DashboardCard>
-
-      <View style={styles.tabs}>
-        {PERIODS.map((item) => {
-          const active = selectedPeriod === item.value;
-          if (active) {
-            return (
-              <Pressable key={item.value} onPress={() => setSelectedPeriod(item.value)}>
-                <LinearGradient
-                  colors={[colors.cyan500, colors.blue600]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.tab}
-                >
-                  <Text style={styles.tabActive}>{item.label}</Text>
-                </LinearGradient>
-              </Pressable>
-            );
-          }
-          return (
-            <Pressable
-              key={item.value}
-              onPress={() => setSelectedPeriod(item.value)}
-              style={styles.tab}
-            >
-              <Text style={styles.tabInactive}>{item.label}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
-
-      {selectedPeriod === 'day' ? (
-        <>
-          <View style={styles.miniStats}>
-            <DashboardCard style={styles.miniStat}>
-              <Text style={styles.miniLabel}>Notes today</Text>
-              <Text style={styles.miniValue}>{snapshot.notesCreated}</Text>
-            </DashboardCard>
-            <DashboardCard style={styles.miniStat}>
-              <Text style={styles.miniLabel}>Overdue tasks</Text>
-              <Text style={styles.miniValue}>{analytics.summary.overdueTasks}</Text>
-            </DashboardCard>
-            <DashboardCard style={styles.miniStat}>
-              <Text style={styles.miniLabel}>Active goals</Text>
-              <Text style={styles.miniValue}>{analytics.summary.activeGoals}</Text>
-            </DashboardCard>
-          </View>
-          <DashboardCard>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="bar-chart-outline" size={18} color={colors.cyan300} />
-              <Text style={styles.cardTitle}>Today's Tasks</Text>
-            </View>
-            <TaskCompletionBarChart
-              points={analytics.taskCompletionWeek}
-              emptyLabel="No tasks due today"
-            />
-          </DashboardCard>
-          <DashboardCard>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="pie-chart-outline" size={18} color={colors.cyan300} />
-              <Text style={styles.cardTitle}>Today's Expenses</Text>
-            </View>
-            <WeeklyExpensesChart
-              slices={analytics.expenseDistribution}
-              emptyLabel="No expenses today"
-            />
-          </DashboardCard>
-        </>
-      ) : null}
-
-      {selectedPeriod === 'week' ? (
-        <>
-          <DashboardCard>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="bar-chart-outline" size={18} color={colors.cyan300} />
-              <Text style={styles.cardTitle}>Tasks Completion</Text>
-            </View>
-            <Text style={styles.cardDescription}>Due vs completed for this week</Text>
-            <TaskCompletionBarChart
-              points={analytics.taskCompletionWeek}
-              emptyLabel="No tasks due this week"
-            />
-          </DashboardCard>
-          <DashboardCard>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="pie-chart-outline" size={18} color={colors.cyan300} />
-              <Text style={styles.cardTitle}>Expense Distribution</Text>
-            </View>
-            <Text style={styles.cardDescription}>Spending for selected week</Text>
-            <WeeklyExpensesChart
-              slices={analytics.expenseDistribution}
-              emptyLabel="No expenses this week"
-            />
-          </DashboardCard>
-          <DashboardCard>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="trophy-outline" size={18} color={colors.cyan300} />
-              <Text style={styles.cardTitle}>Period Highlights</Text>
-            </View>
-            <Text style={styles.cardDescription}>Based on week activity</Text>
-            <View style={styles.highlights}>
-              {analytics.weeklyHighlights.map((highlight) => (
-                <View key={highlight.title} style={styles.highlightCard}>
-                  <Text style={styles.highlightTitle}>{highlight.title}</Text>
-                  <Text style={styles.highlightValue}>{highlight.value}</Text>
-                </View>
-              ))}
-            </View>
-          </DashboardCard>
-        </>
-      ) : null}
-
-      {selectedPeriod === 'month' ? (
-        <DashboardCard>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="analytics-outline" size={18} color={colors.cyan300} />
-            <Text style={styles.cardTitle}>Monthly Trends</Text>
-          </View>
-          <Text style={styles.cardDescription}>
-            Spending, exercise, and focus for this month
-          </Text>
-          <MonthlyTrendsChart points={analytics.monthlyTrends} />
-          {showAiSections && (insightData?.monthly || insightLoading) ? (
-            <View style={styles.insightPanel}>
-              <Text style={styles.insightPanelText}>
-                <Text style={styles.insightStrong}>Monthly Insight: </Text>
-                {insightLoading && !insightData?.monthly
-                  ? 'Generating…'
-                  : insightData?.monthly}
-              </Text>
-            </View>
-          ) : null}
-        </DashboardCard>
-      ) : null}
-
-      {showAiSections &&
-      ((insightData?.cross_domain && insightData.cross_domain.length > 0) ||
-        insightData?.story ||
-        insightLoading) ? (
-        <DashboardCard borderColor="rgba(6, 182, 212, 0.3)">
-          <View style={styles.sectionHeader}>
-            <Ionicons name="flash" size={18} color={colors.amber200} />
-            <Text style={styles.cardTitle}>Cross-Domain Insights</Text>
-          </View>
-          <Text style={styles.cardDescription}>
-            Discover hidden patterns across your life domains
-          </Text>
-          {insightLoading && !insightData?.cross_domain?.length ? (
-            <View style={styles.skeletonStack}>
-              <View style={styles.skeleton} />
-              <View style={styles.skeleton} />
-            </View>
-          ) : (
-            <View style={styles.insightList}>
-              {(insightData?.cross_domain ?? []).map((insight, index) => (
-                <View key={`${insight.title}-${index}`} style={styles.crossInsight}>
-                  <View style={styles.crossTitleRow}>
-                    <InsightHorizonBadge horizon={insight.horizon} />
-                    <Text style={styles.crossTitle}>{insight.title}</Text>
-                  </View>
-                  <Text style={styles.crossBody}>{insight.insight}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-          {insightData?.story ? (
-            <View style={styles.insightPanel}>
-              <Ionicons name="cafe-outline" size={16} color={colors.cyan400} />
-              <Text style={styles.insightPanelText}>
-                <Text style={styles.insightStrong}>AI Story of the Week: </Text>
-                {insightData.story}
-              </Text>
-            </View>
-          ) : null}
-        </DashboardCard>
-      ) : null}
-
-      <DashboardCard>
-        <View style={styles.sectionHeader}>
-          <Ionicons name="ribbon-outline" size={18} color={colors.cyan300} />
-          <Text style={styles.cardTitle}>Achievements & Badges</Text>
-        </View>
-        <View style={styles.achievements}>
-          {analytics.achievements.map((achievement) => (
-            <View
-              key={achievement.name}
-              style={[
-                styles.achievementCard,
-                !achievement.earned && styles.achievementDim,
-              ]}
-            >
-              <Ionicons
-                name={achievementIcon(achievement.kind)}
-                size={22}
-                color={achievement.earned ? colors.cyan400 : colors.slate500}
-              />
-              <Text style={styles.achievementName}>{achievement.name}</Text>
-              <Text style={styles.achievementDesc}>{achievement.description}</Text>
-            </View>
-          ))}
-        </View>
-      </DashboardCard>
-
-      <DashboardCard>
-        <View style={styles.sectionHeader}>
-          <Ionicons name="flag-outline" size={18} color={colors.cyan300} />
-          <Text style={styles.cardTitle}>Goal Progress</Text>
-        </View>
-        {analytics.goalProgress.length === 0 ? (
-          <Text style={styles.emptyText}>No active goals yet.</Text>
-        ) : (
-          <View style={styles.goalList}>
-            {analytics.goalProgress.map((goal) => (
-              <View key={goal.id} style={styles.goalRow}>
-                <View style={styles.goalMeta}>
-                  <Text style={styles.goalTitle} numberOfLines={1}>
-                    {goal.title}
-                  </Text>
-                  <Text style={styles.goalPct}>{goal.progress}%</Text>
-                </View>
-                <View style={styles.progressTrack}>
-                  <View
-                    style={[
-                      styles.progressFill,
-                      { width: `${Math.min(100, goal.progress)}%` },
-                    ]}
-                  />
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
-        {showAiSections && insightData?.goal_prediction ? (
-          <View style={styles.insightPanel}>
-            <Text style={styles.insightPanelText}>
-              <Text style={styles.insightStrong}>AI Prediction: </Text>
-              {insightData.goal_prediction}
-            </Text>
-          </View>
-        ) : null}
-      </DashboardCard>
-
-      {showAiSections &&
-      ((insightData?.predictions && insightData.predictions.length > 0) ||
-        (insightData?.coach && insightData.coach.length > 0) ||
-        insightLoading) ? (
-        <DashboardCard>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="bulb-outline" size={18} color={colors.cyan300} />
-            <Text style={styles.cardTitle}>AI Predictions & Coaching</Text>
-          </View>
-          {insightLoading && !insightData?.predictions?.length ? (
-            <View style={styles.skeletonStack}>
-              <View style={styles.skeleton} />
-              <View style={styles.skeleton} />
-            </View>
-          ) : (
-            <View style={styles.coachGrid}>
-              {(insightData?.predictions?.length ?? 0) > 0 ? (
-                <View style={styles.coachCol}>
-                  <Text style={styles.coachHeading}>Predictive Forecasts</Text>
-                  {insightData!.predictions!.map((text) => (
-                    <View key={text} style={styles.coachCard}>
-                      <Text style={styles.coachText}>{text}</Text>
-                    </View>
-                  ))}
-                </View>
-              ) : null}
-              {(insightData?.coach?.length ?? 0) > 0 ? (
-                <View style={styles.coachCol}>
-                  <Text style={styles.coachHeading}>AI Coach Recommendations</Text>
-                  {insightData!.coach!.map((item) => (
-                    <View key={item.label} style={styles.coachCard}>
-                      <View style={styles.crossTitleRow}>
-                        <InsightHorizonBadge horizon={item.horizon} />
-                        <Text style={styles.coachLabel}>{item.label}</Text>
-                      </View>
-                      <Text style={styles.coachText}>{item.text}</Text>
-                    </View>
-                  ))}
-                </View>
-              ) : null}
-            </View>
-          )}
-        </DashboardCard>
-      ) : null}
-    </ScrollView>
-  );
-}
-
-const styles = StyleSheet.create({
+  const { tokens, colors } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
   scroll: {
     padding: 24,
     paddingBottom: 40,
@@ -842,4 +403,438 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.slate300,
   },
-});
+}));
+
+  const { formatCurrency } = useCurrency();
+  const [selectedPeriod, setSelectedPeriod] = useState<AnalyticsPeriod>('week');
+  const { analytics, isLoading, isError, refetch } = useAnalytics(selectedPeriod);
+
+  const insightContext = analytics ? buildAnalyticsInsightContext(analytics) : undefined;
+  const {
+    data: insightData,
+    hasInsight,
+    isLoading: insightLoading,
+    enabled: insightsEnabled,
+  } = useAiInsight('analytics', insightContext, {
+    enabled: Boolean(analytics),
+  });
+
+  const periodTitle =
+    selectedPeriod === 'day' ? 'Today' : selectedPeriod === 'week' ? 'This week' : 'This month';
+
+  if (isLoading || !analytics) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={colors.cyan400} />
+        <Text style={styles.loadingText}>Loading analytics…</Text>
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View style={styles.centered}>
+        <DashboardCard style={styles.errorCard}>
+          <Text style={styles.errorText}>Couldn't load analytics.</Text>
+          <Pressable style={styles.retryButton} onPress={() => refetch()}>
+            <Text style={styles.retryText}>Retry</Text>
+          </Pressable>
+        </DashboardCard>
+      </View>
+    );
+  }
+
+  const snapshot = analytics.dailySnapshot;
+  const taskTotal = snapshot.tasksCompleted + snapshot.tasksPending;
+  const showAiSections = insightsEnabled && (hasInsight || insightLoading);
+
+  return (
+    <ScrollView
+      contentContainerStyle={styles.scroll}
+      showsVerticalScrollIndicator={false}
+    >
+      <PageHeader
+        title="Analytics"
+        subtitle="Your Personal Life Intelligence Report"
+        right={
+          <LinearGradient
+            colors={tokens.accentGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.badge}
+          >
+            <Ionicons name="star" size={16} color={colors.white} />
+            <Text style={styles.badgeText}>Life Score: {analytics.lifeScoreOverall}</Text>
+          </LinearGradient>
+        }
+      />
+
+      <DashboardCard>
+        <View style={styles.sectionHeader}>
+          <Ionicons name="bar-chart-outline" size={18} color={colors.cyan400} />
+          <Text style={styles.cardTitle}>Life Score Breakdown</Text>
+        </View>
+        <Text style={styles.cardDescription}>
+          Calculated from tasks, health, wealth, notes, goals, and focus time
+        </Text>
+        <View style={styles.categories}>
+          {analytics.categories.map((category) => (
+            <View key={category.name} style={styles.categoryCard}>
+              <View style={styles.categoryHeader}>
+                <Text style={styles.categoryName}>{category.name}</Text>
+                {category.trend === 'up' ? (
+                  <Ionicons name="trending-up" size={14} color={colors.cyan400} />
+                ) : category.trend === 'down' ? (
+                  <Ionicons name="trending-down" size={14} color={colors.red400} />
+                ) : null}
+              </View>
+              <Text style={styles.categoryScore}>{category.score}</Text>
+              <View style={styles.progressTrack}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    { width: `${Math.min(100, category.score)}%` },
+                  ]}
+                />
+              </View>
+            </View>
+          ))}
+        </View>
+      </DashboardCard>
+
+      <DashboardCard>
+        <View style={styles.sectionHeader}>
+          <Ionicons name="calendar-outline" size={18} color={colors.cyan400} />
+          <Text style={styles.cardTitle}>{periodTitle} Snapshot</Text>
+        </View>
+        <Text style={styles.cardDescription}>
+          Live totals for the selected {selectedPeriod}
+        </Text>
+        <View style={styles.snapshotGrid}>
+          <View style={styles.snapshotItem}>
+            <Ionicons name="checkbox-outline" size={28} color={colors.cyan400} />
+            <Text style={styles.snapshotValue}>
+              {snapshot.tasksCompleted}/{taskTotal || 0}
+            </Text>
+            <Text style={styles.snapshotLabel}>Tasks due</Text>
+          </View>
+          <View style={styles.snapshotItem}>
+            <Ionicons name="cash-outline" size={28} color={colors.cyan400} />
+            <Text style={styles.snapshotValue}>
+              {formatCurrency(snapshot.spending)}/{formatCurrency(snapshot.budget)}
+            </Text>
+            <Text style={styles.snapshotLabel}>Spending vs budget</Text>
+          </View>
+          <View style={styles.snapshotItem}>
+            <Ionicons name="fitness-outline" size={28} color={colors.cyan400} />
+            <Text style={styles.snapshotValue}>
+              {snapshot.exerciseMinutes}/{snapshot.exerciseGoal}
+            </Text>
+            <Text style={styles.snapshotLabel}>Exercise minutes</Text>
+          </View>
+          <View style={styles.snapshotItem}>
+            <Ionicons name="time-outline" size={28} color={colors.cyan400} />
+            <Text style={styles.snapshotValue}>{snapshot.focusHours}h</Text>
+            <Text style={styles.snapshotLabel}>Focus time</Text>
+          </View>
+        </View>
+        {showAiSections && (insightData?.daily || insightLoading) ? (
+          <View style={styles.insightPanel}>
+            <Ionicons name="sparkles" size={16} color={colors.cyan400} />
+            <Text style={styles.insightPanelText}>
+              <Text style={styles.insightStrong}>AI Insight: </Text>
+              {insightLoading && !insightData?.daily
+                ? 'Generating…'
+                : insightData?.daily}
+            </Text>
+          </View>
+        ) : null}
+      </DashboardCard>
+
+      <View style={styles.tabs}>
+        {PERIODS.map((item) => {
+          const active = selectedPeriod === item.value;
+          if (active) {
+            return (
+              <Pressable key={item.value} onPress={() => setSelectedPeriod(item.value)}>
+                <LinearGradient
+                  colors={tokens.accentGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.tab}
+                >
+                  <Text style={styles.tabActive}>{item.label}</Text>
+                </LinearGradient>
+              </Pressable>
+            );
+          }
+          return (
+            <Pressable
+              key={item.value}
+              onPress={() => setSelectedPeriod(item.value)}
+              style={styles.tab}
+            >
+              <Text style={styles.tabInactive}>{item.label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {selectedPeriod === 'day' ? (
+        <>
+          <View style={styles.miniStats}>
+            <DashboardCard style={styles.miniStat}>
+              <Text style={styles.miniLabel}>Notes today</Text>
+              <Text style={styles.miniValue}>{snapshot.notesCreated}</Text>
+            </DashboardCard>
+            <DashboardCard style={styles.miniStat}>
+              <Text style={styles.miniLabel}>Overdue tasks</Text>
+              <Text style={styles.miniValue}>{analytics.summary.overdueTasks}</Text>
+            </DashboardCard>
+            <DashboardCard style={styles.miniStat}>
+              <Text style={styles.miniLabel}>Active goals</Text>
+              <Text style={styles.miniValue}>{analytics.summary.activeGoals}</Text>
+            </DashboardCard>
+          </View>
+          <DashboardCard>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="bar-chart-outline" size={18} color={colors.cyan300} />
+              <Text style={styles.cardTitle}>Today's Tasks</Text>
+            </View>
+            <TaskCompletionBarChart
+              points={analytics.taskCompletionWeek}
+              emptyLabel="No tasks due today"
+            />
+          </DashboardCard>
+          <DashboardCard>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="pie-chart-outline" size={18} color={colors.cyan300} />
+              <Text style={styles.cardTitle}>Today's Expenses</Text>
+            </View>
+            <WeeklyExpensesChart
+              slices={analytics.expenseDistribution}
+              emptyLabel="No expenses today"
+            />
+          </DashboardCard>
+        </>
+      ) : null}
+
+      {selectedPeriod === 'week' ? (
+        <>
+          <DashboardCard>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="bar-chart-outline" size={18} color={colors.cyan300} />
+              <Text style={styles.cardTitle}>Tasks Completion</Text>
+            </View>
+            <Text style={styles.cardDescription}>Due vs completed for this week</Text>
+            <TaskCompletionBarChart
+              points={analytics.taskCompletionWeek}
+              emptyLabel="No tasks due this week"
+            />
+          </DashboardCard>
+          <DashboardCard>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="pie-chart-outline" size={18} color={colors.cyan300} />
+              <Text style={styles.cardTitle}>Expense Distribution</Text>
+            </View>
+            <Text style={styles.cardDescription}>Spending for selected week</Text>
+            <WeeklyExpensesChart
+              slices={analytics.expenseDistribution}
+              emptyLabel="No expenses this week"
+            />
+          </DashboardCard>
+          <DashboardCard>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="trophy-outline" size={18} color={colors.cyan300} />
+              <Text style={styles.cardTitle}>Period Highlights</Text>
+            </View>
+            <Text style={styles.cardDescription}>Based on week activity</Text>
+            <View style={styles.highlights}>
+              {analytics.weeklyHighlights.map((highlight) => (
+                <View key={highlight.title} style={styles.highlightCard}>
+                  <Text style={styles.highlightTitle}>{highlight.title}</Text>
+                  <Text style={styles.highlightValue}>{highlight.value}</Text>
+                </View>
+              ))}
+            </View>
+          </DashboardCard>
+        </>
+      ) : null}
+
+      {selectedPeriod === 'month' ? (
+        <DashboardCard>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="analytics-outline" size={18} color={colors.cyan300} />
+            <Text style={styles.cardTitle}>Monthly Trends</Text>
+          </View>
+          <Text style={styles.cardDescription}>
+            Spending, exercise, and focus for this month
+          </Text>
+          <MonthlyTrendsChart points={analytics.monthlyTrends} />
+          {showAiSections && (insightData?.monthly || insightLoading) ? (
+            <View style={styles.insightPanel}>
+              <Text style={styles.insightPanelText}>
+                <Text style={styles.insightStrong}>Monthly Insight: </Text>
+                {insightLoading && !insightData?.monthly
+                  ? 'Generating…'
+                  : insightData?.monthly}
+              </Text>
+            </View>
+          ) : null}
+        </DashboardCard>
+      ) : null}
+
+      {showAiSections &&
+      ((insightData?.cross_domain && insightData.cross_domain.length > 0) ||
+        insightData?.story ||
+        insightLoading) ? (
+        <DashboardCard borderColor="rgba(6, 182, 212, 0.3)">
+          <View style={styles.sectionHeader}>
+            <Ionicons name="flash" size={18} color={colors.amber200} />
+            <Text style={styles.cardTitle}>Cross-Domain Insights</Text>
+          </View>
+          <Text style={styles.cardDescription}>
+            Discover hidden patterns across your life domains
+          </Text>
+          {insightLoading && !insightData?.cross_domain?.length ? (
+            <View style={styles.skeletonStack}>
+              <View style={styles.skeleton} />
+              <View style={styles.skeleton} />
+            </View>
+          ) : (
+            <View style={styles.insightList}>
+              {(insightData?.cross_domain ?? []).map((insight, index) => (
+                <View key={`${insight.title}-${index}`} style={styles.crossInsight}>
+                  <View style={styles.crossTitleRow}>
+                    <InsightHorizonBadge horizon={insight.horizon} />
+                    <Text style={styles.crossTitle}>{insight.title}</Text>
+                  </View>
+                  <Text style={styles.crossBody}>{insight.insight}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+          {insightData?.story ? (
+            <View style={styles.insightPanel}>
+              <Ionicons name="cafe-outline" size={16} color={colors.cyan400} />
+              <Text style={styles.insightPanelText}>
+                <Text style={styles.insightStrong}>AI Story of the Week: </Text>
+                {insightData.story}
+              </Text>
+            </View>
+          ) : null}
+        </DashboardCard>
+      ) : null}
+
+      <DashboardCard>
+        <View style={styles.sectionHeader}>
+          <Ionicons name="ribbon-outline" size={18} color={colors.cyan300} />
+          <Text style={styles.cardTitle}>Achievements & Badges</Text>
+        </View>
+        <View style={styles.achievements}>
+          {analytics.achievements.map((achievement) => (
+            <View
+              key={achievement.name}
+              style={[
+                styles.achievementCard,
+                !achievement.earned && styles.achievementDim,
+              ]}
+            >
+              <Ionicons
+                name={achievementIcon(achievement.kind)}
+                size={22}
+                color={achievement.earned ? colors.cyan400 : colors.slate500}
+              />
+              <Text style={styles.achievementName}>{achievement.name}</Text>
+              <Text style={styles.achievementDesc}>{achievement.description}</Text>
+            </View>
+          ))}
+        </View>
+      </DashboardCard>
+
+      <DashboardCard>
+        <View style={styles.sectionHeader}>
+          <Ionicons name="flag-outline" size={18} color={colors.cyan300} />
+          <Text style={styles.cardTitle}>Goal Progress</Text>
+        </View>
+        {analytics.goalProgress.length === 0 ? (
+          <Text style={styles.emptyText}>No active goals yet.</Text>
+        ) : (
+          <View style={styles.goalList}>
+            {analytics.goalProgress.map((goal) => (
+              <View key={goal.id} style={styles.goalRow}>
+                <View style={styles.goalMeta}>
+                  <Text style={styles.goalTitle} numberOfLines={1}>
+                    {goal.title}
+                  </Text>
+                  <Text style={styles.goalPct}>{goal.progress}%</Text>
+                </View>
+                <View style={styles.progressTrack}>
+                  <View
+                    style={[
+                      styles.progressFill,
+                      { width: `${Math.min(100, goal.progress)}%` },
+                    ]}
+                  />
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+        {showAiSections && insightData?.goal_prediction ? (
+          <View style={styles.insightPanel}>
+            <Text style={styles.insightPanelText}>
+              <Text style={styles.insightStrong}>AI Prediction: </Text>
+              {insightData.goal_prediction}
+            </Text>
+          </View>
+        ) : null}
+      </DashboardCard>
+
+      {showAiSections &&
+      ((insightData?.predictions && insightData.predictions.length > 0) ||
+        (insightData?.coach && insightData.coach.length > 0) ||
+        insightLoading) ? (
+        <DashboardCard>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="bulb-outline" size={18} color={colors.cyan300} />
+            <Text style={styles.cardTitle}>AI Predictions & Coaching</Text>
+          </View>
+          {insightLoading && !insightData?.predictions?.length ? (
+            <View style={styles.skeletonStack}>
+              <View style={styles.skeleton} />
+              <View style={styles.skeleton} />
+            </View>
+          ) : (
+            <View style={styles.coachGrid}>
+              {(insightData?.predictions?.length ?? 0) > 0 ? (
+                <View style={styles.coachCol}>
+                  <Text style={styles.coachHeading}>Predictive Forecasts</Text>
+                  {insightData!.predictions!.map((text) => (
+                    <View key={text} style={styles.coachCard}>
+                      <Text style={styles.coachText}>{text}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+              {(insightData?.coach?.length ?? 0) > 0 ? (
+                <View style={styles.coachCol}>
+                  <Text style={styles.coachHeading}>AI Coach Recommendations</Text>
+                  {insightData!.coach!.map((item) => (
+                    <View key={item.label} style={styles.coachCard}>
+                      <View style={styles.crossTitleRow}>
+                        <InsightHorizonBadge horizon={item.horizon} />
+                        <Text style={styles.coachLabel}>{item.label}</Text>
+                      </View>
+                      <Text style={styles.coachText}>{item.text}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+            </View>
+          )}
+        </DashboardCard>
+      ) : null}
+    </ScrollView>
+  );
+}

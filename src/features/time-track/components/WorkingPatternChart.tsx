@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 
 import type { PatternChartPoint } from '../utils/workingPatternCharts';
@@ -16,6 +17,61 @@ type WorkingPatternChartProps = {
 };
 
 export function WorkingPatternChart({ title, data, emptyMessage }: WorkingPatternChartProps) {
+  const styles = useThemedStyles((colors, tokens) => ({
+  title: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.white,
+    marginBottom: 12,
+  },
+  empty: {
+    minHeight: 180,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+    textAlign: 'center',
+  },
+  chart: {
+    minHeight: CHART_HEIGHT + 48,
+  },
+  bars: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: 6,
+    minHeight: CHART_HEIGHT + 40,
+  },
+  barsScroll: {
+    paddingRight: 8,
+  },
+  barCol: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  barColFlex: {
+    flex: 1,
+  },
+  bar: {
+    borderRadius: 4,
+  },
+  barValue: {
+    fontFamily: fonts.regular,
+    fontSize: 9,
+    color: colors.slate400,
+    minHeight: 14,
+  },
+  barLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 10,
+    color: colors.slate400,
+    minHeight: 14,
+  },
+}));
+
   const [width, setWidth] = useState(0);
   const hasData = data.some((point) => point.hours > 0);
 
@@ -84,57 +140,3 @@ export function WorkingPatternChart({ title, data, emptyMessage }: WorkingPatter
   );
 }
 
-const styles = StyleSheet.create({
-  title: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.white,
-    marginBottom: 12,
-  },
-  empty: {
-    minHeight: 180,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-    textAlign: 'center',
-  },
-  chart: {
-    minHeight: CHART_HEIGHT + 48,
-  },
-  bars: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    gap: 6,
-    minHeight: CHART_HEIGHT + 40,
-  },
-  barsScroll: {
-    paddingRight: 8,
-  },
-  barCol: {
-    alignItems: 'center',
-    gap: 6,
-  },
-  barColFlex: {
-    flex: 1,
-  },
-  bar: {
-    borderRadius: 4,
-  },
-  barValue: {
-    fontFamily: fonts.regular,
-    fontSize: 9,
-    color: colors.slate400,
-    minHeight: 14,
-  },
-  barLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 10,
-    color: colors.slate400,
-    minHeight: 14,
-  },
-});

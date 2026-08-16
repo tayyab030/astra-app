@@ -3,8 +3,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
 import { ROUTES } from '@/constants/routes';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from './DashboardCard';
 
 type QuickActionItem = {
@@ -13,7 +14,7 @@ type QuickActionItem = {
   href: string;
   icon: keyof typeof Ionicons.glyphMap;
   borderColor: string;
-  color: string;
+  tone: 'cyan' | 'blue';
 };
 
 const DASHBOARD_QUICK_ACTIONS: QuickActionItem[] = [
@@ -23,7 +24,7 @@ const DASHBOARD_QUICK_ACTIONS: QuickActionItem[] = [
     href: `${ROUTES.APP.TASKS}?action=create`,
     icon: 'checkbox-outline',
     borderColor: 'rgba(6, 182, 212, 0.3)',
-    color: colors.cyan300,
+    tone: 'cyan',
   },
   {
     id: 'log-expense',
@@ -31,7 +32,7 @@ const DASHBOARD_QUICK_ACTIONS: QuickActionItem[] = [
     href: `${ROUTES.APP.WEALTH}?tab=transactions&action=add`,
     icon: 'cash-outline',
     borderColor: 'rgba(59, 130, 246, 0.3)',
-    color: colors.blue300,
+    tone: 'blue',
   },
   {
     id: 'add-habit',
@@ -39,7 +40,7 @@ const DASHBOARD_QUICK_ACTIONS: QuickActionItem[] = [
     href: `${ROUTES.APP.HABITS}?action=add`,
     icon: 'flame-outline',
     borderColor: 'rgba(34, 211, 238, 0.3)',
-    color: colors.cyan300,
+    tone: 'cyan',
   },
   {
     id: 'quick-note',
@@ -47,7 +48,7 @@ const DASHBOARD_QUICK_ACTIONS: QuickActionItem[] = [
     href: `${ROUTES.APP.NOTES}?tab=quick-notes&action=create`,
     icon: 'document-text-outline',
     borderColor: 'rgba(96, 165, 250, 0.3)',
-    color: colors.blue300,
+    tone: 'blue',
   },
   {
     id: 'add-goal',
@@ -55,7 +56,7 @@ const DASHBOARD_QUICK_ACTIONS: QuickActionItem[] = [
     href: `${ROUTES.APP.GOALS}?action=add`,
     icon: 'flag-outline',
     borderColor: 'rgba(6, 182, 212, 0.3)',
-    color: colors.cyan300,
+    tone: 'cyan',
   },
   {
     id: 'log-workout',
@@ -63,7 +64,7 @@ const DASHBOARD_QUICK_ACTIONS: QuickActionItem[] = [
     href: `${ROUTES.APP.HEALTH}?tab=exercise&action=log-workout`,
     icon: 'barbell-outline',
     borderColor: 'rgba(59, 130, 246, 0.3)',
-    color: colors.blue300,
+    tone: 'blue',
   },
   {
     id: 'log-weight',
@@ -71,7 +72,7 @@ const DASHBOARD_QUICK_ACTIONS: QuickActionItem[] = [
     href: `${ROUTES.APP.HEALTH}?tab=weight`,
     icon: 'scale-outline',
     borderColor: 'rgba(34, 211, 238, 0.3)',
-    color: colors.cyan300,
+    tone: 'cyan',
   },
   {
     id: 'mood-checkin',
@@ -79,7 +80,7 @@ const DASHBOARD_QUICK_ACTIONS: QuickActionItem[] = [
     href: `${ROUTES.APP.HEALTH}?tab=wellness`,
     icon: 'happy-outline',
     borderColor: 'rgba(96, 165, 250, 0.3)',
-    color: colors.blue300,
+    tone: 'blue',
   },
   {
     id: 'track-time',
@@ -87,7 +88,7 @@ const DASHBOARD_QUICK_ACTIONS: QuickActionItem[] = [
     href: `${ROUTES.APP.TIME_TRACK}?tab=timer&action=add-task`,
     icon: 'time-outline',
     borderColor: 'rgba(6, 182, 212, 0.3)',
-    color: colors.cyan300,
+    tone: 'cyan',
   },
   {
     id: 'ask-assistant',
@@ -95,7 +96,7 @@ const DASHBOARD_QUICK_ACTIONS: QuickActionItem[] = [
     href: ROUTES.APP.ASSISTANT,
     icon: 'chatbubble-ellipses-outline',
     borderColor: 'rgba(59, 130, 246, 0.3)',
-    color: colors.blue300,
+    tone: 'blue',
   },
   {
     id: 'set-budget',
@@ -103,65 +104,68 @@ const DASHBOARD_QUICK_ACTIONS: QuickActionItem[] = [
     href: `${ROUTES.APP.WEALTH}?tab=budget&action=set-limit`,
     icon: 'wallet-outline',
     borderColor: 'rgba(34, 211, 238, 0.3)',
-    color: colors.cyan300,
+    tone: 'cyan',
   },
 ];
 
 export function QuickActions() {
+  const { colors } = useAppTheme();
+  const styles = useThemedStyles((c) => ({
+    title: {
+      fontFamily: fonts.heading,
+      fontSize: 18,
+      color: c.cyan300,
+      marginBottom: 12,
+    },
+    actions: {
+      flexDirection: 'row' as const,
+      flexWrap: 'wrap' as const,
+      gap: 12,
+    },
+    action: {
+      width: '47%' as const,
+      height: 80,
+      borderRadius: 8,
+      borderWidth: 1,
+      overflow: 'hidden' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      gap: 8,
+    },
+    actionLabel: {
+      fontFamily: fonts.regular,
+      fontSize: 13,
+      textAlign: 'center' as const,
+      paddingHorizontal: 4,
+    },
+  }));
   const router = useRouter();
 
   return (
     <DashboardCard>
       <Text style={styles.title}>Quick Actions</Text>
       <View style={styles.actions}>
-        {DASHBOARD_QUICK_ACTIONS.map((action) => (
-          <Pressable
-            key={action.id}
-            style={[styles.action, { borderColor: action.borderColor }]}
-            onPress={() => router.push(action.href as never)}
-          >
-            <LinearGradient
-              colors={['rgba(30, 41, 59, 0.5)', 'rgba(51, 65, 85, 0.5)']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              pointerEvents="none"
-              style={StyleSheet.absoluteFill}
-            />
-            <Ionicons name={action.icon} size={20} color={action.color} />
-            <Text style={[styles.actionLabel, { color: action.color }]}>{action.label}</Text>
-          </Pressable>
-        ))}
+        {DASHBOARD_QUICK_ACTIONS.map((action) => {
+          const color = action.tone === 'cyan' ? colors.cyan300 : colors.blue300;
+          return (
+            <Pressable
+              key={action.id}
+              style={[styles.action, { borderColor: action.borderColor }]}
+              onPress={() => router.push(action.href as never)}
+            >
+              <LinearGradient
+                colors={['rgba(30, 41, 59, 0.5)', 'rgba(51, 65, 85, 0.5)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                pointerEvents="none"
+                style={StyleSheet.absoluteFill}
+              />
+              <Ionicons name={action.icon} size={20} color={color} />
+              <Text style={[styles.actionLabel, { color }]}>{action.label}</Text>
+            </Pressable>
+          );
+        })}
       </View>
     </DashboardCard>
   );
 }
-
-const styles = StyleSheet.create({
-  title: {
-    fontFamily: fonts.heading,
-    fontSize: 18,
-    color: colors.cyan300,
-    marginBottom: 12,
-  },
-  actions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  action: {
-    width: '47%',
-    height: 80,
-    borderRadius: 8,
-    borderWidth: 1,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  actionLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    textAlign: 'center',
-    paddingHorizontal: 4,
-  },
-});

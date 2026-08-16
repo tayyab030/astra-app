@@ -1,19 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { PageHeader } from '@/components/PageHeader';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
 import { SelectField } from '@/features/wealth/SelectField';
@@ -43,6 +36,151 @@ function isNoteTab(value: string | undefined): value is NoteTabId {
 }
 
 export function NotesScreen() {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  root: {
+    flex: 1,
+  },
+  scroll: {
+    padding: 24,
+    paddingBottom: 40,
+    gap: 16,
+  },
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  loadingText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  bulkLabel: {
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.slate200,
+    marginBottom: 10,
+  },
+  bulkRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  statsRow: {
+    gap: 10,
+    paddingRight: 8,
+  },
+  statCard: {
+    minWidth: 110,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
+  statLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+  statValue: {
+    marginTop: 4,
+    fontFamily: fonts.heading,
+    fontSize: 18,
+    color: colors.cyan300,
+  },
+  tabs: {
+    gap: 8,
+    paddingRight: 8,
+  },
+  tab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  tabActive: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  tabLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+  },
+  tabActiveLabel: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.white,
+  },
+  toolbar: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    alignItems: 'center',
+  },
+  searchWrap: {
+    flex: 1,
+    minWidth: 180,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    paddingHorizontal: 10,
+    minHeight: 40,
+  },
+  searchInput: {
+    flex: 1,
+    color: colors.white,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    paddingVertical: 8,
+  },
+  filtersRow: {
+    marginTop: 12,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  list: {
+    gap: 12,
+  },
+  emptyTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.slate200,
+    marginBottom: 6,
+  },
+  emptyBody: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+    marginBottom: 14,
+  },
+  errorTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.red300,
+    marginBottom: 12,
+  },
+}));
+
   const router = useRouter();
   const params = useLocalSearchParams<{ tab?: string; action?: string }>();
   const tabParam = Array.isArray(params.tab) ? params.tab[0] : params.tab;
@@ -228,7 +366,7 @@ export function NotesScreen() {
               <Pressable key={tab.id} onPress={() => setActiveTab(tab.id)}>
                 {active ? (
                   <LinearGradient
-                    colors={[colors.cyan500, colors.blue600]}
+                    colors={tokens.accentGradient}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
                     style={styles.tabActive}
@@ -432,146 +570,3 @@ export function NotesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  scroll: {
-    padding: 24,
-    paddingBottom: 40,
-    gap: 16,
-  },
-  loading: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  loadingText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  bulkLabel: {
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.slate200,
-    marginBottom: 10,
-  },
-  bulkRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  statsRow: {
-    gap: 10,
-    paddingRight: 8,
-  },
-  statCard: {
-    minWidth: 110,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-  },
-  statLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  statValue: {
-    marginTop: 4,
-    fontFamily: fonts.heading,
-    fontSize: 18,
-    color: colors.cyan300,
-  },
-  tabs: {
-    gap: 8,
-    paddingRight: 8,
-  },
-  tab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  tabActive: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  tabLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-  },
-  tabActiveLabel: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.white,
-  },
-  toolbar: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    alignItems: 'center',
-  },
-  searchWrap: {
-    flex: 1,
-    minWidth: 180,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    paddingHorizontal: 10,
-    minHeight: 40,
-  },
-  searchInput: {
-    flex: 1,
-    color: colors.white,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    paddingVertical: 8,
-  },
-  filtersRow: {
-    marginTop: 12,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  list: {
-    gap: 12,
-  },
-  emptyTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.slate200,
-    marginBottom: 6,
-  },
-  emptyBody: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-    marginBottom: 14,
-  },
-  errorTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.red300,
-    marginBottom: 12,
-  },
-});

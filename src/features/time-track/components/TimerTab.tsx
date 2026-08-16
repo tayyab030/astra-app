@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
 
@@ -22,6 +23,119 @@ export function TimerTab({
   openAddTask,
   onOpenAddTaskConsumed,
 }: TimerTabProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  root: {
+    gap: 16,
+  },
+  timerBlock: {
+    alignItems: 'center',
+    paddingVertical: 16,
+    gap: 8,
+  },
+  clock: {
+    fontFamily: fonts.headingBold,
+    fontSize: 48,
+    color: colors.cyan300,
+    letterSpacing: 2,
+  },
+  taskName: {
+    fontFamily: fonts.medium,
+    fontSize: 16,
+    color: colors.slate200,
+    textAlign: 'center',
+  },
+  taskMeta: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+  todayTotal: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+    marginTop: 4,
+  },
+  todayTotalValue: {
+    fontFamily: fonts.semibold,
+    color: colors.cyan300,
+  },
+  controls: {
+    marginTop: 16,
+    width: '100%',
+    maxWidth: 220,
+  },
+  secondaryBtn: {
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.6)',
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  secondaryLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+  },
+  addRow: {
+    alignItems: 'flex-end',
+  },
+  sectionTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.white,
+    marginBottom: 12,
+  },
+  empty: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+    textAlign: 'center',
+    paddingVertical: 20,
+  },
+  taskList: {
+    gap: 8,
+  },
+  taskItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.35)',
+    padding: 12,
+  },
+  taskItemSelected: {
+    borderColor: 'rgba(6, 182, 212, 0.5)',
+    backgroundColor: 'rgba(6, 182, 212, 0.1)',
+  },
+  taskItemBody: {
+    flex: 1,
+    gap: 4,
+  },
+  taskItemTitle: {
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.white,
+  },
+  taskItemDuration: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.cyan300,
+  },
+  taskActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+}));
+
   const {
     activeTask,
     activeTimer,
@@ -180,114 +294,3 @@ export function TimerTab({
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    gap: 16,
-  },
-  timerBlock: {
-    alignItems: 'center',
-    paddingVertical: 16,
-    gap: 8,
-  },
-  clock: {
-    fontFamily: fonts.headingBold,
-    fontSize: 48,
-    color: colors.cyan300,
-    letterSpacing: 2,
-  },
-  taskName: {
-    fontFamily: fonts.medium,
-    fontSize: 16,
-    color: colors.slate200,
-    textAlign: 'center',
-  },
-  taskMeta: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  todayTotal: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-    marginTop: 4,
-  },
-  todayTotalValue: {
-    fontFamily: fonts.semibold,
-    color: colors.cyan300,
-  },
-  controls: {
-    marginTop: 16,
-    width: '100%',
-    maxWidth: 220,
-  },
-  secondaryBtn: {
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.6)',
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
-    paddingHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  secondaryLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-  },
-  addRow: {
-    alignItems: 'flex-end',
-  },
-  sectionTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.white,
-    marginBottom: 12,
-  },
-  empty: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-    textAlign: 'center',
-    paddingVertical: 20,
-  },
-  taskList: {
-    gap: 8,
-  },
-  taskItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.35)',
-    padding: 12,
-  },
-  taskItemSelected: {
-    borderColor: 'rgba(6, 182, 212, 0.5)',
-    backgroundColor: 'rgba(6, 182, 212, 0.1)',
-  },
-  taskItemBody: {
-    flex: 1,
-    gap: 4,
-  },
-  taskItemTitle: {
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.white,
-  },
-  taskItemDuration: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.cyan300,
-  },
-  taskActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-});

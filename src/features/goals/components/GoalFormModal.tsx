@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { FormFieldError } from '@/features/wealth/FormFieldError';
 import { FormModal } from '@/features/wealth/FormModal';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
@@ -82,6 +83,105 @@ export function GoalFormModal({
   onDeleteMilestone,
   isSubmitting,
 }: GoalFormModalProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  field: {
+    gap: 6,
+  },
+  half: {
+    flex: 1,
+    minWidth: 140,
+  },
+  row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  label: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.slate200,
+  },
+  hint: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+    marginTop: 2,
+  },
+  input: {
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    paddingHorizontal: 12,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+  },
+  inputError: {
+    borderColor: 'rgba(248, 113, 113, 0.7)',
+  },
+  textarea: {
+    minHeight: 88,
+    paddingTop: 10,
+  },
+  milestonesHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  milestonesHeaderText: {
+    flex: 1,
+  },
+  addMilestone: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+  },
+  addMilestoneText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate300,
+  },
+  milestonesList: {
+    gap: 10,
+    marginTop: 8,
+  },
+  milestoneCard: {
+    gap: 8,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.4)',
+    backgroundColor: 'rgba(15, 23, 42, 0.2)',
+  },
+  removeMilestone: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+  },
+  removeText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.red400,
+  },
+  emptyMilestones: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    fontStyle: 'italic',
+    color: colors.slate500,
+    marginTop: 4,
+  },
+}));
+
   const [isSaving, setIsSaving] = useState(false);
 
   const {
@@ -367,100 +467,3 @@ export function GoalFormModal({
   );
 }
 
-const styles = StyleSheet.create({
-  field: {
-    gap: 6,
-  },
-  half: {
-    flex: 1,
-    minWidth: 140,
-  },
-  row: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  label: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.slate200,
-  },
-  hint: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-    marginTop: 2,
-  },
-  input: {
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    paddingHorizontal: 12,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-  },
-  inputError: {
-    borderColor: 'rgba(248, 113, 113, 0.7)',
-  },
-  textarea: {
-    minHeight: 88,
-    paddingTop: 10,
-  },
-  milestonesHeader: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  milestonesHeaderText: {
-    flex: 1,
-  },
-  addMilestone: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-  },
-  addMilestoneText: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate300,
-  },
-  milestonesList: {
-    gap: 10,
-    marginTop: 8,
-  },
-  milestoneCard: {
-    gap: 8,
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.4)',
-    backgroundColor: 'rgba(15, 23, 42, 0.2)',
-  },
-  removeMilestone: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
-  },
-  removeText: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.red400,
-  },
-  emptyMilestones: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    fontStyle: 'italic',
-    color: colors.slate500,
-    marginTop: 4,
-  },
-});

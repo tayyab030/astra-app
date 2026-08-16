@@ -1,9 +1,10 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { addDays, format, parseISO } from 'date-fns';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { getLocalDateString } from '@/features/health/utils/date';
 
 import type { HabitDayRelative } from '../types/habits.types';
@@ -33,68 +34,8 @@ type HabitDateNavProps = {
 };
 
 export function HabitDateNav({ date, today, relative, onChange }: HabitDateNavProps) {
-  const todayDate = today ?? getLocalDateString();
-  const yesterday = format(addDays(parseISO(todayDate), -1), 'yyyy-MM-dd');
-  const tomorrow = format(addDays(parseISO(todayDate), 1), 'yyyy-MM-dd');
-
-  const shift = (amount: number) => {
-    onChange(format(addDays(parseISO(date), amount), 'yyyy-MM-dd'));
-  };
-
-  return (
-    <View style={styles.wrap}>
-      <View style={styles.nav}>
-        <Pressable style={styles.iconBtn} onPress={() => shift(-1)}>
-          <Ionicons name="chevron-back" size={18} color={colors.slate200} />
-        </Pressable>
-        <View style={styles.center}>
-          <Text style={styles.relative}>{relativeLabel(relative, date)}</Text>
-          <Text style={styles.date}>{format(parseISO(date), 'MMM d, yyyy')}</Text>
-        </View>
-        <Pressable style={styles.iconBtn} onPress={() => shift(1)}>
-          <Ionicons name="chevron-forward" size={18} color={colors.slate200} />
-        </Pressable>
-      </View>
-
-      <View style={styles.quick}>
-        {(
-          [
-            { label: 'Yesterday', value: yesterday },
-            { label: 'Today', value: todayDate },
-            { label: 'Tomorrow', value: tomorrow },
-          ] as const
-        ).map((item) => {
-          const active = date === item.value;
-          if (active) {
-            return (
-              <Pressable key={item.label} onPress={() => onChange(item.value)}>
-                <LinearGradient
-                  colors={[colors.cyan500, colors.blue600]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.quickBtn}
-                >
-                  <Text style={styles.quickActive}>{item.label}</Text>
-                </LinearGradient>
-              </Pressable>
-            );
-          }
-          return (
-            <Pressable
-              key={item.label}
-              style={styles.quickBtn}
-              onPress={() => onChange(item.value)}
-            >
-              <Text style={styles.quickInactive}>{item.label}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
   wrap: {
     gap: 12,
   },
@@ -151,4 +92,66 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.slate300,
   },
-});
+}));
+
+  const todayDate = today ?? getLocalDateString();
+  const yesterday = format(addDays(parseISO(todayDate), -1), 'yyyy-MM-dd');
+  const tomorrow = format(addDays(parseISO(todayDate), 1), 'yyyy-MM-dd');
+
+  const shift = (amount: number) => {
+    onChange(format(addDays(parseISO(date), amount), 'yyyy-MM-dd'));
+  };
+
+  return (
+    <View style={styles.wrap}>
+      <View style={styles.nav}>
+        <Pressable style={styles.iconBtn} onPress={() => shift(-1)}>
+          <Ionicons name="chevron-back" size={18} color={colors.slate200} />
+        </Pressable>
+        <View style={styles.center}>
+          <Text style={styles.relative}>{relativeLabel(relative, date)}</Text>
+          <Text style={styles.date}>{format(parseISO(date), 'MMM d, yyyy')}</Text>
+        </View>
+        <Pressable style={styles.iconBtn} onPress={() => shift(1)}>
+          <Ionicons name="chevron-forward" size={18} color={colors.slate200} />
+        </Pressable>
+      </View>
+
+      <View style={styles.quick}>
+        {(
+          [
+            { label: 'Yesterday', value: yesterday },
+            { label: 'Today', value: todayDate },
+            { label: 'Tomorrow', value: tomorrow },
+          ] as const
+        ).map((item) => {
+          const active = date === item.value;
+          if (active) {
+            return (
+              <Pressable key={item.label} onPress={() => onChange(item.value)}>
+                <LinearGradient
+                  colors={tokens.accentGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.quickBtn}
+                >
+                  <Text style={styles.quickActive}>{item.label}</Text>
+                </LinearGradient>
+              </Pressable>
+            );
+          }
+          return (
+            <Pressable
+              key={item.label}
+              style={styles.quickBtn}
+              onPress={() => onChange(item.value)}
+            >
+              <Text style={styles.quickInactive}>{item.label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+

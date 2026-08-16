@@ -1,12 +1,5 @@
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useRouter } from 'expo-router';
 import { Controller, useForm, useWatch } from 'react-hook-form';
@@ -15,7 +8,8 @@ import { useMutation } from '@tanstack/react-query';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { ROUTES } from '@/constants/routes';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { AUTH, publicApi } from '@/lib/api';
 import {
   collectApiErrorMessages,
@@ -40,242 +34,8 @@ type ForgotResponse = {
 };
 
 export function ForgotPasswordForm() {
-  const router = useRouter();
-  const [toast, setToast] = useState<ToastState | null>(null);
-  const [focused, setFocused] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [linkSent, setLinkSent] = useState(true);
-  const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ForgotPasswordType>({
-    resolver: zodResolver(schema),
-    defaultValues: { email: '' },
-  });
-
-  const email = useWatch({ control, name: 'email', defaultValue: '' });
-
-  const showToast = (type: ToastState['type'], message: string) => {
-    setToast({ type, message });
-  };
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: async (data: ForgotPasswordType) => {
-      const response = await publicApi.post(AUTH.FORGOT_PASSWORD, data);
-      return response.data as ForgotResponse;
-    },
-    onSuccess: (data) => {
-      if (typeof data?.reset_token === 'string' && data.reset_token.length > 0) {
-        showToast('success', data.message || 'Continue to set a new password.');
-        router.push({
-          pathname: ROUTES.AUTH.RESET_PASSWORD,
-          params: { token: data.reset_token },
-        });
-        return;
-      }
-
-      setIsSubmitted(true);
-      setLinkSent(data?.sent !== false);
-      setRemainingSeconds(
-        typeof data?.remaining_time_seconds === 'number'
-          ? data.remaining_time_seconds
-          : null,
-      );
-
-      if (data?.sent === false) {
-        showToast(
-          'success',
-          data?.message || 'Your recovery link is still valid. Check your inbox.',
-        );
-      } else {
-        showToast('success', data?.message || 'Recovery link sent');
-      }
-    },
-    onError: (error: unknown) => {
-      showToast(
-        'error',
-        collectApiErrorMessages(
-          error,
-          'Failed to send recovery link. Please try again.',
-        ),
-      );
-    },
-  });
-
-  return (
-    <GlassCard>
-      <View style={styles.header}>
-        <Text style={styles.title}>Neural Recovery</Text>
-        <Text style={styles.description}>
-          {isSubmitted
-            ? linkSent
-              ? 'Recovery link transmitted'
-              : 'Recovery link still active'
-            : 'Reset your neural pathway'}
-        </Text>
-      </View>
-
-      <View style={styles.content}>
-        {toast ? (
-          <View
-            style={[
-              styles.toast,
-              toast.type === 'error' ? styles.toastError : styles.toastSuccess,
-            ]}
-          >
-            <Text style={styles.toastText}>{toast.message}</Text>
-          </View>
-        ) : null}
-
-        {!isSubmitted ? (
-          <>
-            <Text style={styles.copy}>
-              Enter your registered neural address and we'll send you a secure
-              recovery link to restore access to your ASTRA Life OS.
-            </Text>
-
-            <View style={styles.form}>
-              <View style={styles.field}>
-                <Text style={styles.label}>Neural Address</Text>
-                <Controller
-                  control={control}
-                  name="email"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <TextInput
-                      value={value}
-                      onChangeText={onChange}
-                      onFocus={() => setFocused(true)}
-                      onBlur={() => {
-                        onBlur();
-                        setFocused(false);
-                      }}
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                      autoComplete="email"
-                      keyboardType="email-address"
-                      placeholder="neural@astra.ai"
-                      placeholderTextColor={colors.slate400}
-                      selectionColor={colors.cyan400}
-                      underlineColorAndroid="transparent"
-                      style={[styles.input, focused && styles.inputFocused]}
-                    />
-                  )}
-                />
-                {errors.email ? (
-                  <Text style={styles.error}>{errors.email.message}</Text>
-                ) : null}
-              </View>
-
-              <Pressable
-                onPress={handleSubmit((data) => mutate(data))}
-                disabled={isPending}
-                style={({ pressed }) => [
-                  styles.submitWrap,
-                  pressed && styles.pressed,
-                  isPending && styles.disabled,
-                ]}
-              >
-                <LinearGradient
-                  colors={[colors.cyan600, colors.blue600]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.submit}
-                >
-                  {isPending ? (
-                    <View style={styles.row}>
-                      <ActivityIndicator size="small" color={colors.white} />
-                      <Text style={styles.submitText}>Transmitting...</Text>
-                    </View>
-                  ) : (
-                    <View style={styles.row}>
-                      <Ionicons name="mail-outline" size={16} color={colors.white} />
-                      <Text style={styles.submitText}>Send Recovery Link</Text>
-                    </View>
-                  )}
-                </LinearGradient>
-              </Pressable>
-            </View>
-          </>
-        ) : (
-          <View style={styles.successBlock}>
-            <LinearGradient
-              colors={
-                linkSent
-                  ? [colors.cyan600, colors.blue600]
-                  : ['#f59e0b', '#ea580c']
-              }
-              style={styles.successIcon}
-            >
-              <Ionicons
-                name={linkSent ? 'mail-outline' : 'time-outline'}
-                size={28}
-                color={colors.white}
-              />
-            </LinearGradient>
-            <Text style={styles.successTitle}>
-              {linkSent ? 'Recovery Link Sent' : 'Recovery Link Still Valid'}
-            </Text>
-            <Text style={styles.successCopy}>
-              {linkSent ? (
-                <>
-                  We've transmitted a secure recovery link to{' '}
-                  <Text style={styles.linkInline}>{email}</Text>. Check your
-                  neural inbox and follow the instructions to restore access.
-                </>
-              ) : (
-                <>
-                  A recovery link was already sent to{' '}
-                  <Text style={styles.linkInline}>{email}</Text> and is still
-                  active
-                  {remainingSeconds !== null ? (
-                    <>
-                      {' '}
-                      for{' '}
-                      <Text style={styles.amber}>
-                        {formatCountdown(remainingSeconds)}
-                      </Text>
-                    </>
-                  ) : null}
-                  . Check your inbox and use the existing link.
-                </>
-              )}
-            </Text>
-          </View>
-        )}
-
-        <View style={styles.footer}>
-          <Link href={ROUTES.AUTH.LOGIN} asChild>
-            <Pressable>
-              {({ pressed }) => (
-                <View style={styles.backRow}>
-                  <Ionicons
-                    name="arrow-back"
-                    size={16}
-                    color={pressed ? colors.cyan300 : colors.cyan400}
-                  />
-                  <Text style={[styles.link, pressed && styles.linkPressed]}>
-                    Back to Login
-                  </Text>
-                </View>
-              )}
-            </Pressable>
-          </Link>
-          <Text style={styles.footerText}>
-            New to ASTRA?{' '}
-            <Link href={ROUTES.AUTH.SIGNUP} asChild>
-              <Text style={styles.link}>Create neural profile</Text>
-            </Link>
-          </Text>
-        </View>
-      </View>
-    </GlassCard>
-  );
-}
-
-const styles = StyleSheet.create({
+  const { tokens, colors } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
   header: {
     alignItems: 'center',
     paddingHorizontal: 24,
@@ -436,4 +196,239 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: 0.5,
   },
-});
+}));
+
+  const router = useRouter();
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const [focused, setFocused] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [linkSent, setLinkSent] = useState(true);
+  const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ForgotPasswordType>({
+    resolver: zodResolver(schema),
+    defaultValues: { email: '' },
+  });
+
+  const email = useWatch({ control, name: 'email', defaultValue: '' });
+
+  const showToast = (type: ToastState['type'], message: string) => {
+    setToast({ type, message });
+  };
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (data: ForgotPasswordType) => {
+      const response = await publicApi.post(AUTH.FORGOT_PASSWORD, data);
+      return response.data as ForgotResponse;
+    },
+    onSuccess: (data) => {
+      if (typeof data?.reset_token === 'string' && data.reset_token.length > 0) {
+        showToast('success', data.message || 'Continue to set a new password.');
+        router.push({
+          pathname: ROUTES.AUTH.RESET_PASSWORD,
+          params: { token: data.reset_token },
+        });
+        return;
+      }
+
+      setIsSubmitted(true);
+      setLinkSent(data?.sent !== false);
+      setRemainingSeconds(
+        typeof data?.remaining_time_seconds === 'number'
+          ? data.remaining_time_seconds
+          : null,
+      );
+
+      if (data?.sent === false) {
+        showToast(
+          'success',
+          data?.message || 'Your recovery link is still valid. Check your inbox.',
+        );
+      } else {
+        showToast('success', data?.message || 'Recovery link sent');
+      }
+    },
+    onError: (error: unknown) => {
+      showToast(
+        'error',
+        collectApiErrorMessages(
+          error,
+          'Failed to send recovery link. Please try again.',
+        ),
+      );
+    },
+  });
+
+  return (
+    <GlassCard>
+      <View style={styles.header}>
+        <Text style={styles.title}>Neural Recovery</Text>
+        <Text style={styles.description}>
+          {isSubmitted
+            ? linkSent
+              ? 'Recovery link transmitted'
+              : 'Recovery link still active'
+            : 'Reset your neural pathway'}
+        </Text>
+      </View>
+
+      <View style={styles.content}>
+        {toast ? (
+          <View
+            style={[
+              styles.toast,
+              toast.type === 'error' ? styles.toastError : styles.toastSuccess,
+            ]}
+          >
+            <Text style={styles.toastText}>{toast.message}</Text>
+          </View>
+        ) : null}
+
+        {!isSubmitted ? (
+          <>
+            <Text style={styles.copy}>
+              Enter your registered neural address and we'll send you a secure
+              recovery link to restore access to your ASTRA Life OS.
+            </Text>
+
+            <View style={styles.form}>
+              <View style={styles.field}>
+                <Text style={styles.label}>Neural Address</Text>
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      value={value}
+                      onChangeText={onChange}
+                      onFocus={() => setFocused(true)}
+                      onBlur={() => {
+                        onBlur();
+                        setFocused(false);
+                      }}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      autoComplete="email"
+                      keyboardType="email-address"
+                      placeholder="neural@astra.ai"
+                      placeholderTextColor={colors.slate400}
+                      selectionColor={colors.cyan400}
+                      underlineColorAndroid="transparent"
+                      style={[styles.input, focused && styles.inputFocused]}
+                    />
+                  )}
+                />
+                {errors.email ? (
+                  <Text style={styles.error}>{errors.email.message}</Text>
+                ) : null}
+              </View>
+
+              <Pressable
+                onPress={handleSubmit((data) => mutate(data))}
+                disabled={isPending}
+                style={({ pressed }) => [
+                  styles.submitWrap,
+                  pressed && styles.pressed,
+                  isPending && styles.disabled,
+                ]}
+              >
+                <LinearGradient
+                  colors={tokens.accentGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.submit}
+                >
+                  {isPending ? (
+                    <View style={styles.row}>
+                      <ActivityIndicator size="small" color={colors.white} />
+                      <Text style={styles.submitText}>Transmitting...</Text>
+                    </View>
+                  ) : (
+                    <View style={styles.row}>
+                      <Ionicons name="mail-outline" size={16} color={colors.white} />
+                      <Text style={styles.submitText}>Send Recovery Link</Text>
+                    </View>
+                  )}
+                </LinearGradient>
+              </Pressable>
+            </View>
+          </>
+        ) : (
+          <View style={styles.successBlock}>
+            <LinearGradient
+              colors={
+                linkSent
+                  ? [colors.cyan600, colors.blue600]
+                  : ['#f59e0b', '#ea580c']
+              }
+              style={styles.successIcon}
+            >
+              <Ionicons
+                name={linkSent ? 'mail-outline' : 'time-outline'}
+                size={28}
+                color={colors.white}
+              />
+            </LinearGradient>
+            <Text style={styles.successTitle}>
+              {linkSent ? 'Recovery Link Sent' : 'Recovery Link Still Valid'}
+            </Text>
+            <Text style={styles.successCopy}>
+              {linkSent ? (
+                <>
+                  We've transmitted a secure recovery link to{' '}
+                  <Text style={styles.linkInline}>{email}</Text>. Check your
+                  neural inbox and follow the instructions to restore access.
+                </>
+              ) : (
+                <>
+                  A recovery link was already sent to{' '}
+                  <Text style={styles.linkInline}>{email}</Text> and is still
+                  active
+                  {remainingSeconds !== null ? (
+                    <>
+                      {' '}
+                      for{' '}
+                      <Text style={styles.amber}>
+                        {formatCountdown(remainingSeconds)}
+                      </Text>
+                    </>
+                  ) : null}
+                  . Check your inbox and use the existing link.
+                </>
+              )}
+            </Text>
+          </View>
+        )}
+
+        <View style={styles.footer}>
+          <Link href={ROUTES.AUTH.LOGIN} asChild>
+            <Pressable>
+              {({ pressed }) => (
+                <View style={styles.backRow}>
+                  <Ionicons
+                    name="arrow-back"
+                    size={16}
+                    color={pressed ? colors.cyan300 : colors.cyan400}
+                  />
+                  <Text style={[styles.link, pressed && styles.linkPressed]}>
+                    Back to Login
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          </Link>
+          <Text style={styles.footerText}>
+            New to ASTRA?{' '}
+            <Link href={ROUTES.AUTH.SIGNUP} asChild>
+              <Text style={styles.link}>Create neural profile</Text>
+            </Link>
+          </Text>
+        </View>
+      </View>
+    </GlassCard>
+  );
+}

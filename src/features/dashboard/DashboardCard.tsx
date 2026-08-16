@@ -4,6 +4,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { BlurTargetContext } from '@/features/auth/GlassCard';
+import { useAppTheme } from '@/features/theme/AppThemeProvider';
 
 type DashboardCardProps = {
   children: ReactNode;
@@ -14,30 +15,35 @@ type DashboardCardProps = {
 
 export function DashboardCard({
   children,
-  borderColor = 'rgba(71, 85, 105, 0.5)',
+  borderColor,
   shadowColor,
   style,
 }: DashboardCardProps) {
   const blurTarget = useContext(BlurTargetContext);
+  const { tokens } = useAppTheme();
 
   return (
     <BlurView
       intensity={40}
-      tint="dark"
+      tint={tokens.blurTint}
       blurMethod="dimezisBlurViewSdk31Plus"
       blurTarget={blurTarget ?? undefined}
       style={[
         styles.card,
-        { borderColor, shadowColor: shadowColor ?? 'transparent' },
+        {
+          borderColor: borderColor ?? tokens.border,
+          shadowColor: shadowColor ?? (tokens.fxOpacity > 0 ? tokens.glowPrimary : 'transparent'),
+          backgroundColor: tokens.card,
+        },
         style,
       ]}
     >
       <LinearGradient
-        colors={['rgba(30, 41, 59, 0.5)', 'rgba(51, 65, 85, 0.5)']}
+        colors={[tokens.secondary, tokens.muted]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         pointerEvents="none"
-        style={StyleSheet.absoluteFill}
+        style={[StyleSheet.absoluteFill, { opacity: tokens.isDark ? 0.5 : 0.35 }]}
       />
       {children}
     </BlurView>
@@ -50,7 +56,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     padding: 16,
-    backgroundColor: 'rgba(30, 41, 59, 0.4)',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.15,
     shadowRadius: 20,

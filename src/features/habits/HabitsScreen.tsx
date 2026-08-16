@@ -1,20 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { InsightHorizonBadge } from '@/components/insights/InsightHorizonBadge';
 import { PageHeader } from '@/components/PageHeader';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { useDashboard } from '@/features/dashboard/hooks/useDashboard';
 import { FormModal } from '@/features/wealth/FormModal';
@@ -46,6 +38,185 @@ function shouldPromptDelayReason(habit: Habit, today: string, selectedDate: stri
 }
 
 export function HabitsScreen() {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  root: {
+    flex: 1,
+  },
+  scroll: {
+    padding: 24,
+    paddingBottom: 40,
+    gap: 16,
+  },
+  summaryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  summaryPress: {
+    width: '47%',
+    flexGrow: 1,
+    minWidth: 140,
+  },
+  summaryCard: {
+    flex: 1,
+  },
+  summaryTitle: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.cyan300,
+    marginBottom: 8,
+  },
+  summaryValue: {
+    fontFamily: fonts.headingBold,
+    fontSize: 22,
+    color: colors.cyan300,
+  },
+  summarySubtitle: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+    marginTop: 4,
+  },
+  tabs: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(71, 85, 105, 0.5)',
+  },
+  tab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabActive: {
+    borderBottomColor: colors.cyan400,
+  },
+  tabText: {
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.slate400,
+  },
+  tabTextActive: {
+    color: colors.cyan300,
+  },
+  tabBadge: {
+    minWidth: 20,
+    height: 20,
+    borderRadius: 999,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(71, 85, 105, 0.5)',
+  },
+  tabBadgeActive: {
+    backgroundColor: colors.cyan600,
+  },
+  tabBadgeText: {
+    fontFamily: fonts.medium,
+    fontSize: 11,
+    color: colors.white,
+  },
+  list: {
+    gap: 12,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    gap: 8,
+  },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+    minWidth: 0,
+  },
+  sectionTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.cyan300,
+    flexShrink: 1,
+  },
+  sectionCount: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    color: colors.slate300,
+    backgroundColor: 'rgba(51, 65, 85, 0.5)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  sectionBody: {
+    gap: 10,
+  },
+  loading: {
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+  field: {
+    gap: 6,
+  },
+  label: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.slate200,
+  },
+  input: {
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    paddingHorizontal: 12,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+  },
+  textarea: {
+    minHeight: 96,
+    paddingTop: 10,
+  },
+  insightHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  insightTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.cyan300,
+  },
+  insightItem: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.3)',
+    backgroundColor: 'rgba(6, 182, 212, 0.12)',
+    padding: 12,
+    gap: 8,
+    marginBottom: 10,
+  },
+  insightText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate200,
+    lineHeight: 18,
+  },
+  skeleton: {
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: 'rgba(51, 65, 85, 0.45)',
+    marginBottom: 10,
+  },
+}));
+
   const router = useRouter();
   const { action } = useLocalSearchParams<{ action?: string }>();
   const { user } = useSession();
@@ -607,180 +778,3 @@ export function HabitsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  scroll: {
-    padding: 24,
-    paddingBottom: 40,
-    gap: 16,
-  },
-  summaryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  summaryPress: {
-    width: '47%',
-    flexGrow: 1,
-    minWidth: 140,
-  },
-  summaryCard: {
-    flex: 1,
-  },
-  summaryTitle: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.cyan300,
-    marginBottom: 8,
-  },
-  summaryValue: {
-    fontFamily: fonts.headingBold,
-    fontSize: 22,
-    color: colors.cyan300,
-  },
-  summarySubtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-    marginTop: 4,
-  },
-  tabs: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(71, 85, 105, 0.5)',
-  },
-  tab: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  tabActive: {
-    borderBottomColor: colors.cyan400,
-  },
-  tabText: {
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.slate400,
-  },
-  tabTextActive: {
-    color: colors.cyan300,
-  },
-  tabBadge: {
-    minWidth: 20,
-    height: 20,
-    borderRadius: 999,
-    paddingHorizontal: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(71, 85, 105, 0.5)',
-  },
-  tabBadgeActive: {
-    backgroundColor: colors.cyan600,
-  },
-  tabBadgeText: {
-    fontFamily: fonts.medium,
-    fontSize: 11,
-    color: colors.white,
-  },
-  list: {
-    gap: 12,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-    gap: 8,
-  },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flex: 1,
-    minWidth: 0,
-  },
-  sectionTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.cyan300,
-    flexShrink: 1,
-  },
-  sectionCount: {
-    fontFamily: fonts.medium,
-    fontSize: 12,
-    color: colors.slate300,
-    backgroundColor: 'rgba(51, 65, 85, 0.5)',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  sectionBody: {
-    gap: 10,
-  },
-  loading: {
-    paddingVertical: 40,
-    alignItems: 'center',
-  },
-  field: {
-    gap: 6,
-  },
-  label: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.slate200,
-  },
-  input: {
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    paddingHorizontal: 12,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-  },
-  textarea: {
-    minHeight: 96,
-    paddingTop: 10,
-  },
-  insightHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
-  insightTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.cyan300,
-  },
-  insightItem: {
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(6, 182, 212, 0.3)',
-    backgroundColor: 'rgba(6, 182, 212, 0.12)',
-    padding: 12,
-    gap: 8,
-    marginBottom: 10,
-  },
-  insightText: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate200,
-    lineHeight: 18,
-  },
-  skeleton: {
-    height: 48,
-    borderRadius: 8,
-    backgroundColor: 'rgba(51, 65, 85, 0.45)',
-    marginBottom: 10,
-  },
-});

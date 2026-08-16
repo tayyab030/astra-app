@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 
 import { WEEKDAY_OPTIONS } from '../types/habits.types';
 
@@ -12,55 +13,8 @@ type WeekdayPickerProps = {
 };
 
 export function WeekdayPicker({ value, onChange, disabled }: WeekdayPickerProps) {
-  const toggle = (day: number) => {
-    if (value.includes(day)) {
-      onChange(value.filter((item) => item !== day));
-    } else {
-      onChange([...value, day].sort((a, b) => a - b));
-    }
-  };
-
-  return (
-    <View style={styles.wrap}>
-      <View style={styles.row}>
-        {WEEKDAY_OPTIONS.map((day) => {
-          const active = value.includes(day.value);
-          if (active) {
-            return (
-              <Pressable
-                key={day.value}
-                disabled={disabled}
-                onPress={() => toggle(day.value)}
-              >
-                <LinearGradient
-                  colors={[colors.cyan500, colors.blue600]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.chip}
-                >
-                  <Text style={styles.chipActive}>{day.label}</Text>
-                </LinearGradient>
-              </Pressable>
-            );
-          }
-          return (
-            <Pressable
-              key={day.value}
-              disabled={disabled}
-              onPress={() => toggle(day.value)}
-              style={styles.chip}
-            >
-              <Text style={styles.chipInactive}>{day.label}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
-      <Text style={styles.hint}>Habit repeats on the selected days each week.</Text>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
   wrap: {
     gap: 8,
   },
@@ -91,4 +45,53 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.slate400,
   },
-});
+}));
+
+  const toggle = (day: number) => {
+    if (value.includes(day)) {
+      onChange(value.filter((item) => item !== day));
+    } else {
+      onChange([...value, day].sort((a, b) => a - b));
+    }
+  };
+
+  return (
+    <View style={styles.wrap}>
+      <View style={styles.row}>
+        {WEEKDAY_OPTIONS.map((day) => {
+          const active = value.includes(day.value);
+          if (active) {
+            return (
+              <Pressable
+                key={day.value}
+                disabled={disabled}
+                onPress={() => toggle(day.value)}
+              >
+                <LinearGradient
+                  colors={tokens.accentGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.chip}
+                >
+                  <Text style={styles.chipActive}>{day.label}</Text>
+                </LinearGradient>
+              </Pressable>
+            );
+          }
+          return (
+            <Pressable
+              key={day.value}
+              disabled={disabled}
+              onPress={() => toggle(day.value)}
+              style={styles.chip}
+            >
+              <Text style={styles.chipInactive}>{day.label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      <Text style={styles.hint}>Habit repeats on the selected days each week.</Text>
+    </View>
+  );
+}
+

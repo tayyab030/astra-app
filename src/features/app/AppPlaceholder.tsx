@@ -1,9 +1,28 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 
 export function AppPlaceholder({ title }: { title: string }) {
+  const styles = useThemedStyles((colors) => ({
+    wrap: {
+      flex: 1,
+      padding: 24,
+      gap: 16,
+    },
+    title: {
+      fontFamily: fonts.headingBold,
+      fontSize: 30,
+      color: colors.cyan300,
+    },
+    body: {
+      fontFamily: fonts.regular,
+      fontSize: 16,
+      color: colors.slate300,
+    },
+  }));
+
   return (
     <View style={styles.wrap}>
       <Text style={styles.title}>{title}</Text>
@@ -13,21 +32,3 @@ export function AppPlaceholder({ title }: { title: string }) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrap: {
-    flex: 1,
-    padding: 24,
-    gap: 16,
-  },
-  title: {
-    fontFamily: fonts.headingBold,
-    fontSize: 30,
-    color: colors.cyan300,
-  },
-  body: {
-    fontFamily: fonts.regular,
-    fontSize: 16,
-    color: colors.slate300,
-  },
-});

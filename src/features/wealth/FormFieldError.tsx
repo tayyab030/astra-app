@@ -1,16 +1,18 @@
-import { StyleSheet, Text } from 'react-native';
+import { Text } from 'react-native';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 
 export function FormFieldError({ message }: { message?: string }) {
-  if (!message) return null;
-  return <Text style={styles.error}>{message}</Text>;
-}
-
-const styles = StyleSheet.create({
+  const styles = useThemedStyles((colors, tokens) => ({
   error: {
     fontFamily: fonts.regular,
     fontSize: 14,
     color: colors.red400,
   },
-});
+}));
+
+  if (!message) return null;
+  return <Text style={styles.error}>{message}</Text>;
+}
+

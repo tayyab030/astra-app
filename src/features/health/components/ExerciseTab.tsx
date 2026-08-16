@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { FormFieldError } from '@/features/wealth/FormFieldError';
 import { FormModal } from '@/features/wealth/FormModal';
@@ -21,6 +22,74 @@ export function ExerciseTab({
   openLogWorkout = false,
   onOpenLogWorkoutConsumed,
 }: ExerciseTabProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  wrap: {
+    gap: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 12,
+  },
+  title: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.cyan300,
+    flex: 1,
+  },
+  list: {
+    gap: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(51, 65, 85, 0.3)',
+    padding: 12,
+  },
+  rowInfo: {
+    gap: 4,
+  },
+  rowRight: {
+    alignItems: 'flex-end',
+    gap: 4,
+  },
+  rowTitle: {
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.slate200,
+  },
+  rowMeta: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+  field: {
+    gap: 6,
+  },
+  fieldLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate300,
+  },
+  input: {
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    paddingHorizontal: 12,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+  },
+}));
+
   const { workouts, createWorkout, isSaving } = useHealthContext();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [type, setType] = useState('');
@@ -149,69 +218,3 @@ export function ExerciseTab({
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    gap: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    marginBottom: 12,
-  },
-  title: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.cyan300,
-    flex: 1,
-  },
-  list: {
-    gap: 10,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(51, 65, 85, 0.3)',
-    padding: 12,
-  },
-  rowInfo: {
-    gap: 4,
-  },
-  rowRight: {
-    alignItems: 'flex-end',
-    gap: 4,
-  },
-  rowTitle: {
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.slate200,
-  },
-  rowMeta: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  field: {
-    gap: 6,
-  },
-  fieldLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate300,
-  },
-  input: {
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    paddingHorizontal: 12,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-  },
-});

@@ -1,16 +1,11 @@
 import { useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { addDays, addMonths, format, parseISO } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { SelectField } from '@/features/wealth/SelectField';
 import { fetchTimeTrackDashboard } from '@/lib/api/timeTrack';
@@ -58,6 +53,104 @@ function buildMonthOptions(selectedMonth: string) {
 }
 
 export function PatternsTab() {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  root: {
+    gap: 16,
+  },
+  label: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+    marginBottom: 8,
+  },
+  modes: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.35)',
+  },
+  chipActive: {
+    borderColor: 'rgba(167, 139, 250, 0.55)',
+    backgroundColor: 'rgba(167, 139, 250, 0.18)',
+  },
+  chipLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+  },
+  chipLabelActive: {
+    color: '#c4b5fd',
+  },
+  periodNav: {
+    marginTop: 16,
+  },
+  navRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  iconBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
+  },
+  periodValue: {
+    flex: 1,
+    textAlign: 'center',
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.white,
+  },
+  selectWrap: {
+    flex: 1,
+  },
+  description: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+  },
+  loading: {
+    minHeight: 160,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  loadingText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+  },
+  stats: {
+    gap: 12,
+  },
+  statCard: {
+    gap: 6,
+  },
+  statLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+  statValue: {
+    fontFamily: fonts.headingBold,
+    fontSize: 20,
+    color: colors.white,
+  },
+}));
+
   const [mode, setMode] = useState<PatternViewMode>('day');
   const [selectedDay, setSelectedDay] = useState(getTodayString);
   const [selectedMonth, setSelectedMonth] = useState(() => format(new Date(), 'yyyy-MM'));
@@ -216,99 +309,3 @@ export function PatternsTab() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    gap: 16,
-  },
-  label: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-    marginBottom: 8,
-  },
-  modes: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.35)',
-  },
-  chipActive: {
-    borderColor: 'rgba(167, 139, 250, 0.55)',
-    backgroundColor: 'rgba(167, 139, 250, 0.18)',
-  },
-  chipLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-  },
-  chipLabelActive: {
-    color: '#c4b5fd',
-  },
-  periodNav: {
-    marginTop: 16,
-  },
-  navRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  iconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(15, 23, 42, 0.4)',
-  },
-  periodValue: {
-    flex: 1,
-    textAlign: 'center',
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.white,
-  },
-  selectWrap: {
-    flex: 1,
-  },
-  description: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-  },
-  loading: {
-    minHeight: 160,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-  },
-  loadingText: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-  },
-  stats: {
-    gap: 12,
-  },
-  statCard: {
-    gap: 6,
-  },
-  statLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  statValue: {
-    fontFamily: fonts.headingBold,
-    fontSize: 20,
-    color: colors.white,
-  },
-});

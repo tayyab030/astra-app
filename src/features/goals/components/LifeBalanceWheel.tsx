@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import type { Goal } from '@/lib/api/goals';
 
@@ -15,72 +16,8 @@ type LifeBalanceWheelProps = {
 };
 
 export function LifeBalanceWheel({ goals, isLoading }: LifeBalanceWheelProps) {
-  const categories = useMemo(() => buildLifeBalanceFromGoals(goals), [goals]);
-  const summary = useMemo(
-    () => getLifeBalanceSummary(categories, goals.length),
-    [categories, goals.length],
-  );
-
-  return (
-    <DashboardCard>
-      <View style={styles.header}>
-        <Ionicons name="pie-chart-outline" size={18} color={colors.cyan400} />
-        <Text style={styles.title}>Life Balance</Text>
-      </View>
-      <Text style={styles.description}>
-        {isLoading
-          ? 'Loading your goal balance…'
-          : goals.length === 0
-            ? 'Add goals to see how your focus is spread across life areas.'
-            : `Average progress across ${goals.length} goal${goals.length === 1 ? '' : 's'} · ${summary.overallProgress}% overall`}
-      </Text>
-
-      {isLoading ? (
-        <ActivityIndicator color={colors.cyan400} style={{ marginVertical: 16 }} />
-      ) : (
-        <View style={styles.list}>
-          {categories.map((category) => (
-            <View key={category.category} style={styles.row}>
-              <View style={styles.rowHeader}>
-                <View style={styles.nameRow}>
-                  <Ionicons
-                    name={CATEGORY_ICONS[category.category]}
-                    size={14}
-                    color={CATEGORY_BAR_COLORS[category.category]}
-                  />
-                  <Text style={styles.name}>{category.name}</Text>
-                  <Text style={styles.count}>
-                    {category.goalCount === 0
-                      ? 'No goals'
-                      : `${category.goalCount} goal${category.goalCount === 1 ? '' : 's'}`}
-                  </Text>
-                </View>
-                <Text style={styles.percent}>{category.value}%</Text>
-              </View>
-              <View style={styles.track}>
-                <View
-                  style={[
-                    styles.fill,
-                    {
-                      width: `${category.value}%`,
-                      backgroundColor: CATEGORY_BAR_COLORS[category.category],
-                    },
-                  ]}
-                />
-              </View>
-            </View>
-          ))}
-
-          {goals.length > 0 && summary.insight ? (
-            <Text style={styles.insight}>{summary.insight}</Text>
-          ) : null}
-        </View>
-      )}
-    </DashboardCard>
-  );
-}
-
-const styles = StyleSheet.create({
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -152,4 +89,70 @@ const styles = StyleSheet.create({
     color: colors.slate400,
     lineHeight: 17,
   },
-});
+}));
+
+  const categories = useMemo(() => buildLifeBalanceFromGoals(goals), [goals]);
+  const summary = useMemo(
+    () => getLifeBalanceSummary(categories, goals.length),
+    [categories, goals.length],
+  );
+
+  return (
+    <DashboardCard>
+      <View style={styles.header}>
+        <Ionicons name="pie-chart-outline" size={18} color={colors.cyan400} />
+        <Text style={styles.title}>Life Balance</Text>
+      </View>
+      <Text style={styles.description}>
+        {isLoading
+          ? 'Loading your goal balance…'
+          : goals.length === 0
+            ? 'Add goals to see how your focus is spread across life areas.'
+            : `Average progress across ${goals.length} goal${goals.length === 1 ? '' : 's'} · ${summary.overallProgress}% overall`}
+      </Text>
+
+      {isLoading ? (
+        <ActivityIndicator color={colors.cyan400} style={{ marginVertical: 16 }} />
+      ) : (
+        <View style={styles.list}>
+          {categories.map((category) => (
+            <View key={category.category} style={styles.row}>
+              <View style={styles.rowHeader}>
+                <View style={styles.nameRow}>
+                  <Ionicons
+                    name={CATEGORY_ICONS[category.category]}
+                    size={14}
+                    color={CATEGORY_BAR_COLORS[category.category]}
+                  />
+                  <Text style={styles.name}>{category.name}</Text>
+                  <Text style={styles.count}>
+                    {category.goalCount === 0
+                      ? 'No goals'
+                      : `${category.goalCount} goal${category.goalCount === 1 ? '' : 's'}`}
+                  </Text>
+                </View>
+                <Text style={styles.percent}>{category.value}%</Text>
+              </View>
+              <View style={styles.track}>
+                <View
+                  style={[
+                    styles.fill,
+                    {
+                      width: `${category.value}%`,
+                      backgroundColor: CATEGORY_BAR_COLORS[category.category],
+                    },
+                  ]}
+                />
+              </View>
+            </View>
+          ))}
+
+          {goals.length > 0 && summary.insight ? (
+            <Text style={styles.insight}>{summary.insight}</Text>
+          ) : null}
+        </View>
+      )}
+    </DashboardCard>
+  );
+}
+

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { useCurrency } from '@/hooks/useCurrency';
 import type { WealthDashboard, WealthTransaction } from '@/lib/api/wealth';
 
@@ -13,6 +14,48 @@ type SpendingTrendChartProps = {
 };
 
 export function SpendingTrendChart({ transactions, filter }: SpendingTrendChartProps) {
+  const styles = useThemedStyles((colors, tokens) => ({
+  empty: {
+    height: 256,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+  },
+  chart: {
+    minHeight: 220,
+  },
+  bars: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: 8,
+    minHeight: 200,
+  },
+  barCol: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 6,
+  },
+  bar: {
+    borderRadius: 4,
+    backgroundColor: colors.cyan400,
+  },
+  barValue: {
+    fontFamily: fonts.regular,
+    fontSize: 10,
+    color: colors.slate400,
+  },
+  barLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 10,
+    color: colors.slate400,
+  },
+}));
+
   const { formatCurrency } = useCurrency();
   const data = buildSpendingTrendData(transactions, filter);
   const [width, setWidth] = useState(0);
@@ -55,44 +98,3 @@ export function SpendingTrendChart({ transactions, filter }: SpendingTrendChartP
   );
 }
 
-const styles = StyleSheet.create({
-  empty: {
-    height: 256,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-  },
-  chart: {
-    minHeight: 220,
-  },
-  bars: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    gap: 8,
-    minHeight: 200,
-  },
-  barCol: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 6,
-  },
-  bar: {
-    borderRadius: 4,
-    backgroundColor: colors.cyan400,
-  },
-  barValue: {
-    fontFamily: fonts.regular,
-    fontSize: 10,
-    color: colors.slate400,
-  },
-  barLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 10,
-    color: colors.slate400,
-  },
-});

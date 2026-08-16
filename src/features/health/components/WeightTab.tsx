@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { FormFieldError } from '@/features/wealth/FormFieldError';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
@@ -21,6 +22,92 @@ import { HealthPeriodFilterBar } from './HealthPeriodFilterBar';
 import { HealthTrendList } from './HealthTrendList';
 
 export function WeightTab() {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  wrap: {
+    gap: 16,
+  },
+  cardTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.cyan300,
+    marginBottom: 12,
+  },
+  metaLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+    marginTop: 4,
+  },
+  bigValue: {
+    fontFamily: fonts.headingBold,
+    fontSize: 28,
+    marginBottom: 8,
+  },
+  midValue: {
+    fontFamily: fonts.headingBold,
+    fontSize: 22,
+    marginBottom: 8,
+  },
+  badge: {
+    alignSelf: 'flex-start',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginBottom: 8,
+  },
+  badgeText: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+  },
+  delta: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    marginBottom: 4,
+  },
+  metaHint: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+    marginTop: 8,
+  },
+  fieldLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+    marginTop: 12,
+    marginBottom: 6,
+  },
+  input: {
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    paddingHorizontal: 12,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+    marginTop: 10,
+  },
+  inputDisabled: {
+    opacity: 0.5,
+  },
+  heightRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  half: {
+    flex: 1,
+  },
+  clearLink: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+    marginTop: 8,
+  },
+}));
+
   const {
     profile,
     latestWeight,
@@ -259,87 +346,3 @@ export function WeightTab() {
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    gap: 16,
-  },
-  cardTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.cyan300,
-    marginBottom: 12,
-  },
-  metaLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-    marginTop: 4,
-  },
-  bigValue: {
-    fontFamily: fonts.headingBold,
-    fontSize: 28,
-    marginBottom: 8,
-  },
-  midValue: {
-    fontFamily: fonts.headingBold,
-    fontSize: 22,
-    marginBottom: 8,
-  },
-  badge: {
-    alignSelf: 'flex-start',
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    marginBottom: 8,
-  },
-  badgeText: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-  },
-  delta: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    marginBottom: 4,
-  },
-  metaHint: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-    marginTop: 8,
-  },
-  fieldLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-    marginTop: 12,
-    marginBottom: 6,
-  },
-  input: {
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    paddingHorizontal: 12,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-    marginTop: 10,
-  },
-  inputDisabled: {
-    opacity: 0.5,
-  },
-  heightRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  half: {
-    flex: 1,
-  },
-  clearLink: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-    marginTop: 8,
-  },
-});

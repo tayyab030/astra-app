@@ -21,18 +21,20 @@ import {
 } from '@expo-google-fonts/poppins';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { colors } from '@/constants/theme';
+import { getThemeTokens } from '@/constants/theme-tokens';
+import { GlobalToast } from '@/components/GlobalToast';
+import { AppThemeProvider, useAppTheme } from '@/features/theme/AppThemeProvider';
 import { useSession } from '@/hooks/useSession';
+import { DEFAULT_THEME } from '@/lib/app-theme';
 import {
   hydrateSession,
   startSessionWatchdog,
   stopSessionWatchdog,
 } from '@/lib/auth/tokenManager';
-import { GlobalToast } from '@/components/GlobalToast';
 import '@/lib/notifications';
 
 SplashScreen.preventAutoHideAsync();
-SystemUI.setBackgroundColorAsync(colors.slate900);
+SystemUI.setBackgroundColorAsync(getThemeTokens(DEFAULT_THEME).background);
 
 const queryClient = new QueryClient();
 
@@ -74,15 +76,28 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <StatusBar style="light" />
+      <AppThemeProvider>
+        <ThemedRoot />
+      </AppThemeProvider>
+    </QueryClientProvider>
+  );
+}
+
+function ThemedRoot() {
+  const { tokens } = useAppTheme();
+
+  return (
+    <>
+      <StatusBar style={tokens.isDark ? 'light' : 'dark'} />
       <RootNavigator />
       <GlobalToast />
-    </QueryClientProvider>
+    </>
   );
 }
 
 function RootNavigator() {
   const { isAuthenticated } = useSession();
+  const { tokens } = useAppTheme();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -110,7 +125,7 @@ function RootNavigator() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: colors.slate900 },
+        contentStyle: { backgroundColor: tokens.background },
         animation: 'fade',
       }}
     >

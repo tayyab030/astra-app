@@ -1,12 +1,5 @@
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useRouter } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
@@ -16,7 +9,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import axios from 'axios';
 
 import { ROUTES } from '@/constants/routes';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { AUTH, publicApi } from '@/lib/api';
 import { setSession } from '@/lib/auth/tokenManager';
 import { getMobileClientDeviceMeta } from '@/lib/auth/clientDevice';
@@ -35,6 +29,168 @@ type ToastState = {
 };
 
 export function LoginForm() {
+  const { tokens, colors } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  header: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    gap: 8,
+  },
+  title: {
+    fontFamily: fonts.semibold,
+    fontSize: 30,
+    color: colors.cyan100,
+    textAlign: 'center',
+  },
+  description: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate300,
+    textAlign: 'center',
+  },
+  content: {
+    paddingHorizontal: 24,
+    paddingBottom: 16,
+    gap: 24,
+  },
+  toast: {
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+  },
+  toastError: {
+    backgroundColor: 'rgba(248, 113, 113, 0.12)',
+    borderColor: 'rgba(248, 113, 113, 0.35)',
+  },
+  toastSuccess: {
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    borderColor: 'rgba(16, 185, 129, 0.35)',
+  },
+  toastText: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.white,
+  },
+  unverified: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.3)',
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    padding: 16,
+    gap: 12,
+  },
+  unverifiedText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.amber200,
+    lineHeight: 20,
+  },
+  unverifiedButton: {
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.4)',
+    borderRadius: 6,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  unverifiedButtonText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.amber100,
+  },
+  form: {
+    gap: 16,
+  },
+  field: {
+    gap: 8,
+  },
+  label: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.cyan200,
+  },
+  input: {
+    height: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.3)',
+    backgroundColor: 'rgba(51, 65, 85, 0.5)',
+    color: colors.white,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    paddingHorizontal: 12,
+  },
+  inputFocused: {
+    borderColor: colors.cyan400,
+  },
+  passwordWrap: {
+    position: 'relative',
+    justifyContent: 'center',
+  },
+  passwordInput: {
+    paddingRight: 40,
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: 12,
+    height: 40,
+    justifyContent: 'center',
+  },
+  error: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.red400,
+  },
+  submitWrap: {
+    borderRadius: 6,
+    overflow: 'hidden',
+    shadowColor: colors.cyan500,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  submit: {
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  submitText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+  },
+  footer: {
+    alignItems: 'center',
+    gap: 16,
+  },
+  link: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.cyan400,
+  },
+  linkPressed: {
+    color: colors.cyan300,
+  },
+  footerText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+    textAlign: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  pressed: {
+    opacity: 0.85,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+}));
+
   const [showPassword, setShowPassword] = useState(false);
   const [unverified, setUnverified] = useState<UnverifiedState | null>(null);
   const [toast, setToast] = useState<ToastState | null>(null);
@@ -304,7 +460,7 @@ export function LoginForm() {
             ]}
           >
             <LinearGradient
-              colors={[colors.cyan600, colors.blue600]}
+              colors={tokens.accentGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.submit}
@@ -342,164 +498,3 @@ export function LoginForm() {
     </GlassCard>
   );
 }
-
-const styles = StyleSheet.create({
-  header: {
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    gap: 8,
-  },
-  title: {
-    fontFamily: fonts.semibold,
-    fontSize: 30,
-    color: colors.cyan100,
-    textAlign: 'center',
-  },
-  description: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate300,
-    textAlign: 'center',
-  },
-  content: {
-    paddingHorizontal: 24,
-    paddingBottom: 16,
-    gap: 24,
-  },
-  toast: {
-    borderRadius: 8,
-    padding: 12,
-    borderWidth: 1,
-  },
-  toastError: {
-    backgroundColor: 'rgba(248, 113, 113, 0.12)',
-    borderColor: 'rgba(248, 113, 113, 0.35)',
-  },
-  toastSuccess: {
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    borderColor: 'rgba(16, 185, 129, 0.35)',
-  },
-  toastText: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.white,
-  },
-  unverified: {
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.3)',
-    backgroundColor: 'rgba(245, 158, 11, 0.1)',
-    padding: 16,
-    gap: 12,
-  },
-  unverifiedText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.amber200,
-    lineHeight: 20,
-  },
-  unverifiedButton: {
-    borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.4)',
-    borderRadius: 6,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  unverifiedButtonText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.amber100,
-  },
-  form: {
-    gap: 16,
-  },
-  field: {
-    gap: 8,
-  },
-  label: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.cyan200,
-  },
-  input: {
-    height: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(6, 182, 212, 0.3)',
-    backgroundColor: 'rgba(51, 65, 85, 0.5)',
-    color: colors.white,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    paddingHorizontal: 12,
-  },
-  inputFocused: {
-    borderColor: colors.cyan400,
-  },
-  passwordWrap: {
-    position: 'relative',
-    justifyContent: 'center',
-  },
-  passwordInput: {
-    paddingRight: 40,
-  },
-  eyeButton: {
-    position: 'absolute',
-    right: 12,
-    height: 40,
-    justifyContent: 'center',
-  },
-  error: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.red400,
-  },
-  submitWrap: {
-    borderRadius: 6,
-    overflow: 'hidden',
-    shadowColor: colors.cyan500,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  submit: {
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  submitText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-  },
-  footer: {
-    alignItems: 'center',
-    gap: 16,
-  },
-  link: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.cyan400,
-  },
-  linkPressed: {
-    color: colors.cyan300,
-  },
-  footerText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-    textAlign: 'center',
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-});

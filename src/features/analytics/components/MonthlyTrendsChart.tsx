@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { useCurrency } from '@/hooks/useCurrency';
 import type { MonthlyTrendPoint } from '@/features/analytics/utils/computeAnalytics';
 
@@ -10,6 +11,74 @@ type MonthlyTrendsChartProps = {
 };
 
 export function MonthlyTrendsChart({ points }: MonthlyTrendsChartProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  empty: {
+    height: 200,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+  },
+  chart: {
+    minHeight: 200,
+    gap: 12,
+  },
+  legendRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  swatch: {
+    width: 10,
+    height: 10,
+    borderRadius: 2,
+  },
+  legendText: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+  bars: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: 4,
+    minHeight: 160,
+  },
+  barCol: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 4,
+  },
+  pair: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 2,
+  },
+  bar: {
+    borderRadius: 2,
+  },
+  barLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 9,
+    color: colors.slate400,
+  },
+  hint: {
+    fontFamily: fonts.regular,
+    fontSize: 8,
+    color: colors.slate500,
+  },
+}));
+
   const { formatCurrency } = useCurrency();
   const [width, setWidth] = useState(0);
 
@@ -102,69 +171,3 @@ export function MonthlyTrendsChart({ points }: MonthlyTrendsChartProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  empty: {
-    height: 200,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-  },
-  chart: {
-    minHeight: 200,
-    gap: 12,
-  },
-  legendRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  swatch: {
-    width: 10,
-    height: 10,
-    borderRadius: 2,
-  },
-  legendText: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  bars: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    gap: 4,
-    minHeight: 160,
-  },
-  barCol: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 4,
-  },
-  pair: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 2,
-  },
-  bar: {
-    borderRadius: 2,
-  },
-  barLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 9,
-    color: colors.slate400,
-  },
-  hint: {
-    fontFamily: fonts.regular,
-    fontSize: 8,
-    color: colors.slate500,
-  },
-});

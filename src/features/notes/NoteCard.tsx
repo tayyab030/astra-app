@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { format, parseISO } from 'date-fns';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { OverflowMenu, type OverflowMenuItem } from '@/components/OverflowMenu';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 
 import { NOTE_PRIORITIES } from './constants';
@@ -40,6 +41,79 @@ export function NoteCard({
   onDuplicate,
   onRestoreVersion,
 }: NoteCardProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  titleRow: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  title: {
+    flex: 1,
+    minWidth: 0,
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.slate200,
+  },
+  preview: {
+    marginTop: 8,
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.slate400,
+  },
+  meta: {
+    marginTop: 12,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 8,
+  },
+  badge: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.6)',
+    backgroundColor: 'rgba(15, 23, 42, 0.45)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  badgeText: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: colors.slate300,
+  },
+  date: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: colors.slate500,
+  },
+  tags: {
+    marginTop: 10,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  tag: {
+    borderRadius: 4,
+    backgroundColor: 'rgba(6, 182, 212, 0.12)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  tagText: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: colors.cyan300,
+  },
+}));
+
   const [menuOpen, setMenuOpen] = useState(false);
   const priority = NOTE_PRIORITIES.find((item) => item.value === note.priority);
   const preview = noteToPlainText(note.content);
@@ -254,74 +328,3 @@ function confirmPermanentDelete(note: Note, onDelete: (note: Note) => void) {
   ]);
 }
 
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  titleRow: {
-    flex: 1,
-    minWidth: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  title: {
-    flex: 1,
-    minWidth: 0,
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.slate200,
-  },
-  preview: {
-    marginTop: 8,
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    lineHeight: 18,
-    color: colors.slate400,
-  },
-  meta: {
-    marginTop: 12,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    gap: 8,
-  },
-  badge: {
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.6)',
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  badgeText: {
-    fontFamily: fonts.regular,
-    fontSize: 11,
-    color: colors.slate300,
-  },
-  date: {
-    fontFamily: fonts.regular,
-    fontSize: 11,
-    color: colors.slate500,
-  },
-  tags: {
-    marginTop: 10,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  tag: {
-    borderRadius: 4,
-    backgroundColor: 'rgba(6, 182, 212, 0.12)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  tagText: {
-    fontFamily: fonts.regular,
-    fontSize: 11,
-    color: colors.cyan300,
-  },
-});

@@ -2,7 +2,7 @@ import { createContext, useContext, type ReactNode, type RefObject } from 'react
 import { StyleSheet, View, type ViewStyle } from 'react-native';
 import { BlurView } from 'expo-blur';
 
-import { colors } from '@/constants/theme';
+import { useAppTheme } from '@/features/theme/AppThemeProvider';
 
 export const BlurTargetContext = createContext<RefObject<View | null> | null>(null);
 
@@ -14,14 +14,23 @@ export function GlassCard({
   style?: ViewStyle;
 }) {
   const blurTarget = useContext(BlurTargetContext);
+  const { tokens } = useAppTheme();
 
   return (
     <BlurView
       intensity={50}
-      tint="dark"
+      tint={tokens.blurTint}
       blurMethod="dimezisBlurViewSdk31Plus"
       blurTarget={blurTarget ?? undefined}
-      style={[styles.card, style]}
+      style={[
+        styles.card,
+        {
+          backgroundColor: tokens.card,
+          borderColor: tokens.border,
+          shadowColor: tokens.glowPrimary,
+        },
+        style,
+      ]}
     >
       {children}
     </BlurView>
@@ -33,13 +42,10 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 448,
     overflow: 'hidden',
-    backgroundColor: 'rgba(30, 41, 59, 0.5)',
     borderWidth: 1,
-    borderColor: 'rgba(6, 182, 212, 0.3)',
     borderRadius: 12,
     paddingVertical: 8,
     gap: 24,
-    shadowColor: colors.cyan500,
     shadowOffset: { width: 0, height: 25 },
     shadowOpacity: 0.1,
     shadowRadius: 50,

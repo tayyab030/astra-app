@@ -1,8 +1,6 @@
 import type { ComponentProps } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors } from '@/constants/theme';
-
 import type { HealthTabId } from './types/health.types';
 
 export const HEALTH_TABS: {
@@ -17,12 +15,13 @@ export const HEALTH_TABS: {
   { id: 'wellness', label: 'Wellness', icon: 'happy-outline' },
 ];
 
+/** Mood status accents (data viz) — fixed hex, not chrome theme. */
 export const MOOD_OPTIONS = [
   { value: 'great', label: 'Great', color: '#4ade80' },
-  { value: 'good', label: 'Good', color: colors.blue400 },
+  { value: 'good', label: 'Good', color: '#60a5fa' },
   { value: 'okay', label: 'Okay', color: '#facc15' },
   { value: 'bad', label: 'Bad', color: '#fb923c' },
-  { value: 'terrible', label: 'Terrible', color: colors.red400 },
+  { value: 'terrible', label: 'Terrible', color: '#f87171' },
 ] as const;
 
 export const METRIC_STEP = {

@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 
 import { PageHeader } from '@/components/PageHeader';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { SelectField } from '@/features/wealth/SelectField';
 import { useTimeTrackContext } from '@/features/time-track/context/TimeTrackProvider';
 import { mapTaskItemToAvailableTask } from '@/lib/api/timeTrack';
@@ -22,6 +23,26 @@ function getGreeting() {
 }
 
 export function TasksScreen() {
+  const styles = useThemedStyles((colors, tokens) => ({
+  root: {
+    flex: 1,
+  },
+  scroll: {
+    padding: 24,
+    paddingBottom: 40,
+    gap: 16,
+  },
+  headerRight: {
+    gap: 8,
+    alignItems: 'flex-start',
+  },
+  completedHint: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate300,
+  },
+}));
+
   const [period, setPeriod] = useState<TaskPeriodFilter>('month');
   const { playTask, stopTask, activeTimer } = useTimeTrackContext();
 
@@ -102,22 +123,3 @@ export function TasksScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  scroll: {
-    padding: 24,
-    paddingBottom: 40,
-    gap: 16,
-  },
-  headerRight: {
-    gap: 8,
-    alignItems: 'flex-start',
-  },
-  completedHint: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate300,
-  },
-});

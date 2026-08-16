@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, Text, TextInput, View } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format, parseISO } from 'date-fns';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { FormFieldError } from '@/features/wealth/FormFieldError';
 import { FormModal } from '@/features/wealth/FormModal';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
@@ -62,6 +63,83 @@ export function NoteFormModal({
   onRestoreVersion,
   loading,
 }: NoteFormModalProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  field: {
+    gap: 8,
+  },
+  flex: {
+    flex: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  fieldLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.cyan200,
+  },
+  input: {
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    color: colors.white,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  textarea: {
+    minHeight: 140,
+    textAlignVertical: 'top',
+  },
+  inputError: {
+    borderColor: 'rgba(248, 113, 113, 0.7)',
+  },
+  favoriteRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  favoriteLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate300,
+  },
+  versionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(71, 85, 105, 0.4)',
+  },
+  versionMeta: {
+    flex: 1,
+    gap: 2,
+    minWidth: 0,
+  },
+  versionTitle: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.slate200,
+  },
+  versionDate: {
+    fontFamily: fonts.regular,
+    fontSize: 11,
+    color: colors.slate500,
+  },
+  versionAction: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    color: colors.cyan400,
+  },
+}));
+
   const {
     handleSubmit,
     reset,
@@ -279,78 +357,3 @@ export function NoteFormModal({
   );
 }
 
-const styles = StyleSheet.create({
-  field: {
-    gap: 8,
-  },
-  flex: {
-    flex: 1,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  fieldLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.cyan200,
-  },
-  input: {
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    color: colors.white,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  textarea: {
-    minHeight: 140,
-    textAlignVertical: 'top',
-  },
-  inputError: {
-    borderColor: 'rgba(248, 113, 113, 0.7)',
-  },
-  favoriteRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  favoriteLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate300,
-  },
-  versionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 10,
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(71, 85, 105, 0.4)',
-  },
-  versionMeta: {
-    flex: 1,
-    gap: 2,
-    minWidth: 0,
-  },
-  versionTitle: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.slate200,
-  },
-  versionDate: {
-    fontFamily: fonts.regular,
-    fontSize: 11,
-    color: colors.slate500,
-  },
-  versionAction: {
-    fontFamily: fonts.medium,
-    fontSize: 12,
-    color: colors.cyan400,
-  },
-});

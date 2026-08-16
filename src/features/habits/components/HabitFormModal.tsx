@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { getLocalDateString } from '@/features/health/utils/date';
 import { FormModal } from '@/features/wealth/FormModal';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
@@ -91,6 +92,87 @@ export function HabitFormModal({
   onCreatePack,
   onUpdate,
 }: HabitFormModalProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  modeRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  modeChip: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.55)',
+    alignItems: 'center',
+  },
+  modeChipActive: {
+    borderColor: colors.cyan500,
+    backgroundColor: 'rgba(6, 182, 212, 0.12)',
+  },
+  modeChipText: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.slate400,
+  },
+  modeChipTextActive: {
+    color: colors.cyan300,
+  },
+  field: {
+    gap: 6,
+  },
+  half: {
+    flex: 1,
+    minWidth: 140,
+  },
+  row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  packItem: {
+    gap: 8,
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.45)',
+    backgroundColor: 'rgba(15, 23, 42, 0.35)',
+    marginBottom: 8,
+  },
+  removePackItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+  },
+  removePackText: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.red400,
+  },
+  label: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.slate200,
+  },
+  hint: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+  input: {
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    paddingHorizontal: 12,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.white,
+  },
+}));
+
   const [createMode, setCreateMode] = useState<HabitCreateMode>('single');
   const [name, setName] = useState('');
   const [packName, setPackName] = useState('');
@@ -452,82 +534,3 @@ export function HabitFormModal({
   );
 }
 
-const styles = StyleSheet.create({
-  modeRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  modeChip: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.55)',
-    alignItems: 'center',
-  },
-  modeChipActive: {
-    borderColor: colors.cyan500,
-    backgroundColor: 'rgba(6, 182, 212, 0.12)',
-  },
-  modeChipText: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.slate400,
-  },
-  modeChipTextActive: {
-    color: colors.cyan300,
-  },
-  field: {
-    gap: 6,
-  },
-  half: {
-    flex: 1,
-    minWidth: 140,
-  },
-  row: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  packItem: {
-    gap: 8,
-    padding: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.45)',
-    backgroundColor: 'rgba(15, 23, 42, 0.35)',
-    marginBottom: 8,
-  },
-  removePackItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
-  },
-  removePackText: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.red400,
-  },
-  label: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.slate200,
-  },
-  hint: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  input: {
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    paddingHorizontal: 12,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-  },
-});

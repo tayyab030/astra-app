@@ -1,18 +1,20 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { PageHeader } from '@/components/PageHeader';
 import { ROUTES } from '@/constants/routes';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import type { ThemedPalette } from '@/constants/theme-tokens';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { AlertsSettingsPanel } from '@/features/notifications/AlertsSettingsPanel';
 import { useAppNotificationsContext } from '@/features/notifications/AppNotificationsProvider';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
 import type { AlertSeverity } from '@/lib/alerts/types';
 
-function severityStyle(severity: AlertSeverity) {
+function severityStyle(severity: AlertSeverity, colors: ThemedPalette) {
   if (severity === 'critical') {
     return { bg: 'rgba(220, 38, 38, 0.2)', text: colors.red300 };
   }
@@ -27,6 +29,110 @@ function severityStyle(severity: AlertSeverity) {
  * Prefs are device-local (same as web). No Communication messaging backend.
  */
 export function CommunicationScreen() {
+  const { colors } = useAppTheme();
+  const styles = useThemedStyles((c) => ({
+    root: { flex: 1 },
+    scroll: { padding: 24, paddingBottom: 40, gap: 16 },
+    inboxHeader: { flexDirection: 'row' as const, gap: 12, marginBottom: 8 },
+    inboxMeta: { flex: 1 },
+    sectionTitle: {
+      fontFamily: fonts.heading,
+      fontSize: 16,
+      color: c.cyan300,
+      marginBottom: 4,
+    },
+    sectionDesc: {
+      fontFamily: fonts.regular,
+      fontSize: 13,
+      color: c.slate400,
+      marginBottom: 8,
+    },
+    actions: {
+      flexDirection: 'row' as const,
+      gap: 12,
+      marginBottom: 8,
+    },
+    actionBtn: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 6,
+      paddingVertical: 6,
+      paddingHorizontal: 10,
+      borderRadius: 8,
+      backgroundColor: 'rgba(30, 41, 59, 0.7)',
+    },
+    actionText: {
+      fontFamily: fonts.medium,
+      fontSize: 12,
+      color: c.slate300,
+    },
+    emptyBox: {
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: 'rgba(71, 85, 105, 0.45)',
+      backgroundColor: 'rgba(15, 23, 42, 0.45)',
+      padding: 16,
+      gap: 6,
+    },
+    emptyTitle: { fontFamily: fonts.medium, fontSize: 15, color: c.slate200 },
+    emptyBody: { fontFamily: fonts.regular, fontSize: 13, color: c.slate500 },
+    row: {
+      flexDirection: 'row' as const,
+      gap: 4,
+      paddingVertical: 12,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(71, 85, 105, 0.35)',
+    },
+    rowUnread: {
+      backgroundColor: 'rgba(6, 182, 212, 0.05)',
+      marginHorizontal: -8,
+      paddingHorizontal: 8,
+      borderRadius: 8,
+    },
+    rowMain: { flex: 1, minWidth: 0 },
+    rowTop: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 8 },
+    severityBadge: {
+      borderRadius: 6,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+    },
+    severityText: {
+      fontFamily: fonts.medium,
+      fontSize: 10,
+      textTransform: 'capitalize' as const,
+    },
+    unreadDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: c.cyan400,
+    },
+    alertTitle: {
+      marginTop: 6,
+      fontFamily: fonts.semibold,
+      fontSize: 14,
+      color: c.slate200,
+    },
+    alertBody: {
+      marginTop: 2,
+      fontFamily: fonts.regular,
+      fontSize: 12,
+      color: c.slate400,
+    },
+    alertWhen: {
+      marginTop: 6,
+      fontFamily: fonts.regular,
+      fontSize: 10,
+      color: c.slate500,
+    },
+    dismissBtn: {
+      width: 32,
+      height: 32,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+  }));
+
   const router = useRouter();
   const {
     alerts,
@@ -94,7 +200,7 @@ export function CommunicationScreen() {
           </View>
         ) : (
           alerts.map((alert) => {
-            const tone = severityStyle(alert.severity);
+            const tone = severityStyle(alert.severity, colors);
             return (
               <View
                 key={alert.id}
@@ -156,106 +262,3 @@ export function CommunicationScreen() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1 },
-  scroll: { padding: 24, paddingBottom: 40, gap: 16 },
-  inboxHeader: { flexDirection: 'row', gap: 12, marginBottom: 8 },
-  inboxMeta: { flex: 1 },
-  sectionTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.cyan300,
-    marginBottom: 4,
-  },
-  sectionDesc: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-    marginBottom: 8,
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 8,
-  },
-  actionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    backgroundColor: 'rgba(30, 41, 59, 0.7)',
-  },
-  actionText: {
-    fontFamily: fonts.medium,
-    fontSize: 12,
-    color: colors.slate300,
-  },
-  emptyBox: {
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.45)',
-    backgroundColor: 'rgba(15, 23, 42, 0.45)',
-    padding: 16,
-    gap: 6,
-  },
-  emptyTitle: { fontFamily: fonts.medium, fontSize: 15, color: colors.slate200 },
-  emptyBody: { fontFamily: fonts.regular, fontSize: 13, color: colors.slate500 },
-  row: {
-    flexDirection: 'row',
-    gap: 4,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(71, 85, 105, 0.35)',
-  },
-  rowUnread: {
-    backgroundColor: 'rgba(6, 182, 212, 0.05)',
-    marginHorizontal: -8,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-  },
-  rowMain: { flex: 1, minWidth: 0 },
-  rowTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  severityBadge: {
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  severityText: {
-    fontFamily: fonts.medium,
-    fontSize: 10,
-    textTransform: 'capitalize',
-  },
-  unreadDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.cyan400,
-  },
-  alertTitle: {
-    marginTop: 6,
-    fontFamily: fonts.semibold,
-    fontSize: 14,
-    color: colors.slate200,
-  },
-  alertBody: {
-    marginTop: 2,
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  alertWhen: {
-    marginTop: 6,
-    fontFamily: fonts.regular,
-    fontSize: 10,
-    color: colors.slate500,
-  },
-  dismissBtn: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LoginBackground } from '@/features/auth/LoginBackground';
 import { BlurTargetContext } from '@/features/auth/GlassCard';
-import { colors } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 
 type AuthScreenProps = {
   children: ReactNode;
@@ -14,13 +14,24 @@ type AuthScreenProps = {
 
 export function AuthScreen({ children }: AuthScreenProps) {
   const blurTargetRef = useRef<View | null>(null);
+  const { tokens } = useAppTheme();
+  const styles = useThemedStyles((_c, t) => ({
+    root: {
+      flex: 1,
+      backgroundColor: t.background,
+      overflow: 'hidden' as const,
+    },
+    safe: {
+      flex: 1,
+    },
+  }));
 
   return (
     <BlurTargetContext.Provider value={blurTargetRef}>
       <View style={styles.root}>
         <BlurTargetView ref={blurTargetRef} style={StyleSheet.absoluteFill}>
           <LinearGradient
-            colors={[colors.slate900, colors.slate800, colors.slate900]}
+            colors={tokens.pageGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={StyleSheet.absoluteFill}
@@ -34,14 +45,3 @@ export function AuthScreen({ children }: AuthScreenProps) {
     </BlurTargetContext.Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.slate900,
-    overflow: 'hidden',
-  },
-  safe: {
-    flex: 1,
-  },
-});

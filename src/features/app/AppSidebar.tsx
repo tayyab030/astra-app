@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { usePathname, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { ROUTES } from '@/constants/routes';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { useSession } from '@/hooks/useSession';
 import { logoutSession } from '@/lib/auth/tokenManager';
 import {
@@ -43,6 +44,51 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useSession();
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((c, t) => ({
+    nav: {
+      gap: 8,
+      padding: 16,
+    },
+    footer: {
+      marginTop: 16,
+      paddingTop: 16,
+      borderTopWidth: 1,
+      borderTopColor: t.sidebarBorder,
+      gap: 8,
+    },
+    item: {
+      minHeight: 40,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 12,
+    },
+    activeLabel: {
+      fontFamily: fonts.medium,
+      fontSize: 14,
+      color: t.primaryForeground,
+    },
+    inactiveLabel: {
+      fontFamily: fonts.medium,
+      fontSize: 14,
+      color: c.slate300,
+    },
+    logout: {
+      minHeight: 40,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 12,
+    },
+    logoutLabel: {
+      fontFamily: fonts.medium,
+      fontSize: 14,
+      color: c.red400,
+    },
+  }));
 
   const visibleItems = useMemo(() => {
     const enabled = normalizeModuleSettings(user?.module_settings).enabled;
@@ -88,6 +134,10 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
             icon={item.icon}
             active={isActive}
             onPress={() => go(item.href)}
+            styles={styles}
+            accentGradient={tokens.accentGradient}
+            primaryForeground={tokens.primaryForeground}
+            mutedColor={colors.slate300}
           />
         );
       })}
@@ -98,6 +148,10 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
           icon="settings-outline"
           active={pathname.includes(ROUTES.APP.SETTINGS)}
           onPress={() => go(ROUTES.APP.SETTINGS)}
+          styles={styles}
+          accentGradient={tokens.accentGradient}
+          primaryForeground={tokens.primaryForeground}
+          mutedColor={colors.slate300}
         />
         <Pressable onPress={confirmLogout} style={styles.logout}>
           <Ionicons name="log-out-outline" size={16} color={colors.red400} />
@@ -113,22 +167,31 @@ function SidebarButton({
   icon,
   active,
   onPress,
+  styles,
+  accentGradient,
+  primaryForeground,
+  mutedColor,
 }: {
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
   active: boolean;
   onPress: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  styles: any;
+  accentGradient: [string, string];
+  primaryForeground: string;
+  mutedColor: string;
 }) {
   if (active) {
     return (
       <Pressable onPress={onPress}>
         <LinearGradient
-          colors={[colors.cyan500, colors.blue600]}
+          colors={accentGradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.item}
         >
-          <Ionicons name={icon} size={16} color={colors.white} />
+          <Ionicons name={icon} size={16} color={primaryForeground} />
           <Text style={styles.activeLabel}>{label}</Text>
         </LinearGradient>
       </Pressable>
@@ -137,53 +200,8 @@ function SidebarButton({
 
   return (
     <Pressable onPress={onPress} style={styles.item}>
-      <Ionicons name={icon} size={16} color={colors.slate300} />
+      <Ionicons name={icon} size={16} color={mutedColor} />
       <Text style={styles.inactiveLabel}>{label}</Text>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  nav: {
-    gap: 8,
-    padding: 16,
-  },
-  footer: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(51, 65, 85, 0.5)',
-    gap: 8,
-  },
-  item: {
-    minHeight: 40,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  activeLabel: {
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.white,
-  },
-  inactiveLabel: {
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.slate300,
-  },
-  logout: {
-    minHeight: 40,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  logoutLabel: {
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.red400,
-  },
-});

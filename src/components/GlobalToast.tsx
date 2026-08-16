@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useThemedStyles } from '@/features/theme/AppThemeProvider';
 import {
   getToastSnapshot,
   subscribeToast,
@@ -10,37 +11,7 @@ import {
 } from '@/lib/ui/toastStore';
 
 export function GlobalToast() {
-  const insets = useSafeAreaInsets();
-  const [toast, setToast] = useState<AppToast | null>(getToastSnapshot);
-
-  useEffect(() => subscribeToast(setToast), []);
-
-  if (!toast) {
-    return null;
-  }
-
-  return (
-    <View
-      pointerEvents="none"
-      style={[styles.wrap, { top: Math.max(insets.top, 12) + 8 }]}
-    >
-      <View
-        style={[
-          styles.toast,
-          toast.type === 'success'
-            ? styles.success
-            : toast.type === 'warning'
-              ? styles.warning
-              : styles.error,
-        ]}
-      >
-        <Text style={styles.text}>{toast.message}</Text>
-      </View>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
+    const styles = useThemedStyles((colors, tokens) => ({
   wrap: {
     position: 'absolute',
     left: 20,
@@ -73,4 +44,34 @@ const styles = StyleSheet.create({
     color: colors.white,
     textAlign: 'center',
   },
-});
+}));
+
+  const insets = useSafeAreaInsets();
+  const [toast, setToast] = useState<AppToast | null>(getToastSnapshot);
+
+  useEffect(() => subscribeToast(setToast), []);
+
+  if (!toast) {
+    return null;
+  }
+
+  return (
+    <View
+      pointerEvents="none"
+      style={[styles.wrap, { top: Math.max(insets.top, 12) + 8 }]}
+    >
+      <View
+        style={[
+          styles.toast,
+          toast.type === 'success'
+            ? styles.success
+            : toast.type === 'warning'
+              ? styles.warning
+              : styles.error,
+        ]}
+      >
+        <Text style={styles.text}>{toast.message}</Text>
+      </View>
+    </View>
+  );
+}

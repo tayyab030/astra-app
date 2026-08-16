@@ -12,7 +12,8 @@ import {
   View,
 } from 'react-native';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import type { AssistantConversation } from '@/lib/api/assistant';
 
 type Props = {
@@ -38,6 +39,137 @@ export function ConversationDrawer({
   onRename,
   onDelete,
 }: Props) {
+  const { colors } = useAppTheme();
+  const styles = useThemedStyles((c) => ({
+    overlay: {
+      flex: 1,
+      flexDirection: 'row' as const,
+      justifyContent: 'flex-start' as const,
+      backgroundColor: 'rgba(2, 6, 23, 0.55)',
+    },
+    backdrop: {
+      ...StyleSheet.absoluteFill,
+    },
+    panel: {
+      width: '82%' as const,
+      maxWidth: 340,
+      height: '100%' as const,
+      backgroundColor: c.slate900,
+      borderRightWidth: 1,
+      borderRightColor: 'rgba(71, 85, 105, 0.55)',
+      paddingTop: 54,
+      paddingHorizontal: 14,
+      paddingBottom: 24,
+    },
+    panelHeader: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      marginBottom: 14,
+    },
+    panelTitle: {
+      fontFamily: fonts.headingBold,
+      fontSize: 22,
+      color: c.cyan300,
+    },
+    iconBtn: {
+      width: 34,
+      height: 34,
+      borderRadius: 10,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      backgroundColor: 'rgba(30, 41, 59, 0.9)',
+    },
+    newChatBtn: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 8,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: 'rgba(34, 211, 238, 0.35)',
+      backgroundColor: 'rgba(6, 182, 212, 0.12)',
+      paddingHorizontal: 12,
+      paddingVertical: 12,
+      marginBottom: 12,
+    },
+    newChatText: {
+      fontFamily: fonts.semibold,
+      fontSize: 15,
+      color: c.cyan200,
+    },
+    loading: {
+      paddingVertical: 8,
+    },
+    list: {
+      flex: 1,
+    },
+    listContent: {
+      gap: 6,
+      paddingBottom: 24,
+    },
+    empty: {
+      fontFamily: fonts.regular,
+      fontSize: 13,
+      color: c.slate400,
+      paddingVertical: 12,
+    },
+    row: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 6,
+      borderRadius: 12,
+      paddingHorizontal: 10,
+      paddingVertical: 10,
+      backgroundColor: 'rgba(30, 41, 59, 0.55)',
+    },
+    rowActive: {
+      backgroundColor: 'rgba(6, 182, 212, 0.18)',
+      borderWidth: 1,
+      borderColor: 'rgba(34, 211, 238, 0.35)',
+    },
+    rowMain: {
+      flex: 1,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 8,
+      minWidth: 0,
+    },
+    rowTitle: {
+      flex: 1,
+      fontFamily: fonts.medium,
+      fontSize: 14,
+      color: c.slate300,
+    },
+    rowTitleActive: {
+      color: c.cyan200,
+    },
+    renameInput: {
+      flex: 1,
+      minHeight: 34,
+      borderRadius: 8,
+      paddingHorizontal: 10,
+      color: c.slate200,
+      backgroundColor: 'rgba(15, 23, 42, 0.9)',
+      borderWidth: 1,
+      borderColor: 'rgba(34, 211, 238, 0.35)',
+      fontFamily: fonts.regular,
+      fontSize: 14,
+    },
+    rowActions: {
+      flexDirection: 'row' as const,
+      gap: 2,
+    },
+    rowAction: {
+      width: 28,
+      height: 28,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    disabled: {
+      opacity: 0.55,
+    },
+  }));
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftTitle, setDraftTitle] = useState('');
 
@@ -165,133 +297,3 @@ export function ConversationDrawer({
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    backgroundColor: 'rgba(2, 6, 23, 0.55)',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFill,
-  },
-  panel: {
-    width: '82%',
-    maxWidth: 340,
-    height: '100%',
-    backgroundColor: colors.slate900,
-    borderRightWidth: 1,
-    borderRightColor: 'rgba(71, 85, 105, 0.55)',
-    paddingTop: 54,
-    paddingHorizontal: 14,
-    paddingBottom: 24,
-  },
-  panelHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 14,
-  },
-  panelTitle: {
-    fontFamily: fonts.headingBold,
-    fontSize: 22,
-    color: colors.cyan300,
-  },
-  iconBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(30, 41, 59, 0.9)',
-  },
-  newChatBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(34, 211, 238, 0.35)',
-    backgroundColor: 'rgba(6, 182, 212, 0.12)',
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    marginBottom: 12,
-  },
-  newChatText: {
-    fontFamily: fonts.semibold,
-    fontSize: 15,
-    color: colors.cyan200,
-  },
-  loading: {
-    paddingVertical: 8,
-  },
-  list: {
-    flex: 1,
-  },
-  listContent: {
-    gap: 6,
-    paddingBottom: 24,
-  },
-  empty: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-    paddingVertical: 12,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(30, 41, 59, 0.55)',
-  },
-  rowActive: {
-    backgroundColor: 'rgba(6, 182, 212, 0.18)',
-    borderWidth: 1,
-    borderColor: 'rgba(34, 211, 238, 0.35)',
-  },
-  rowMain: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    minWidth: 0,
-  },
-  rowTitle: {
-    flex: 1,
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.slate300,
-  },
-  rowTitleActive: {
-    color: colors.cyan200,
-  },
-  renameInput: {
-    flex: 1,
-    minHeight: 34,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    color: colors.slate200,
-    backgroundColor: 'rgba(15, 23, 42, 0.9)',
-    borderWidth: 1,
-    borderColor: 'rgba(34, 211, 238, 0.35)',
-    fontFamily: fonts.regular,
-    fontSize: 14,
-  },
-  rowActions: {
-    flexDirection: 'row',
-    gap: 2,
-  },
-  rowAction: {
-    width: 28,
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  disabled: {
-    opacity: 0.55,
-  },
-});

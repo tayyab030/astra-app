@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { FormFieldError } from '@/features/wealth/FormFieldError';
 import { FormModal } from '@/features/wealth/FormModal';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
@@ -39,6 +40,74 @@ function buildProjectPayload(data: ProjectFormValues) {
 }
 
 export function ProjectFormModal({ visible, onClose, mode, project }: ProjectFormModalProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  field: {
+    gap: 8,
+  },
+  fieldLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.cyan200,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  titleInput: {
+    flex: 1,
+  },
+  starButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+  },
+  starButtonActive: {
+    backgroundColor: '#f59e0b',
+    borderColor: 'rgba(251, 191, 36, 0.5)',
+  },
+  input: {
+    minHeight: 40,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(71, 85, 105, 0.5)',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    color: colors.white,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  textarea: {
+    minHeight: 88,
+    textAlignVertical: 'top',
+  },
+  inputError: {
+    borderColor: 'rgba(248, 113, 113, 0.7)',
+  },
+  colorRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  swatch: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  swatchActive: {
+    borderColor: colors.white,
+  },
+}));
+
   const { createProject, updateProject, isCreatingProject, isUpdatingProject } = useProjects();
 
   const {
@@ -204,69 +273,3 @@ export function ProjectFormModal({ visible, onClose, mode, project }: ProjectFor
   );
 }
 
-const styles = StyleSheet.create({
-  field: {
-    gap: 8,
-  },
-  fieldLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.cyan200,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  titleInput: {
-    flex: 1,
-  },
-  starButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-  },
-  starButtonActive: {
-    backgroundColor: '#f59e0b',
-    borderColor: 'rgba(251, 191, 36, 0.5)',
-  },
-  input: {
-    minHeight: 40,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.5)',
-    backgroundColor: 'rgba(15, 23, 42, 0.5)',
-    color: colors.white,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  textarea: {
-    minHeight: 88,
-    textAlignVertical: 'top',
-  },
-  inputError: {
-    borderColor: 'rgba(248, 113, 113, 0.7)',
-  },
-  colorRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  swatch: {
-    width: 28,
-    height: 28,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  swatchActive: {
-    borderColor: colors.white,
-  },
-});

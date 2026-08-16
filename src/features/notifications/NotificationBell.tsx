@@ -1,22 +1,17 @@
 import { useMemo, useState } from 'react';
-import {
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { formatDistanceToNow } from 'date-fns';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { ROUTES } from '@/constants/routes';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import type { ThemedPalette } from '@/constants/theme-tokens';
 import { useAppNotificationsContext } from '@/features/notifications/AppNotificationsProvider';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import type { AlertSeverity } from '@/lib/alerts/types';
 
-function severityStyle(severity: AlertSeverity) {
+function severityStyle(severity: AlertSeverity, colors: ThemedPalette) {
   if (severity === 'critical') {
     return { bg: 'rgba(220, 38, 38, 0.2)', text: colors.red300 };
   }
@@ -27,6 +22,169 @@ function severityStyle(severity: AlertSeverity) {
 }
 
 export function NotificationBell() {
+  const { colors } = useAppTheme();
+  const styles = useThemedStyles((c) => ({
+    bellButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 8,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      backgroundColor: 'rgba(30, 41, 59, 0.7)',
+      borderWidth: 1,
+      borderColor: 'rgba(71, 85, 105, 0.45)',
+    },
+    badge: {
+      position: 'absolute' as const,
+      top: -2,
+      right: -2,
+      minWidth: 16,
+      height: 16,
+      borderRadius: 8,
+      paddingHorizontal: 4,
+      backgroundColor: c.red600,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    badgeText: {
+      fontFamily: fonts.semibold,
+      fontSize: 9,
+      color: c.white,
+    },
+    modalRoot: {
+      flex: 1,
+      justifyContent: 'flex-start' as const,
+      alignItems: 'flex-end' as const,
+      paddingTop: 72,
+      paddingHorizontal: 16,
+    },
+    backdrop: {
+      ...StyleSheet.absoluteFill,
+      backgroundColor: 'rgba(2, 6, 23, 0.45)',
+    },
+    panel: {
+      width: '100%' as const,
+      maxWidth: 360,
+      maxHeight: '70%' as const,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: 'rgba(71, 85, 105, 0.55)',
+      backgroundColor: 'rgba(15, 23, 42, 0.97)',
+      overflow: 'hidden' as const,
+    },
+    panelHeader: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      gap: 8,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(51, 65, 85, 0.5)',
+    },
+    panelHeaderMeta: { flex: 1 },
+    panelTitle: {
+      fontFamily: fonts.heading,
+      fontSize: 15,
+      color: c.slate200,
+    },
+    panelSubtitle: {
+      fontFamily: fonts.regular,
+      fontSize: 12,
+      color: c.slate400,
+      marginTop: 2,
+    },
+    panelActions: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 2 },
+    iconBtn: {
+      width: 32,
+      height: 32,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    list: { flexGrow: 0 },
+    listContent: { paddingBottom: 4 },
+    empty: {
+      paddingHorizontal: 16,
+      paddingVertical: 36,
+      alignItems: 'center' as const,
+      gap: 10,
+    },
+    emptyTitle: {
+      fontFamily: fonts.medium,
+      fontSize: 14,
+      color: c.slate400,
+    },
+    link: {
+      fontFamily: fonts.medium,
+      fontSize: 12,
+      color: c.cyan400,
+    },
+    row: {
+      flexDirection: 'row' as const,
+      gap: 4,
+      paddingHorizontal: 12,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(51, 65, 85, 0.4)',
+    },
+    rowUnread: {
+      backgroundColor: 'rgba(6, 182, 212, 0.06)',
+    },
+    rowMain: { flex: 1, minWidth: 0 },
+    rowTop: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 8 },
+    severityBadge: {
+      borderRadius: 6,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+    },
+    severityText: {
+      fontFamily: fonts.medium,
+      fontSize: 10,
+      textTransform: 'capitalize' as const,
+    },
+    unreadDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: c.cyan400,
+    },
+    alertTitle: {
+      marginTop: 6,
+      fontFamily: fonts.semibold,
+      fontSize: 14,
+      color: c.slate200,
+    },
+    alertBody: {
+      marginTop: 2,
+      fontFamily: fonts.regular,
+      fontSize: 12,
+      color: c.slate400,
+    },
+    alertWhen: {
+      marginTop: 6,
+      fontFamily: fonts.regular,
+      fontSize: 10,
+      color: c.slate500,
+    },
+    dismissBtn: {
+      width: 28,
+      height: 28,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    footer: {
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      borderTopWidth: 1,
+      borderTopColor: 'rgba(51, 65, 85, 0.5)',
+    },
+    footerLink: {
+      fontFamily: fonts.regular,
+      fontSize: 12,
+      color: c.slate400,
+    },
+  }));
+
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const {
@@ -144,7 +302,7 @@ export function NotificationBell() {
                 </View>
               ) : (
                 alerts.map((alert) => {
-                  const tone = severityStyle(alert.severity);
+                  const tone = severityStyle(alert.severity, colors);
                   return (
                     <View
                       key={alert.id}
@@ -200,165 +358,3 @@ export function NotificationBell() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  bellButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(30, 41, 59, 0.7)',
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.45)',
-  },
-  badge: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
-    paddingHorizontal: 4,
-    backgroundColor: colors.red600,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeText: {
-    fontFamily: fonts.semibold,
-    fontSize: 9,
-    color: colors.white,
-  },
-  modalRoot: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'flex-end',
-    paddingTop: 72,
-    paddingHorizontal: 16,
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(2, 6, 23, 0.45)',
-  },
-  panel: {
-    width: '100%',
-    maxWidth: 360,
-    maxHeight: '70%',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(71, 85, 105, 0.55)',
-    backgroundColor: 'rgba(15, 23, 42, 0.97)',
-    overflow: 'hidden',
-  },
-  panelHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(51, 65, 85, 0.5)',
-  },
-  panelHeaderMeta: { flex: 1 },
-  panelTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 15,
-    color: colors.slate200,
-  },
-  panelSubtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-    marginTop: 2,
-  },
-  panelActions: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  iconBtn: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  list: { flexGrow: 0 },
-  listContent: { paddingBottom: 4 },
-  empty: {
-    paddingHorizontal: 16,
-    paddingVertical: 36,
-    alignItems: 'center',
-    gap: 10,
-  },
-  emptyTitle: {
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.slate400,
-  },
-  link: {
-    fontFamily: fonts.medium,
-    fontSize: 12,
-    color: colors.cyan400,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(51, 65, 85, 0.4)',
-  },
-  rowUnread: {
-    backgroundColor: 'rgba(6, 182, 212, 0.06)',
-  },
-  rowMain: { flex: 1, minWidth: 0 },
-  rowTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  severityBadge: {
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  severityText: {
-    fontFamily: fonts.medium,
-    fontSize: 10,
-    textTransform: 'capitalize',
-  },
-  unreadDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.cyan400,
-  },
-  alertTitle: {
-    marginTop: 6,
-    fontFamily: fonts.semibold,
-    fontSize: 14,
-    color: colors.slate200,
-  },
-  alertBody: {
-    marginTop: 2,
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-  alertWhen: {
-    marginTop: 6,
-    fontFamily: fonts.regular,
-    fontSize: 10,
-    color: colors.slate500,
-  },
-  dismissBtn: {
-    width: 28,
-    height: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  footer: {
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(51, 65, 85, 0.5)',
-  },
-  footerLink: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-  },
-});

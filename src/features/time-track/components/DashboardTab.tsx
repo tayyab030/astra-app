@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { SelectField } from '@/features/wealth/SelectField';
 
@@ -65,6 +66,90 @@ function buildTaskBreakdown(entries: TimeEntry[]) {
 }
 
 export function DashboardTab({ timeTrack }: DashboardTabProps) {
+  const { colors, tokens } = useAppTheme();
+  const styles = useThemedStyles((colors, tokens) => ({
+  root: {
+    gap: 16,
+  },
+  label: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+    marginBottom: 8,
+  },
+  periodHint: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate500,
+    marginTop: 10,
+  },
+  stats: {
+    gap: 12,
+  },
+  statCard: {
+    gap: 6,
+  },
+  statTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  statTitle: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+  },
+  statValue: {
+    fontFamily: fonts.headingBold,
+    fontSize: 22,
+  },
+  sectionTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.white,
+    marginBottom: 12,
+  },
+  empty: {
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate400,
+    textAlign: 'center',
+    paddingVertical: 16,
+  },
+  bars: {
+    gap: 12,
+  },
+  barRow: {
+    gap: 6,
+  },
+  barHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  barLabel: {
+    flex: 1,
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors.slate200,
+  },
+  barValue: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.cyan300,
+  },
+  barTrack: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(51, 65, 85, 0.7)',
+    overflow: 'hidden',
+  },
+  barFill: {
+    height: '100%',
+    borderRadius: 4,
+    backgroundColor: colors.cyan500,
+  },
+}));
+
   const { entriesInDateRange, dateRange, setDateRangePreset } = timeTrack;
 
   const stats = useMemo(() => getDashboardStats(entriesInDateRange), [entriesInDateRange]);
@@ -157,85 +242,3 @@ export function DashboardTab({ timeTrack }: DashboardTabProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    gap: 16,
-  },
-  label: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate400,
-    marginBottom: 8,
-  },
-  periodHint: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate500,
-    marginTop: 10,
-  },
-  stats: {
-    gap: 12,
-  },
-  statCard: {
-    gap: 6,
-  },
-  statTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  statTitle: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-  },
-  statValue: {
-    fontFamily: fonts.headingBold,
-    fontSize: 22,
-  },
-  sectionTitle: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.white,
-    marginBottom: 12,
-  },
-  empty: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
-    textAlign: 'center',
-    paddingVertical: 16,
-  },
-  bars: {
-    gap: 12,
-  },
-  barRow: {
-    gap: 6,
-  },
-  barHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  barLabel: {
-    flex: 1,
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate200,
-  },
-  barValue: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.cyan300,
-  },
-  barTrack: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(51, 65, 85, 0.7)',
-    overflow: 'hidden',
-  },
-  barFill: {
-    height: '100%',
-    borderRadius: 4,
-    backgroundColor: colors.cyan500,
-  },
-});

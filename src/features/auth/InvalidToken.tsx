@@ -1,10 +1,11 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useRouter, type Href } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { ROUTES } from '@/constants/routes';
-import { colors, fonts } from '@/constants/theme';
+import { fonts } from '@/constants/theme';
+import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { GlassCard } from './GlassCard';
 
 type InvalidTokenProps = {
@@ -19,6 +20,105 @@ export function InvalidToken({
   redirectPath = ROUTES.AUTH.LOGIN,
 }: InvalidTokenProps) {
   const router = useRouter();
+  const { colors } = useAppTheme();
+  const styles = useThemedStyles((c) => ({
+    header: {
+      alignItems: 'center' as const,
+      paddingHorizontal: 24,
+      gap: 8,
+    },
+    badge: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 6,
+      borderRadius: 999,
+      borderWidth: 1,
+      borderColor: 'rgba(248, 113, 113, 0.35)',
+      backgroundColor: 'rgba(248, 113, 113, 0.12)',
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+    },
+    badgeText: {
+      fontFamily: fonts.regular,
+      fontSize: 12,
+      color: c.red300,
+    },
+    title: {
+      fontFamily: fonts.semibold,
+      fontSize: 28,
+      color: c.red300,
+      textAlign: 'center' as const,
+    },
+    description: {
+      fontFamily: fonts.regular,
+      fontSize: 14,
+      color: c.slate300,
+      textAlign: 'center' as const,
+      lineHeight: 20,
+    },
+    content: {
+      paddingHorizontal: 24,
+      paddingBottom: 16,
+      gap: 16,
+      alignItems: 'center' as const,
+    },
+    notice: {
+      width: '100%' as const,
+      flexDirection: 'row' as const,
+      gap: 12,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: 'rgba(248, 113, 113, 0.25)',
+      backgroundColor: 'rgba(248, 113, 113, 0.1)',
+      padding: 14,
+    },
+    noticeCopy: {
+      flex: 1,
+      gap: 4,
+    },
+    noticeTitle: {
+      fontFamily: fonts.medium,
+      fontSize: 13,
+      color: c.red300,
+    },
+    noticeText: {
+      fontFamily: fonts.regular,
+      fontSize: 12,
+      color: c.slate300,
+      lineHeight: 18,
+    },
+    submitWrap: {
+      width: '100%' as const,
+      borderRadius: 6,
+      overflow: 'hidden' as const,
+    },
+    submit: {
+      height: 36,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    submitText: {
+      fontFamily: fonts.regular,
+      fontSize: 14,
+      color: c.white,
+    },
+    link: {
+      fontFamily: fonts.regular,
+      fontSize: 14,
+      color: c.cyan400,
+    },
+    linkPressed: {
+      color: c.cyan300,
+    },
+    row: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 8,
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+  }));
 
   return (
     <GlassCard>
@@ -73,102 +173,3 @@ export function InvalidToken({
     </GlassCard>
   );
 }
-
-const styles = StyleSheet.create({
-  header: {
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    gap: 8,
-  },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: 'rgba(248, 113, 113, 0.35)',
-    backgroundColor: 'rgba(248, 113, 113, 0.12)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  badgeText: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.red300,
-  },
-  title: {
-    fontFamily: fonts.semibold,
-    fontSize: 28,
-    color: colors.red300,
-    textAlign: 'center',
-  },
-  description: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate300,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
-  content: {
-    paddingHorizontal: 24,
-    paddingBottom: 16,
-    gap: 16,
-    alignItems: 'center',
-  },
-  notice: {
-    width: '100%',
-    flexDirection: 'row',
-    gap: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(248, 113, 113, 0.25)',
-    backgroundColor: 'rgba(248, 113, 113, 0.1)',
-    padding: 14,
-  },
-  noticeCopy: {
-    flex: 1,
-    gap: 4,
-  },
-  noticeTitle: {
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors.red300,
-  },
-  noticeText: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors.slate300,
-    lineHeight: 18,
-  },
-  submitWrap: {
-    width: '100%',
-    borderRadius: 6,
-    overflow: 'hidden',
-  },
-  submit: {
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  submitText: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.white,
-  },
-  link: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.cyan400,
-  },
-  linkPressed: {
-    color: colors.cyan300,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-});
