@@ -22,3 +22,4 @@ export * from './habits';
 export * from './health';
 export * from './timeTrack';
 export * from './insights';
+export * from './sessions';

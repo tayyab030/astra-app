@@ -116,7 +116,93 @@ export interface NotesQueryParams {
   page_size?: number;
 }
 
+export interface CreateNoteApiPayload {
+  title: string;
+  content: string;
+  note_type: NoteTypeApi;
+  category?: string;
+  tags?: string[];
+  priority?: NotePriorityApi;
+  is_favorite?: boolean;
+  color?: string;
+  status?: NoteStatusApi;
+  reminder?: string;
+  linked_items?: LinkedItemApi[];
+  visibility?: NoteVisibilityApi;
+  metadata?: Record<string, unknown>;
+}
+
+export interface UpdateNoteApiPayload {
+  title?: string;
+  content?: string;
+  note_type?: NoteTypeApi;
+  category?: string;
+  tags?: string[];
+  priority?: NotePriorityApi;
+  is_favorite?: boolean;
+  is_pinned?: boolean;
+  color?: string;
+  status?: NoteStatusApi;
+  reminder?: string | null;
+  linked_items?: LinkedItemApi[];
+  attachments?: NoteAttachmentApi[];
+  visibility?: NoteVisibilityApi;
+  metadata?: Record<string, unknown>;
+}
+
+export function getNotesErrorMessage(error: unknown, fallback: string) {
+  const responseData = (error as { response?: { data?: Record<string, unknown> } })?.response
+    ?.data;
+
+  if (!responseData) return fallback;
+
+  if (typeof responseData.detail === 'string') return responseData.detail;
+  if (typeof responseData.message === 'string') return responseData.message;
+
+  const firstFieldError = Object.values(responseData).find(
+    (value) => Array.isArray(value) && typeof value[0] === 'string',
+  ) as string[] | undefined;
+
+  return firstFieldError?.[0] ?? fallback;
+}
+
 export async function fetchNotesDashboard(params: NotesQueryParams) {
   const response = await authApi.get<NotesDashboardApi>(NOTES.DASHBOARD, { params });
+  return response.data;
+}
+
+export async function fetchNote(id: string) {
+  const response = await authApi.get<NoteApi>(NOTES.NOTE(id));
+  return response.data;
+}
+
+export async function createNoteApi(payload: CreateNoteApiPayload) {
+  const response = await authApi.post<NoteApi>(NOTES.NOTES, payload);
+  return response.data;
+}
+
+export async function updateNoteApi(id: string, payload: UpdateNoteApiPayload) {
+  const response = await authApi.patch<NoteApi>(NOTES.NOTE(id), payload);
+  return response.data;
+}
+
+export async function deleteNoteApi(id: string, permanent = false) {
+  const url = permanent ? NOTES.PERMANENT(id) : NOTES.NOTE(id);
+  const response = await authApi.delete<{ message: string }>(url);
+  return response.data;
+}
+
+export async function restoreNoteApi(id: string) {
+  const response = await authApi.post<NoteApi>(NOTES.RESTORE(id));
+  return response.data;
+}
+
+export async function archiveNoteApi(id: string) {
+  const response = await authApi.post<NoteApi>(NOTES.ARCHIVE(id));
+  return response.data;
+}
+
+export async function duplicateNoteApi(id: string) {
+  const response = await authApi.post<NoteApi>(NOTES.DUPLICATE(id));
   return response.data;
 }

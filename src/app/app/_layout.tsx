@@ -1,11 +1,14 @@
 import { Slot } from 'expo-router';
 
 import { AppShell } from '@/features/app/AppShell';
+import { TimeTrackProvider } from '@/features/time-track/context/TimeTrackProvider';
 
 export default function AppGroupLayout() {
   return (
-    <AppShell>
-      <Slot />
-    </AppShell>
+    <TimeTrackProvider>
+      <AppShell>
+        <Slot />
+      </AppShell>
+    </TimeTrackProvider>
   );
 }

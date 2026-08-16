@@ -69,11 +69,97 @@ export interface HabitDayApi {
   items: HabitApi[];
 }
 
+export interface CreateHabitPayload {
+  name: string;
+  frequency?: string;
+  repeat_days?: number[];
+  period_target?: number;
+  interval_days?: number;
+  time_of_day?: string;
+  reminder_time?: string | null;
+  start_date?: string;
+  end_date?: string | null;
+  target?: number;
+  domain?: string;
+  metric_type?: string;
+  unit?: string | null;
+  group_key?: string | null;
+  group_name?: string | null;
+  priority?: HabitPriorityApi;
+  miss_behavior?: HabitMissBehaviorApi;
+}
+
+export interface UpdateHabitPayload {
+  name?: string;
+  frequency?: string;
+  repeat_days?: number[];
+  period_target?: number;
+  interval_days?: number;
+  time_of_day?: string;
+  reminder_time?: string | null;
+  start_date?: string;
+  end_date?: string | null;
+  target?: number;
+  domain?: string;
+  metric_type?: string;
+  unit?: string | null;
+  priority?: HabitPriorityApi;
+  miss_behavior?: HabitMissBehaviorApi;
+}
+
+export interface CreateHabitPackPayload {
+  name: string;
+  frequency?: string;
+  repeat_days?: number[];
+  period_target?: number;
+  interval_days?: number;
+  time_of_day?: string;
+  reminder_time?: string | null;
+  start_date?: string;
+  miss_behavior?: HabitMissBehaviorApi;
+  items: Array<{
+    name: string;
+    priority?: HabitPriorityApi;
+    miss_behavior?: HabitMissBehaviorApi;
+  }>;
+}
+
+export interface AdjustHabitPayload {
+  date?: string;
+  direction?: -1 | 1;
+  value?: number;
+  step?: number;
+  delay_reason?: string;
+  cannot_do?: boolean;
+  is_late?: boolean;
+}
+
+export interface ToggleHabitPayload {
+  date?: string;
+  delay_reason?: string;
+  cannot_do?: boolean;
+  is_late?: boolean;
+}
+
 function resolvePriority(habit: HabitApi): HabitPriorityApi {
   if (habit.priority === 'high' || habit.priority === 'medium' || habit.priority === 'low') {
     return habit.priority;
   }
   return habit.is_required === false ? 'low' : 'medium';
+}
+
+export function getHabitsErrorMessage(error: unknown, fallback: string) {
+  const responseData = (error as { response?: { data?: Record<string, unknown> } })?.response?.data;
+  if (!responseData) return fallback;
+  if (typeof responseData.detail === 'string') return responseData.detail;
+  if (typeof responseData.message === 'string') return responseData.message;
+  if (Array.isArray(responseData.delay_reason) && typeof responseData.delay_reason[0] === 'string') {
+    return responseData.delay_reason[0];
+  }
+  const firstFieldError = Object.values(responseData).find(
+    (value) => Array.isArray(value) && typeof value[0] === 'string',
+  ) as string[] | undefined;
+  return firstFieldError?.[0] ?? fallback;
 }
 
 export function mapHabit(habit: HabitApi) {
@@ -153,4 +239,33 @@ export async function fetchHabits() {
 export async function fetchHabitsDay(date: string) {
   const response = await authApi.get<HabitDayApi>(HABITS.DAY, { params: { date } });
   return mapHabitDay(response.data);
+}
+
+export async function toggleHabit(id: string, payload: ToggleHabitPayload = {}) {
+  const response = await authApi.patch<HabitApi>(HABITS.TOGGLE(id), payload);
+  return mapHabit(response.data);
+}
+
+export async function createHabit(payload: CreateHabitPayload) {
+  const response = await authApi.post<HabitApi>(HABITS.LIST, payload);
+  return mapHabit(response.data);
+}
+
+export async function createHabitPack(payload: CreateHabitPackPayload) {
+  const response = await authApi.post<HabitApi[]>(HABITS.PACK, payload);
+  return response.data.map(mapHabit);
+}
+
+export async function adjustHabit(id: string, payload: AdjustHabitPayload) {
+  const response = await authApi.post<HabitApi>(HABITS.ADJUST(id), payload);
+  return mapHabit(response.data);
+}
+
+export async function updateHabit(id: string, payload: UpdateHabitPayload) {
+  const response = await authApi.patch<HabitApi>(HABITS.HABIT(id), payload);
+  return mapHabit(response.data);
+}
+
+export async function deleteHabit(id: string) {
+  await authApi.delete(HABITS.HABIT(id));
 }

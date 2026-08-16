@@ -96,11 +96,10 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
     }
     const normalized = part.replace(/-/g, '+').replace(/_/g, '/');
     const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
-    const json =
-      typeof atob === 'function'
-        ? atob(padded)
-        : Buffer.from(padded, 'base64').toString('utf8');
-    return JSON.parse(json) as Record<string, unknown>;
+    if (typeof atob !== 'function') {
+      return null;
+    }
+    return JSON.parse(atob(padded)) as Record<string, unknown>;
   } catch {
     return null;
   }
@@ -416,4 +415,11 @@ export async function logoutSession(reason?: LogoutReason) {
 
 export function getCurrentUser() {
   return currentUser;
+}
+
+/** Merge profile fields into the stored session user (keeps tokens intact). */
+export async function updateStoredUser(user: AuthUser) {
+  currentUser = user;
+  await setSecureItem(USER_KEY, JSON.stringify(user));
+  notifySession();
 }

@@ -78,6 +78,75 @@ export interface HealthMoodEntryApi {
   notes: string;
 }
 
+export interface UpdateHealthProfilePayload {
+  height_cm?: number | null;
+  ideal_weight_kg?: number | null;
+}
+
+export interface UpdateHealthTargetsPayload {
+  water_glasses?: number;
+  sleep_hours?: number;
+  exercise_minutes?: number;
+}
+
+export interface UpdateTodayMetricsPayload {
+  water_glasses?: number;
+  exercise_minutes?: number;
+}
+
+export interface ToggleSleepPayload {
+  timestamp?: string;
+  local_date?: string;
+}
+
+export interface CreateSleepSessionPayload {
+  start_time: string;
+  end_time: string;
+  date?: string;
+}
+
+export interface UpdateSleepSessionPayload {
+  start_time?: string;
+  end_time?: string;
+  date?: string;
+}
+
+export interface LogWeightPayload {
+  weight_kg: number;
+  date?: string;
+}
+
+export interface CreateWorkoutPayload {
+  type: string;
+  duration: number;
+  calories?: number;
+  date?: string;
+}
+
+export interface SaveMoodPayload {
+  mood: string;
+  notes?: string;
+  date?: string;
+}
+
+export interface AdjustMetricPayload {
+  metric: 'water' | 'exercise';
+  direction: -1 | 1;
+  date?: string;
+}
+
+export function getHealthErrorMessage(error: unknown, fallback: string) {
+  const responseData = (error as { response?: { data?: Record<string, unknown> } })?.response
+    ?.data;
+  if (!responseData) return fallback;
+  if (typeof responseData.detail === 'string') return responseData.detail;
+  if (typeof responseData.message === 'string') return responseData.message;
+  const firstFieldError = Object.values(responseData).find(
+    (value) => Array.isArray(value) && typeof value[0] === 'string',
+  ) as string[] | undefined;
+  return firstFieldError?.[0] ?? fallback;
+}
+
 function mapWeight(entry: HealthWeightEntryApi) {
   return { id: entry.id, date: entry.date, weightKg: entry.weight_kg };
 }
@@ -164,4 +233,68 @@ export function mapHealthDashboard(data: HealthDashboardApi) {
 export async function fetchHealthDashboard(params: HealthFilterParams) {
   const response = await authApi.get<HealthDashboardApi>(HEALTH.DASHBOARD, { params });
   return mapHealthDashboard(response.data);
+}
+
+export async function updateHealthProfile(payload: UpdateHealthProfilePayload) {
+  const response = await authApi.patch<{
+    height_cm: number | null;
+    ideal_weight_kg: number | null;
+  }>(HEALTH.PROFILE, payload);
+  return {
+    heightCm: response.data.height_cm,
+    idealWeightKg: response.data.ideal_weight_kg ?? null,
+  };
+}
+
+export async function updateHealthTargets(payload: UpdateHealthTargetsPayload) {
+  const response = await authApi.patch<HealthDashboardApi['targets']>(HEALTH.TARGETS, payload);
+  return {
+    waterGlasses: response.data.water_glasses,
+    sleepHours: response.data.sleep_hours,
+    exerciseMinutes: response.data.exercise_minutes,
+  };
+}
+
+export async function updateHealthTodayMetrics(payload: UpdateTodayMetricsPayload) {
+  const response = await authApi.patch<HealthDashboardApi['today']>(HEALTH.TODAY, payload);
+  return mapTodayMetrics(response.data);
+}
+
+export async function adjustHealthMetric(payload: AdjustMetricPayload) {
+  const response = await authApi.post<HealthDashboardApi['today']>(HEALTH.METRICS_ADJUST, payload);
+  return mapTodayMetrics(response.data);
+}
+
+export async function toggleHealthSleep(payload: ToggleSleepPayload = {}) {
+  const response = await authApi.post<HealthSleepSessionApi>(HEALTH.SLEEP_TOGGLE, payload);
+  return mapSleepSession(response.data);
+}
+
+export async function createHealthSleepSession(payload: CreateSleepSessionPayload) {
+  const response = await authApi.post<HealthSleepSessionApi>(HEALTH.SLEEP_SESSIONS, payload);
+  return mapSleepSession(response.data);
+}
+
+export async function updateHealthSleepSession(id: string, payload: UpdateSleepSessionPayload) {
+  const response = await authApi.patch<HealthSleepSessionApi>(HEALTH.SLEEP_SESSION(id), payload);
+  return mapSleepSession(response.data);
+}
+
+export async function deleteHealthSleepSession(id: string) {
+  await authApi.delete(HEALTH.SLEEP_SESSION(id));
+}
+
+export async function logHealthWeight(payload: LogWeightPayload) {
+  const response = await authApi.post<HealthWeightEntryApi>(HEALTH.WEIGHT, payload);
+  return mapWeight(response.data);
+}
+
+export async function createHealthWorkout(payload: CreateWorkoutPayload) {
+  const response = await authApi.post<HealthWorkoutApi>(HEALTH.WORKOUTS, payload);
+  return mapWorkout(response.data);
+}
+
+export async function saveHealthMood(payload: SaveMoodPayload) {
+  const response = await authApi.post<HealthMoodEntryApi>(HEALTH.MOOD, payload);
+  return mapMood(response.data);
 }

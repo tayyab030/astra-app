@@ -1,22 +1,8 @@
-import { useLocalSearchParams } from 'expo-router';
+import { Redirect } from 'expo-router';
 
-import { AppPlaceholder } from '@/features/app/AppPlaceholder';
+import { ROUTES } from '@/constants/routes';
 
-const titles: Record<string, string> = {
-  tasks: 'Tasks',
-  'time-track': 'Time Track',
-  goals: 'Goals',
-  health: 'Health',
-  notes: 'Notes',
-  communication: 'Communication',
-  analytics: 'Analytics',
-  'life-score': 'Life Score',
-  settings: 'Settings',
-};
-
+/** Fallback for unknown `/app/*` segments — all main modules have dedicated routes. */
 export default function AppSectionPage() {
-  const { page } = useLocalSearchParams<{ page: string }>();
-  const key = Array.isArray(page) ? page[0] : page;
-
-  return <AppPlaceholder title={titles[key] ?? 'Astra'} />;
+  return <Redirect href={ROUTES.APP.DASHBOARD} />;
 }

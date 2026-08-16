@@ -12,16 +12,20 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 type WeeklyExpensesChartProps = {
   slices: ExpenseSlice[];
+  emptyLabel?: string;
 };
 
-export function WeeklyExpensesChart({ slices }: WeeklyExpensesChartProps) {
+export function WeeklyExpensesChart({
+  slices,
+  emptyLabel = 'No expenses this week',
+}: WeeklyExpensesChartProps) {
   const { formatCurrency } = useCurrency();
   const total = slices.reduce((sum, point) => sum + point.value, 0);
 
   if (slices.length === 0 || total <= 0) {
     return (
       <View style={styles.empty}>
-        <Text style={styles.emptyText}>No expenses this week</Text>
+        <Text style={styles.emptyText}>{emptyLabel}</Text>
       </View>
     );
   }

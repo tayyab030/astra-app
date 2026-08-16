@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(2, 6, 23, 0.55)',
   },
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   panel: {
     width: '82%',

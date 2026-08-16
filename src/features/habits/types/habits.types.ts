@@ -1,4 +1,5 @@
 export type HabitMetricType = 'boolean' | 'count' | 'duration';
+export type HabitCreateMode = 'single' | 'pack';
 export type HabitDayRelative = 'today' | 'yesterday' | 'tomorrow' | 'past' | 'future';
 export type HabitDayStatus = 'done' | 'late' | 'pending' | 'missed' | 'upcoming';
 export type HabitFrequency = 'daily' | 'weekly' | 'monthly' | 'interval';
@@ -68,3 +69,57 @@ export interface HabitDayView {
   summary: HabitDaySummary;
   items: Habit[];
 }
+
+export interface HabitPackItemDraft {
+  id: string;
+  name: string;
+  priority: HabitPriority;
+  missBehavior: HabitMissBehavior;
+}
+
+export const PRIORITY_OPTIONS: { value: HabitPriority; label: string }[] = [
+  { value: 'high', label: 'High' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'low', label: 'Low' },
+];
+
+export const MISS_BEHAVIOR_OPTIONS: {
+  value: HabitMissBehavior;
+  label: string;
+  hint: string;
+}[] = [
+  {
+    value: 'carry',
+    label: 'Carry over',
+    hint: 'If missed, it stays due tomorrow. Completing late is marked late.',
+  },
+  {
+    value: 'reset',
+    label: 'Reset on miss',
+    hint: 'If missed, it disappears tomorrow and the streak breaks.',
+  },
+];
+
+export const WEEKDAY_OPTIONS = [
+  { value: 0, label: 'Sun', full: 'Sunday' },
+  { value: 1, label: 'Mon', full: 'Monday' },
+  { value: 2, label: 'Tue', full: 'Tuesday' },
+  { value: 3, label: 'Wed', full: 'Wednesday' },
+  { value: 4, label: 'Thu', full: 'Thursday' },
+  { value: 5, label: 'Fri', full: 'Friday' },
+  { value: 6, label: 'Sat', full: 'Saturday' },
+] as const;
+
+export const FREQUENCY_OPTIONS: { value: HabitFrequency; label: string; hint: string }[] = [
+  { value: 'daily', label: 'Daily', hint: 'Pick weekdays' },
+  { value: 'weekly', label: 'Weekly', hint: 'N times / week' },
+  { value: 'monthly', label: 'Monthly', hint: 'N times / month' },
+  { value: 'interval', label: 'Interval', hint: 'Every N days' },
+];
+
+export const TIME_OF_DAY_OPTIONS: { value: HabitTimeOfDay; label: string }[] = [
+  { value: 'morning', label: 'Morning' },
+  { value: 'afternoon', label: 'Afternoon' },
+  { value: 'evening', label: 'Evening' },
+  { value: 'anytime', label: 'Anytime' },
+];

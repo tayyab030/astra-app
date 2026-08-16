@@ -1,3 +1,6 @@
+import type { AppTheme } from '@/lib/app-theme';
+import type { ModuleSettings } from '@/lib/module-settings';
+
 export type AuthUser = {
   id: string;
   username: string;
@@ -8,13 +11,14 @@ export type AuthUser = {
   currency?: string;
   country?: string | null;
   timezone?: string;
-  theme?: 'light' | 'dark' | 'neon';
+  theme?: AppTheme | string;
   ai_voice?: string | null;
   ai_voice_mode?: boolean | null;
   ai_personality?: string | null;
   ai_insights?: boolean | null;
   ai_data_scope?: string | null;
   ai_language?: string | null;
+  module_settings?: ModuleSettings;
 };
 
 export type AuthSession = {

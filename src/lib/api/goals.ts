@@ -72,6 +72,38 @@ export interface GoalsDashboard {
   goals: Goal[];
 }
 
+export interface CreateGoalPayload {
+  title: string;
+  category: GoalCategoryValue;
+  priority: GoalPriorityValue;
+  motivation?: string;
+  start_date: string;
+  target_date: string;
+  progress?: number;
+  milestones?: { title: string; due_date: string }[];
+}
+
+export interface UpdateGoalPayload {
+  title?: string;
+  category?: GoalCategoryValue;
+  priority?: GoalPriorityValue;
+  motivation?: string;
+  start_date?: string;
+  target_date?: string;
+  progress?: number;
+}
+
+export interface UpdateMilestonePayload {
+  title?: string;
+  due_date?: string;
+  completed?: boolean;
+}
+
+export interface CreateMilestonePayload {
+  title: string;
+  due_date: string;
+}
+
 export function buildGoalsFilterParams(filter: GoalsFilter) {
   if (filter.mode === 'month') {
     return {
@@ -88,9 +120,63 @@ export function buildGoalsFilterParams(filter: GoalsFilter) {
   };
 }
 
+export function getGoalsErrorMessage(error: unknown, fallback: string) {
+  const responseData = (error as { response?: { data?: Record<string, unknown> } })?.response?.data;
+
+  if (!responseData) return fallback;
+
+  if (typeof responseData.detail === 'string') return responseData.detail;
+  if (typeof responseData.message === 'string') return responseData.message;
+
+  const firstFieldError = Object.values(responseData).find(
+    (value) => Array.isArray(value) && typeof value[0] === 'string',
+  ) as string[] | undefined;
+
+  return firstFieldError?.[0] ?? fallback;
+}
+
 export async function fetchGoalsDashboard(filter: GoalsFilter) {
   const response = await authApi.get<GoalsDashboard>(GOALS.DASHBOARD, {
     params: buildGoalsFilterParams(filter),
   });
+  return response.data;
+}
+
+export async function fetchGoal(id: string) {
+  const response = await authApi.get<Goal>(GOALS.GOAL(id));
+  return response.data;
+}
+
+export async function createGoal(payload: CreateGoalPayload) {
+  const response = await authApi.post<Goal>(GOALS.GOALS, payload);
+  return response.data;
+}
+
+export async function updateGoal(id: string, payload: UpdateGoalPayload) {
+  const response = await authApi.patch<Goal>(GOALS.GOAL(id), payload);
+  return response.data;
+}
+
+export async function deleteGoal(id: string) {
+  const response = await authApi.delete<{ message: string }>(GOALS.GOAL(id));
+  return response.data;
+}
+
+export async function updateGoalMilestone(
+  goalId: string,
+  milestoneId: string,
+  payload: UpdateMilestonePayload,
+) {
+  const response = await authApi.patch<Goal>(GOALS.MILESTONE(goalId, milestoneId), payload);
+  return response.data;
+}
+
+export async function createGoalMilestone(goalId: string, payload: CreateMilestonePayload) {
+  const response = await authApi.post<Goal>(GOALS.MILESTONES(goalId), payload);
+  return response.data;
+}
+
+export async function deleteGoalMilestone(goalId: string, milestoneId: string) {
+  const response = await authApi.delete<Goal>(GOALS.MILESTONE(goalId, milestoneId));
   return response.data;
 }
