@@ -45,7 +45,7 @@ export function InvalidToken({
     },
     title: {
       fontFamily: fonts.semibold,
-      fontSize: 28,
+      fontSize: 22,
       color: c.red300,
       textAlign: 'center' as const,
     },

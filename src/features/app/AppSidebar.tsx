@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { ROUTES } from '@/constants/routes';
-import { fonts } from '@/constants/theme';
+import { fonts, type } from '@/constants/theme';
 import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { useSession } from '@/hooks/useSession';
 import { logoutSession } from '@/lib/auth/tokenManager';
@@ -67,12 +67,12 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
     },
     activeLabel: {
       fontFamily: fonts.medium,
-      fontSize: 14,
+      fontSize: type.body,
       color: t.primaryForeground,
     },
     inactiveLabel: {
       fontFamily: fonts.medium,
-      fontSize: 14,
+      fontSize: type.body,
       color: c.slate300,
     },
     logout: {
@@ -85,7 +85,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
     },
     logoutLabel: {
       fontFamily: fonts.medium,
-      fontSize: 14,
+      fontSize: type.body,
       color: c.red400,
     },
   }));

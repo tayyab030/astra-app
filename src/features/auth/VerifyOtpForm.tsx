@@ -45,13 +45,13 @@ export function VerifyOtpForm() {
   },
   title: {
     fontFamily: fonts.semibold,
-    fontSize: 30,
+    fontSize: 24,
     color: colors.cyan100,
     textAlign: 'center',
   },
   description: {
     fontFamily: fonts.regular,
-    fontSize: 14,
+    fontSize: 13,
     color: colors.slate300,
     textAlign: 'center',
   },
@@ -131,7 +131,7 @@ export function VerifyOtpForm() {
   },
   submitText: {
     fontFamily: fonts.regular,
-    fontSize: 14,
+    fontSize: 15,
     color: colors.white,
   },
   footer: {

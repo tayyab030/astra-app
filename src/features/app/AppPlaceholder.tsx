@@ -13,7 +13,7 @@ export function AppPlaceholder({ title }: { title: string }) {
     },
     title: {
       fontFamily: fonts.headingBold,
-      fontSize: 30,
+      fontSize: 24,
       color: colors.cyan300,
     },
     body: {

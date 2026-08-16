@@ -2,7 +2,7 @@ import { ActivityIndicator, Pressable, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { fonts } from '@/constants/theme';
+import { fonts, type } from '@/constants/theme';
 import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 
 type PrimaryButtonProps = {
@@ -17,8 +17,8 @@ export function PrimaryButton({ label, onPress, disabled, loading, icon }: Prima
   const { tokens } = useAppTheme();
   const styles = useThemedStyles((_c, t) => ({
     button: {
-      minHeight: 40,
-      borderRadius: 6,
+      minHeight: 44,
+      borderRadius: 8,
       paddingHorizontal: 16,
       flexDirection: 'row' as const,
       alignItems: 'center' as const,
@@ -28,8 +28,8 @@ export function PrimaryButton({ label, onPress, disabled, loading, icon }: Prima
       borderColor: t.border,
     },
     label: {
-      fontFamily: fonts.regular,
-      fontSize: 14,
+      fontFamily: fonts.medium,
+      fontSize: type.body,
       color: t.primaryForeground,
     },
     disabled: {

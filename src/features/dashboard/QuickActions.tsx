@@ -3,7 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { fonts } from '@/constants/theme';
+import { fonts, type } from '@/constants/theme';
 import { ROUTES } from '@/constants/routes';
 import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { DashboardCard } from './DashboardCard';
@@ -113,7 +113,7 @@ export function QuickActions() {
   const styles = useThemedStyles((c) => ({
     title: {
       fontFamily: fonts.heading,
-      fontSize: 18,
+      fontSize: type.titleMd,
       color: c.cyan300,
       marginBottom: 12,
     },
@@ -134,7 +134,7 @@ export function QuickActions() {
     },
     actionLabel: {
       fontFamily: fonts.regular,
-      fontSize: 13,
+      fontSize: type.md,
       textAlign: 'center' as const,
       paddingHorizontal: 4,
     },

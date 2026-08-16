@@ -117,7 +117,7 @@ export function SettingsScreen() {
     tabActiveLabel: { fontFamily: fonts.medium, fontSize: 13, color: colors.white },
     sectionTitle: {
       fontFamily: fonts.heading,
-      fontSize: 16,
+      fontSize: 17,
       color: colors.cyan300,
       marginBottom: 4,
     },

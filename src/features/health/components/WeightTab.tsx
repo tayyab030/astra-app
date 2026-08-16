@@ -41,7 +41,7 @@ export function WeightTab() {
   },
   bigValue: {
     fontFamily: fonts.headingBold,
-    fontSize: 28,
+    fontSize: 22,
     marginBottom: 8,
   },
   midValue: {

@@ -113,9 +113,9 @@ export function LifeScoreScreen() {
   },
   scoreValue: {
     fontFamily: fonts.headingBold,
-    fontSize: 56,
+    fontSize: 36,
     color: colors.cyan300,
-    lineHeight: 64,
+    lineHeight: 40,
   },
   scoreOutOf: {
     fontFamily: fonts.regular,

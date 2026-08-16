@@ -43,13 +43,13 @@ export function ForgotPasswordForm() {
   },
   title: {
     fontFamily: fonts.semibold,
-    fontSize: 30,
+    fontSize: 24,
     color: colors.cyan100,
     textAlign: 'center',
   },
   description: {
     fontFamily: fonts.regular,
-    fontSize: 14,
+    fontSize: 13,
     color: colors.slate300,
     textAlign: 'center',
   },
@@ -91,7 +91,7 @@ export function ForgotPasswordForm() {
   },
   label: {
     fontFamily: fonts.regular,
-    fontSize: 14,
+    fontSize: 13,
     color: colors.cyan200,
   },
   input: {
@@ -102,7 +102,7 @@ export function ForgotPasswordForm() {
     backgroundColor: 'rgba(51, 65, 85, 0.5)',
     color: colors.white,
     fontFamily: fonts.regular,
-    fontSize: 14,
+    fontSize: 15,
     paddingHorizontal: 12,
   },
   inputFocused: {
@@ -129,7 +129,7 @@ export function ForgotPasswordForm() {
   },
   submitText: {
     fontFamily: fonts.regular,
-    fontSize: 14,
+    fontSize: 15,
     color: colors.white,
   },
   successBlock: {

@@ -232,7 +232,7 @@ export function AnalyticsScreen() {
   },
   miniValue: {
     fontFamily: fonts.headingBold,
-    fontSize: 28,
+    fontSize: 22,
     color: colors.cyan300,
   },
   highlights: {

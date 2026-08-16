@@ -103,15 +103,16 @@ export function DashboardScreen() {
   },
   title: {
     fontFamily: fonts.headingBold,
-    fontSize: 30,
+    fontSize: 22,
     color: colors.cyan300,
-    lineHeight: 36,
+    lineHeight: 28,
   },
   quote: {
     fontFamily: fonts.regular,
-    fontSize: 16,
+    fontSize: 14,
     color: colors.slate300,
     marginTop: 4,
+    lineHeight: 20,
   },
   badge: {
     alignSelf: 'flex-start',
