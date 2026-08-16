@@ -11,6 +11,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { InsightHorizonBadge } from '@/components/insights/InsightHorizonBadge';
+import { PageHeader } from '@/components/PageHeader';
 import { colors, fonts } from '@/constants/theme';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { useDashboard } from '@/features/dashboard/hooks/useDashboard';
@@ -153,13 +154,11 @@ export function GoalsScreen() {
       contentContainerStyle={styles.scroll}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <View style={styles.headerText}>
-          <Text style={styles.title}>Goals Dashboard</Text>
-          <Text style={styles.subtitle}>"{quote}"</Text>
-        </View>
-        <PrimaryButton label="Add Goal" icon="add" onPress={openAddGoal} />
-      </View>
+      <PageHeader
+        title="Goals"
+        subtitle={`"${quote}"`}
+        right={<PrimaryButton label="Add Goal" icon="add" onPress={openAddGoal} />}
+      />
 
       <WealthFilters onChange={(next) => setFilter(next as GoalsFilter & WealthFilter)} />
 
@@ -283,26 +282,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scroll: {
-    padding: 16,
+    padding: 24,
     paddingBottom: 40,
     gap: 16,
-  },
-  header: {
-    gap: 12,
-  },
-  headerText: {
-    gap: 4,
-  },
-  title: {
-    fontFamily: fonts.heading,
-    fontSize: 24,
-    color: colors.cyan300,
-  },
-  subtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
-    fontStyle: 'italic',
   },
   summaryGrid: {
     flexDirection: 'row',

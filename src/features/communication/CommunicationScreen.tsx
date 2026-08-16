@@ -6,6 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { ROUTES } from '@/constants/routes';
 import { colors, fonts } from '@/constants/theme';
+import { PageHeader } from '@/components/PageHeader';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
 import { showToast } from '@/lib/ui/toastStore';
@@ -65,12 +66,10 @@ export function CommunicationScreen() {
       contentContainerStyle={styles.scroll}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>Device preferences</Text>
-        <Text style={styles.subtitle}>
-          Local notification prefs only — nothing here syncs to the server yet.
-        </Text>
-      </View>
+      <PageHeader
+        title="Communication"
+        subtitle="Local notification prefs only — nothing here syncs to the server yet."
+      />
 
       <DashboardCard borderColor="rgba(250, 204, 21, 0.35)">
         <View style={styles.inboxHeader}>
@@ -200,10 +199,7 @@ function ToggleRow({
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  scroll: { padding: 16, paddingBottom: 40, gap: 16 },
-  header: { gap: 4 },
-  title: { fontFamily: fonts.headingBold, fontSize: 28, color: colors.cyan300 },
-  subtitle: { fontFamily: fonts.regular, fontSize: 14, color: colors.slate400 },
+  scroll: { padding: 24, paddingBottom: 40, gap: 16 },
   inboxHeader: { flexDirection: 'row', gap: 12, marginBottom: 12 },
   inboxMeta: { flex: 1 },
   sectionTitle: {

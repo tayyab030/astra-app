@@ -2,6 +2,7 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { format, parseISO } from 'date-fns';
 
+import { OverflowMenu } from '@/components/OverflowMenu';
 import { colors, fonts } from '@/constants/theme';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import type { Goal, UpdateMilestonePayload } from '@/lib/api/goals';
@@ -65,14 +66,6 @@ export function GoalCard({
     );
   };
 
-  const openMenu = () => {
-    Alert.alert(goal.title, undefined, [
-      { text: 'Edit', onPress: () => onEdit(goal) },
-      { text: 'Delete', style: 'destructive', onPress: confirmDelete },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  };
-
   return (
     <DashboardCard>
       <View style={styles.header}>
@@ -110,13 +103,29 @@ export function GoalCard({
           {goal.motivation ? <Text style={styles.motivation}>{goal.motivation}</Text> : null}
         </View>
         <View style={styles.headerRight}>
+          <OverflowMenu
+            disabled={isDeleting}
+            accessibilityLabel="Goal actions"
+            items={[
+              {
+                key: 'edit',
+                label: 'Edit',
+                icon: 'create-outline',
+                onPress: () => onEdit(goal),
+              },
+              {
+                key: 'delete',
+                label: 'Delete',
+                icon: 'trash-outline',
+                destructive: true,
+                onPress: confirmDelete,
+              },
+            ]}
+          />
           <View style={styles.progressWrap}>
             <Text style={styles.progressValue}>{goal.progress}%</Text>
             <Text style={styles.progressLabel}>Complete</Text>
           </View>
-          <Pressable onPress={openMenu} hitSlop={8} disabled={isDeleting}>
-            <Ionicons name="ellipsis-vertical" size={18} color={colors.slate400} />
-          </Pressable>
         </View>
       </View>
 
@@ -286,9 +295,9 @@ const styles = StyleSheet.create({
     color: colors.slate300,
   },
   headerRight: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
+    flexShrink: 0,
+    alignItems: 'flex-end',
+    gap: 6,
   },
   progressWrap: {
     alignItems: 'flex-end',

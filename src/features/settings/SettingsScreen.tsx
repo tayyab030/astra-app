@@ -17,6 +17,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { ROUTES } from '@/constants/routes';
 import { colors, fonts } from '@/constants/theme';
+import { PageHeader } from '@/components/PageHeader';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { FormModal } from '@/features/wealth/FormModal';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
@@ -357,10 +358,10 @@ export function SettingsScreen() {
   return (
     <View style={styles.root}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Settings</Text>
-          <Text style={styles.subtitle}>Your ASTRA control center — personalize your Life OS</Text>
-        </View>
+        <PageHeader
+          title="Settings"
+          subtitle="Your ASTRA control center — personalize your Life OS"
+        />
 
         <ScrollView
           horizontal
@@ -832,12 +833,9 @@ function FieldLabel({ children }: { children: string }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  scroll: { padding: 16, paddingBottom: 40, gap: 16 },
+  scroll: { padding: 24, paddingBottom: 40, gap: 16 },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
   loadingText: { fontFamily: fonts.regular, fontSize: 14, color: colors.slate400 },
-  header: { gap: 4 },
-  title: { fontFamily: fonts.headingBold, fontSize: 28, color: colors.cyan300 },
-  subtitle: { fontFamily: fonts.regular, fontSize: 14, color: colors.slate400 },
   tabs: { gap: 8, paddingVertical: 4 },
   tab: {
     minHeight: 36,

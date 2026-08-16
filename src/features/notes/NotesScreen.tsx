@@ -12,6 +12,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { PageHeader } from '@/components/PageHeader';
 import { colors, fonts } from '@/constants/theme';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
@@ -185,25 +186,23 @@ export function NotesScreen() {
   return (
     <View style={styles.root}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View style={styles.headingWrap}>
-            <Text style={styles.title}>Notes & Knowledge</Text>
-            <Text style={styles.subtitle}>
-              Your personal second brain — capture, organize, and connect ideas
-            </Text>
-          </View>
-          <View style={styles.headerActions}>
-            <PrimaryButton
-              label={selectionMode ? 'Done' : 'Select'}
-              icon={selectionMode ? 'checkmark' : 'checkbox-outline'}
-              onPress={() => {
-                setSelectionMode((prev) => !prev);
-                setSelectedIds([]);
-              }}
-            />
-            <PrimaryButton label="New Note" icon="add" onPress={openCreate} />
-          </View>
-        </View>
+        <PageHeader
+          title="Notes"
+          subtitle="Your personal second brain — capture, organize, and connect ideas"
+          right={
+            <View style={styles.headerActions}>
+              <PrimaryButton
+                label={selectionMode ? 'Done' : 'Select'}
+                icon={selectionMode ? 'checkmark' : 'checkbox-outline'}
+                onPress={() => {
+                  setSelectionMode((prev) => !prev);
+                  setSelectedIds([]);
+                }}
+              />
+              <PrimaryButton label="New Note" icon="add" onPress={openCreate} />
+            </View>
+          }
+        />
 
         <ScrollView
           horizontal
@@ -438,7 +437,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scroll: {
-    padding: 16,
+    padding: 24,
     paddingBottom: 40,
     gap: 16,
   },
@@ -453,16 +452,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.slate400,
   },
-  header: {
-    gap: 12,
-  },
   headerActions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-  },
-  headingWrap: {
-    gap: 4,
   },
   bulkLabel: {
     fontFamily: fonts.medium,
@@ -474,16 +467,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-  },
-  title: {
-    fontFamily: fonts.headingBold,
-    fontSize: 28,
-    color: colors.slate200,
-  },
-  subtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
   },
   statsRow: {
     gap: 10,

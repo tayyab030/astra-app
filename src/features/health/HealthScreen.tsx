@@ -12,6 +12,7 @@ import { format } from 'date-fns';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { PageHeader } from '@/components/PageHeader';
 import { colors, fonts } from '@/constants/theme';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { PrimaryButton } from '@/features/wealth/PrimaryButton';
@@ -66,16 +67,16 @@ function HealthScreenInner() {
   return (
     <View style={styles.root}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View style={styles.headingWrap}>
-            <Text style={styles.title}>Health Dashboard</Text>
-            <Text style={styles.subtitle}>{format(new Date(), 'EEEE, MMMM d, yyyy')}</Text>
-          </View>
-          <View style={styles.scoreBadge}>
-            <Ionicons name="heart" size={16} color={colors.cyan300} />
-            <Text style={styles.scoreText}>Health Score: {healthScore}</Text>
-          </View>
-        </View>
+        <PageHeader
+          title="Health"
+          subtitle={format(new Date(), 'EEEE, MMMM d, yyyy')}
+          right={
+            <View style={styles.scoreBadge}>
+              <Ionicons name="heart" size={16} color={colors.cyan300} />
+              <Text style={styles.scoreText}>Health Score: {healthScore}</Text>
+            </View>
+          }
+        />
 
         {isError ? (
           <DashboardCard borderColor="rgba(248, 113, 113, 0.35)">
@@ -169,22 +170,6 @@ const styles = StyleSheet.create({
   loadingText: {
     fontFamily: fonts.regular,
     fontSize: 14,
-    color: colors.slate400,
-  },
-  header: {
-    gap: 12,
-  },
-  headingWrap: {
-    gap: 4,
-  },
-  title: {
-    fontFamily: fonts.headingBold,
-    fontSize: 24,
-    color: colors.white,
-  },
-  subtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
     color: colors.slate400,
   },
   scoreBadge: {

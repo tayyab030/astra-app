@@ -12,6 +12,7 @@ import { format } from 'date-fns';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { PageHeader } from '@/components/PageHeader';
 import { colors, fonts } from '@/constants/theme';
 
 import { TIME_TRACK_TABS, type TimeTrackTabId } from './constants/tabs';
@@ -79,10 +80,10 @@ export function TimeTrackScreen() {
   return (
     <View style={styles.root}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Time Track</Text>
-          <Text style={styles.subtitle}>{format(new Date(), 'EEEE, MMMM d, yyyy')}</Text>
-        </View>
+        <PageHeader
+          title="Time Track"
+          subtitle={format(new Date(), 'EEEE, MMMM d, yyyy')}
+        />
 
         <ScrollView
           horizontal
@@ -155,19 +156,6 @@ const styles = StyleSheet.create({
   loadingText: {
     fontFamily: fonts.regular,
     fontSize: 14,
-    color: colors.slate400,
-  },
-  header: {
-    gap: 4,
-  },
-  title: {
-    fontFamily: fonts.headingBold,
-    fontSize: 24,
-    color: colors.white,
-  },
-  subtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
     color: colors.slate400,
   },
   tabs: {

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
   Alert,
-  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -11,6 +10,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { OverflowMenu } from '@/components/OverflowMenu';
 import { colors, fonts } from '@/constants/theme';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -140,14 +140,6 @@ export function TransactionsTab({
     );
   };
 
-  const openMenu = (transaction: WealthTransaction) => {
-    Alert.alert(transaction.description, undefined, [
-      { text: 'Edit', onPress: () => openEditDialog(transaction) },
-      { text: 'Delete', style: 'destructive', onPress: () => confirmDelete(transaction) },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  };
-
   const onSubmit = handleSubmit(async (data) => {
     const payload: CreateTransactionPayload = {
       description: data.description.trim(),
@@ -215,31 +207,60 @@ export function TransactionsTab({
           <View style={styles.list}>
             {transactions.map((transaction) => (
               <View key={transaction.id} style={styles.row}>
-                <View
-                  style={[
-                    styles.icon,
-                    transaction.amount > 0 ? styles.incomeIcon : styles.expenseIcon,
-                  ]}
-                >
-                  <Ionicons
-                    name={transaction.amount > 0 ? 'trending-up-outline' : 'trending-down-outline'}
-                    size={16}
-                    color={transaction.amount > 0 ? '#4ade80' : colors.red400}
+                <View style={styles.rowTop}>
+                  <View style={styles.rowBody}>
+                    <View
+                      style={[
+                        styles.icon,
+                        transaction.amount > 0 ? styles.incomeIcon : styles.expenseIcon,
+                      ]}
+                    >
+                      <Ionicons
+                        name={
+                          transaction.amount > 0
+                            ? 'trending-up-outline'
+                            : 'trending-down-outline'
+                        }
+                        size={16}
+                        color={transaction.amount > 0 ? '#4ade80' : colors.red400}
+                      />
+                    </View>
+                    <View style={styles.copy}>
+                      <Text style={styles.description} numberOfLines={2}>
+                        {transaction.description}
+                      </Text>
+                      <Text style={styles.meta} numberOfLines={1}>
+                        {getCategoryLabel(transaction.category)} ·{' '}
+                        {formatTransactionDate(transaction.date)}
+                      </Text>
+                    </View>
+                  </View>
+                  <OverflowMenu
+                    iconSize={18}
+                    accessibilityLabel="Transaction actions"
+                    items={[
+                      {
+                        key: 'edit',
+                        label: 'Edit',
+                        icon: 'create-outline',
+                        onPress: () => openEditDialog(transaction),
+                      },
+                      {
+                        key: 'delete',
+                        label: 'Delete',
+                        icon: 'trash-outline',
+                        destructive: true,
+                        onPress: () => confirmDelete(transaction),
+                      },
+                    ]}
                   />
-                </View>
-                <View style={styles.copy}>
-                  <Text style={styles.description} numberOfLines={1}>
-                    {transaction.description}
-                  </Text>
-                  <Text style={styles.meta}>
-                    {getCategoryLabel(transaction.category)} • {formatTransactionDate(transaction.date)}
-                  </Text>
                 </View>
                 <Text
                   style={[
                     styles.amount,
                     { color: transaction.amount > 0 ? '#4ade80' : colors.red400 },
                   ]}
+                  numberOfLines={1}
                 >
                   {formatCurrency(transaction.amount, {
                     minimumFractionDigits: 2,
@@ -247,9 +268,6 @@ export function TransactionsTab({
                     showSign: transaction.amount > 0,
                   })}
                 </Text>
-                <Pressable onPress={() => openMenu(transaction)} hitSlop={8}>
-                  <Ionicons name="ellipsis-vertical" size={16} color={colors.slate400} />
-                </Pressable>
               </View>
             ))}
           </View>
@@ -369,14 +387,27 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15, 23, 42, 0.5)',
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'column',
     gap: 10,
-    padding: 12,
+    paddingVertical: 12,
+    paddingLeft: 12,
+    paddingRight: 6,
     borderRadius: 8,
     backgroundColor: 'rgba(15, 23, 42, 0.3)',
     borderWidth: 1,
     borderColor: 'rgba(71, 85, 105, 0.3)',
+  },
+  rowTop: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  rowBody: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   icon: {
     width: 32,
@@ -412,7 +443,8 @@ const styles = StyleSheet.create({
   },
   amount: {
     fontFamily: fonts.semibold,
-    fontSize: 14,
+    fontSize: 16,
+    paddingLeft: 42,
   },
   field: {
     gap: 8,

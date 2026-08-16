@@ -1,7 +1,9 @@
+import { useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { format, parseISO } from 'date-fns';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { OverflowMenu, type OverflowMenuItem } from '@/components/OverflowMenu';
 import { colors, fonts } from '@/constants/theme';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 
@@ -38,6 +40,7 @@ export function NoteCard({
   onDuplicate,
   onRestoreVersion,
 }: NoteCardProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const priority = NOTE_PRIORITIES.find((item) => item.value === note.priority);
   const preview = noteToPlainText(note.content);
   const isTrash = note.status === 'deleted';
@@ -50,65 +53,99 @@ export function NoteCard({
     }
   })();
 
-  const openActions = () => {
-    const buttons: {
-      text: string;
-      style?: 'cancel' | 'destructive' | 'default';
-      onPress?: () => void;
-    }[] = [];
-
+  const menuItems = useMemo((): OverflowMenuItem[] => {
     if (isTrash) {
-      buttons.push(
-        { text: 'Restore', onPress: () => onRestore?.(note) },
+      return [
         {
-          text: 'Delete forever',
-          style: 'destructive',
+          key: 'restore',
+          label: 'Restore',
+          icon: 'arrow-undo-outline',
+          onPress: () => onRestore?.(note),
+        },
+        {
+          key: 'delete-forever',
+          label: 'Delete forever',
+          icon: 'trash-outline',
+          destructive: true,
           onPress: () => confirmPermanentDelete(note, onDelete),
         },
-        { text: 'Cancel', style: 'cancel' },
-      );
-    } else {
-      buttons.push(
-        { text: 'Edit', onPress: () => onEdit(note) },
-        {
-          text: note.isFavorite ? 'Unfavorite' : 'Favorite',
-          onPress: () => onToggleFavorite(note),
-        },
-        {
-          text: note.isPinned ? 'Unpin' : 'Pin',
-          onPress: () => onTogglePin(note),
-        },
-        { text: 'Duplicate', onPress: () => onDuplicate(note) },
-        { text: 'Archive', onPress: () => onArchive(note) },
-      );
-
-      if (versions.length > 0 && onRestoreVersion) {
-        for (const version of versions) {
-          let versionLabel = 'Earlier version';
-          try {
-            versionLabel = `Restore · ${format(parseISO(version.createdAt), 'MMM d, HH:mm')}`;
-          } catch {
-            // keep fallback
-          }
-          buttons.push({
-            text: versionLabel,
-            onPress: () => onRestoreVersion(note, version.id),
-          });
-        }
-      }
-
-      buttons.push(
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => confirmDelete(note, onDelete),
-        },
-        { text: 'Cancel', style: 'cancel' },
-      );
+      ];
     }
 
-    Alert.alert(note.title || 'Note', undefined, buttons);
-  };
+    const items: OverflowMenuItem[] = [
+      {
+        key: 'edit',
+        label: 'Edit',
+        icon: 'create-outline',
+        onPress: () => onEdit(note),
+      },
+      {
+        key: 'favorite',
+        label: note.isFavorite ? 'Unfavorite' : 'Favorite',
+        icon: note.isFavorite ? 'star' : 'star-outline',
+        onPress: () => onToggleFavorite(note),
+      },
+      {
+        key: 'pin',
+        label: note.isPinned ? 'Unpin' : 'Pin',
+        icon: note.isPinned ? 'pin' : 'pin-outline',
+        onPress: () => onTogglePin(note),
+      },
+      {
+        key: 'duplicate',
+        label: 'Duplicate',
+        icon: 'copy-outline',
+        onPress: () => onDuplicate(note),
+      },
+      {
+        key: 'archive',
+        label: 'Archive',
+        icon: 'archive-outline',
+        onPress: () => onArchive(note),
+      },
+    ];
+
+    if (versions.length > 0 && onRestoreVersion) {
+      for (const version of versions) {
+        let versionLabel = 'Earlier version';
+        try {
+          versionLabel = `Restore · ${format(parseISO(version.createdAt), 'MMM d, HH:mm')}`;
+        } catch {
+          // keep fallback
+        }
+        items.push({
+          key: `version-${version.id}`,
+          label: versionLabel,
+          icon: 'time-outline',
+          onPress: () => onRestoreVersion(note, version.id),
+        });
+      }
+    }
+
+    items.push({
+      key: 'delete',
+      label: 'Delete',
+      icon: 'trash-outline',
+      destructive: true,
+      onPress: () => confirmDelete(note, onDelete),
+    });
+
+    return items;
+  }, [
+    isTrash,
+    note,
+    onArchive,
+    onDelete,
+    onDuplicate,
+    onEdit,
+    onRestore,
+    onRestoreVersion,
+    onToggleFavorite,
+    onTogglePin,
+    versions,
+  ]);
+
+  const openActions = () => setMenuOpen(true);
 
   const onPressCard = () => {
     if (selectionMode) {
@@ -148,9 +185,14 @@ export function NoteCard({
               {note.title || 'Untitled'}
             </Text>
           </View>
-          <Pressable onPress={openActions} hitSlop={8}>
-            <Ionicons name="ellipsis-horizontal" size={18} color={colors.slate400} />
-          </Pressable>
+          <OverflowMenu
+            icon="ellipsis-horizontal"
+            iconSize={18}
+            accessibilityLabel="Note actions"
+            open={menuOpen}
+            onOpenChange={setMenuOpen}
+            items={menuItems}
+          />
         </View>
 
         {preview ? (
@@ -217,16 +259,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: 8,
   },
   titleRow: {
     flex: 1,
+    minWidth: 0,
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: 6,
   },
   title: {
     flex: 1,
+    minWidth: 0,
     fontFamily: fonts.heading,
     fontSize: 16,
     color: colors.slate200,

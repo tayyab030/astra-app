@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
   Alert,
-  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -12,6 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { OverflowMenu } from '@/components/OverflowMenu';
 import { colors, fonts } from '@/constants/theme';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -164,14 +164,6 @@ export function BudgetTab({
     );
   };
 
-  const openMenu = (budget: WealthCategoryBudget) => {
-    Alert.alert(budget.label, undefined, [
-      { text: 'Edit Limit', onPress: () => openEdit(budget) },
-      { text: 'Delete', style: 'destructive', onPress: () => confirmDelete(budget) },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  };
-
   const filterLabel =
     filter.mode === 'month'
       ? formatBudgetPeriod('month', filter.year, filter.month)
@@ -220,28 +212,50 @@ export function BudgetTab({
 
             return (
               <DashboardCard key={budget.id}>
-                <View style={styles.budgetHeader}>
-                  <View style={styles.budgetMeta}>
-                    <LinearGradient colors={style.colors} style={styles.icon}>
-                      <Ionicons name={style.icon} size={20} color={colors.white} />
-                    </LinearGradient>
-                    <View style={styles.budgetCopy}>
-                      <Text style={styles.budgetTitle}>{budget.label}</Text>
-                      <Text style={styles.budgetSpend}>
-                        {formatCurrency(budget.spent)} of {formatCurrency(budget.limit)}
-                      </Text>
-                      <Text style={styles.budgetPeriod}>
-                        {budget.period_type === 'month' ? 'Monthly' : 'Yearly'} · {periodLabel}
-                      </Text>
+                <View style={styles.budgetCard}>
+                  <View style={styles.budgetHeader}>
+                    <View style={styles.budgetMeta}>
+                      <LinearGradient colors={style.colors} style={styles.icon}>
+                        <Ionicons name={style.icon} size={20} color={colors.white} />
+                      </LinearGradient>
+                      <View style={styles.budgetCopy}>
+                        <Text style={styles.budgetTitle} numberOfLines={2}>
+                          {budget.label}
+                        </Text>
+                        <Text style={styles.budgetPeriod} numberOfLines={1}>
+                          {budget.period_type === 'month' ? 'Monthly' : 'Yearly'} · {periodLabel}
+                        </Text>
+                      </View>
                     </View>
+                    <OverflowMenu
+                      iconSize={18}
+                      accessibilityLabel="Budget actions"
+                      items={[
+                        {
+                          key: 'edit',
+                          label: 'Edit Limit',
+                          icon: 'create-outline',
+                          onPress: () => openEdit(budget),
+                        },
+                        {
+                          key: 'delete',
+                          label: 'Delete',
+                          icon: 'trash-outline',
+                          destructive: true,
+                          onPress: () => confirmDelete(budget),
+                        },
+                      ]}
+                    />
                   </View>
-                  <View style={styles.budgetActions}>
+                  <Text style={styles.budgetSpend} numberOfLines={1}>
+                    {formatCurrency(budget.spent)} of {formatCurrency(budget.limit)}
+                  </Text>
+                  <View style={styles.badgeRow}>
                     <View style={styles.badge}>
-                      <Text style={[styles.badgeText, { color: status.color }]}>{status.status}</Text>
+                      <Text style={[styles.badgeText, { color: status.color }]}>
+                        {status.status}
+                      </Text>
                     </View>
-                    <Pressable onPress={() => openMenu(budget)} hitSlop={8}>
-                      <Ionicons name="ellipsis-vertical" size={16} color={colors.slate400} />
-                    </Pressable>
                   </View>
                 </View>
                 <View style={styles.progressTrack}>
@@ -451,18 +465,23 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: 'rgba(15, 23, 42, 0.5)',
   },
+  budgetCard: {
+    flexDirection: 'column',
+    gap: 10,
+    marginBottom: 12,
+  },
   budgetHeader: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
-    gap: 12,
-    marginBottom: 16,
+    gap: 8,
   },
   budgetMeta: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    flex: 1,
-    minWidth: 0,
   },
   icon: {
     width: 36,
@@ -474,6 +493,7 @@ const styles = StyleSheet.create({
   budgetCopy: {
     flex: 1,
     minWidth: 0,
+    gap: 2,
   },
   budgetTitle: {
     fontFamily: fonts.semibold,
@@ -484,17 +504,16 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 14,
     color: colors.slate400,
+    paddingLeft: 48,
   },
   budgetPeriod: {
     fontFamily: fonts.regular,
     fontSize: 12,
     color: colors.slate500,
-    marginTop: 2,
   },
-  budgetActions: {
+  badgeRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    paddingLeft: 48,
   },
   badge: {
     paddingHorizontal: 8,

@@ -12,6 +12,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { colors, fonts } from '@/constants/theme';
 import { InsightHorizonBadge } from '@/components/insights/InsightHorizonBadge';
+import { PageHeader } from '@/components/PageHeader';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { WeeklyExpensesChart } from '@/features/dashboard/WeeklyExpensesChart';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -122,21 +123,21 @@ export function AnalyticsScreen() {
       contentContainerStyle={styles.scroll}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <View style={styles.headingWrap}>
-          <Text style={styles.title}>Analytics Dashboard</Text>
-          <Text style={styles.subtitle}>Your Personal Life Intelligence Report</Text>
-        </View>
-        <LinearGradient
-          colors={[colors.cyan500, colors.blue600]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.badge}
-        >
-          <Ionicons name="star" size={16} color={colors.white} />
-          <Text style={styles.badgeText}>Life Score: {analytics.lifeScoreOverall}</Text>
-        </LinearGradient>
-      </View>
+      <PageHeader
+        title="Analytics"
+        subtitle="Your Personal Life Intelligence Report"
+        right={
+          <LinearGradient
+            colors={[colors.cyan500, colors.blue600]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.badge}
+          >
+            <Ionicons name="star" size={16} color={colors.white} />
+            <Text style={styles.badgeText}>Life Score: {analytics.lifeScoreOverall}</Text>
+          </LinearGradient>
+        }
+      />
 
       <DashboardCard>
         <View style={styles.sectionHeader}>
@@ -547,22 +548,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semibold,
     fontSize: 14,
     color: colors.white,
-  },
-  header: {
-    gap: 12,
-  },
-  headingWrap: {
-    gap: 4,
-  },
-  title: {
-    fontFamily: fonts.headingBold,
-    fontSize: 28,
-    color: colors.cyan300,
-  },
-  subtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 15,
-    color: colors.slate400,
   },
   badge: {
     alignSelf: 'flex-start',

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { PageHeader } from '@/components/PageHeader';
 import { colors, fonts } from '@/constants/theme';
 import { SelectField } from '@/features/wealth/SelectField';
 import { useTimeTrackContext } from '@/features/time-track/context/TimeTrackProvider';
@@ -70,24 +71,24 @@ export function TasksScreen() {
       contentContainerStyle={styles.scroll}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <View style={styles.greetingWrap}>
-          <Text style={styles.date}>{formattedDate}</Text>
-          <Text style={styles.greeting}>{getGreeting()}</Text>
-        </View>
-
-        <View style={styles.headerRight}>
-          <SelectField
-            value={period}
-            options={[...PERIOD_OPTIONS]}
-            onChange={(value) => setPeriod(value as TaskPeriodFilter)}
-            minWidth={120}
-          />
-          <Text style={styles.completedHint}>
-            {summary?.completed ?? 0} task{(summary?.completed ?? 0) === 1 ? '' : 's'} completed
-          </Text>
-        </View>
-      </View>
+      <PageHeader
+        title="Tasks"
+        subtitle={`${getGreeting()} · ${formattedDate}`}
+        right={
+          <View style={styles.headerRight}>
+            <SelectField
+              value={period}
+              options={[...PERIOD_OPTIONS]}
+              onChange={(value) => setPeriod(value as TaskPeriodFilter)}
+              minWidth={120}
+            />
+            <Text style={styles.completedHint}>
+              {summary?.completed ?? 0} task{(summary?.completed ?? 0) === 1 ? '' : 's'}{' '}
+              completed
+            </Text>
+          </View>
+        }
+      />
 
       <MyTasksSection
         listParams={listParams}
@@ -106,35 +107,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scroll: {
-    padding: 16,
+    padding: 24,
     paddingBottom: 40,
     gap: 16,
   },
-  header: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 16,
-    marginBottom: 4,
-  },
-  greetingWrap: {
-    gap: 4,
-    flexShrink: 1,
-  },
-  date: {
-    fontFamily: fonts.heading,
-    fontSize: 22,
-    color: colors.white,
-  },
-  greeting: {
-    fontFamily: fonts.regular,
-    fontSize: 16,
-    color: colors.slate400,
-  },
   headerRight: {
     gap: 8,
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
   },
   completedHint: {
     fontFamily: fonts.regular,

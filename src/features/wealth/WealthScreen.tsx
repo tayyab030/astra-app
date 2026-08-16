@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { PageHeader } from '@/components/PageHeader';
 import { colors, fonts } from '@/constants/theme';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -144,13 +145,11 @@ export function WealthScreen() {
   return (
     <View style={styles.root}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View style={styles.headingWrap}>
-            <Text style={styles.title}>💰 Wealth Dashboard</Text>
-            <Text style={styles.subtitle}>Your complete financial command center</Text>
-          </View>
-          <WealthFilters onChange={setFilter} />
-        </View>
+        <PageHeader
+          title="Wealth"
+          subtitle="Your complete financial command center"
+          right={<WealthFilters onChange={setFilter} />}
+        />
 
         {isError ? (
           <DashboardCard borderColor="rgba(248, 113, 113, 0.35)">
@@ -280,12 +279,6 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     gap: 24,
   },
-  header: {
-    gap: 16,
-  },
-  headingWrap: {
-    gap: 4,
-  },
   errorTitle: {
     fontFamily: fonts.heading,
     fontSize: 16,
@@ -297,16 +290,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.slate300,
     marginBottom: 16,
-  },
-  title: {
-    fontFamily: fonts.headingBold,
-    fontSize: 30,
-    color: colors.cyan400,
-  },
-  subtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 16,
-    color: colors.slate300,
   },
   summary: {
     gap: 16,

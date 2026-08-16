@@ -17,6 +17,7 @@ import {
 } from "react-native";
 
 import { colors, fonts } from "@/constants/theme";
+import { PageHeader } from "@/components/PageHeader";
 import { ConversationDrawer } from "./ConversationDrawer";
 import { MessageList } from "./MessageBubble";
 import { useAssistantChat } from "./useAssistantChat";
@@ -115,50 +116,48 @@ export function AssistantScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={88}
     >
-      <View style={styles.header}>
-        <Pressable
-          onPress={() => setHistoryOpen(true)}
-          style={styles.iconBtn}
-          hitSlop={8}
-        >
-          <Ionicons name="menu-outline" size={18} color={colors.slate300} />
-        </Pressable>
-        <View style={styles.headerText}>
-          <Text style={styles.title} numberOfLines={1}>
-            {activeTitle || "Assistant"}
-          </Text>
-        </View>
-        <View style={styles.headerActions}>
-          <Pressable
-            onPress={() => {
-              void createNewChat();
-            }}
-            style={styles.iconBtn}
-            disabled={busy || historyBusy}
-          >
-            <Ionicons name="create-outline" size={16} color={colors.slate300} />
-          </Pressable>
-          <Pressable
-            onPress={() => setSpeakReplies((value) => !value)}
-            style={[styles.iconBtn, speakReplies && styles.iconBtnActive]}
-          >
-            <Ionicons
-              name={speakReplies ? "volume-high" : "volume-mute"}
-              size={18}
-              color={speakReplies ? colors.white : colors.slate300}
-            />
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              void stopSpeech();
-            }}
-            style={styles.iconBtn}
-            disabled={!speaking}
-          >
-            <Ionicons name="stop" size={16} color={colors.slate300} />
-          </Pressable>
-        </View>
-      </View>
+      <PageHeader
+        title={activeTitle || "Assistant"}
+        right={
+          <View style={styles.headerActions}>
+            <Pressable
+              onPress={() => setHistoryOpen(true)}
+              style={styles.iconBtn}
+              hitSlop={8}
+            >
+              <Ionicons name="menu-outline" size={18} color={colors.slate300} />
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                void createNewChat();
+              }}
+              style={styles.iconBtn}
+              disabled={busy || historyBusy}
+            >
+              <Ionicons name="create-outline" size={16} color={colors.slate300} />
+            </Pressable>
+            <Pressable
+              onPress={() => setSpeakReplies((value) => !value)}
+              style={[styles.iconBtn, speakReplies && styles.iconBtnActive]}
+            >
+              <Ionicons
+                name={speakReplies ? "volume-high" : "volume-mute"}
+                size={18}
+                color={speakReplies ? colors.white : colors.slate300}
+              />
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                void stopSpeech();
+              }}
+              style={styles.iconBtn}
+              disabled={!speaking}
+            >
+              <Ionicons name="stop" size={16} color={colors.slate300} />
+            </Pressable>
+          </View>
+        }
+      />
 
       <ConversationDrawer
         visible={historyOpen}
@@ -283,26 +282,6 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 16,
     gap: 12,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  headerText: {
-    flex: 1,
-    gap: 2,
-  },
-  title: {
-    fontFamily: fonts.headingBold,
-    fontSize: 20,
-    color: colors.cyan300,
-  },
-  subtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors.slate400,
   },
   headerActions: {
     flexDirection: "row",

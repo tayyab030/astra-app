@@ -11,6 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { colors, fonts } from '@/constants/theme';
+import { PageHeader } from '@/components/PageHeader';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { useAnalytics } from '@/features/analytics/hooks/useAnalytics';
 import type { AnalyticsPeriod } from '@/features/analytics/utils/dateRanges';
@@ -131,42 +132,40 @@ export function LifeScoreScreen() {
       contentContainerStyle={styles.scroll}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <View style={styles.headingWrap}>
-          <Text style={styles.title}>Life Score Dashboard</Text>
-          <Text style={styles.subtitle}>
-            Holistic balance across productivity, health, wealth, and knowledge
-          </Text>
-        </View>
-        <View style={styles.tabs}>
-          {PERIODS.map((period) => {
-            const active = selectedPeriod === period;
-            if (active) {
+      <PageHeader
+        title="Life Score"
+        subtitle="Holistic balance across productivity, health, wealth, and knowledge"
+        right={
+          <View style={styles.tabs}>
+            {PERIODS.map((period) => {
+              const active = selectedPeriod === period;
+              if (active) {
+                return (
+                  <Pressable key={period} onPress={() => setSelectedPeriod(period)}>
+                    <LinearGradient
+                      colors={[colors.cyan500, colors.blue600]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={styles.tab}
+                    >
+                      <Text style={styles.tabActive}>{period}</Text>
+                    </LinearGradient>
+                  </Pressable>
+                );
+              }
               return (
-                <Pressable key={period} onPress={() => setSelectedPeriod(period)}>
-                  <LinearGradient
-                    colors={[colors.cyan500, colors.blue600]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.tab}
-                  >
-                    <Text style={styles.tabActive}>{period}</Text>
-                  </LinearGradient>
+                <Pressable
+                  key={period}
+                  onPress={() => setSelectedPeriod(period)}
+                  style={styles.tab}
+                >
+                  <Text style={styles.tabInactive}>{period}</Text>
                 </Pressable>
               );
-            }
-            return (
-              <Pressable
-                key={period}
-                onPress={() => setSelectedPeriod(period)}
-                style={styles.tab}
-              >
-                <Text style={styles.tabInactive}>{period}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      </View>
+            })}
+          </View>
+        }
+      />
 
       <DashboardCard>
         <View style={styles.scoreHero}>
@@ -494,22 +493,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semibold,
     fontSize: 14,
     color: colors.white,
-  },
-  header: {
-    gap: 14,
-  },
-  headingWrap: {
-    gap: 4,
-  },
-  title: {
-    fontFamily: fonts.headingBold,
-    fontSize: 28,
-    color: colors.cyan300,
-  },
-  subtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 15,
-    color: colors.slate400,
   },
   tabs: {
     flexDirection: 'row',

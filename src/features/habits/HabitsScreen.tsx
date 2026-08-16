@@ -13,6 +13,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { InsightHorizonBadge } from '@/components/insights/InsightHorizonBadge';
+import { PageHeader } from '@/components/PageHeader';
 import { colors, fonts } from '@/constants/theme';
 import { DashboardCard } from '@/features/dashboard/DashboardCard';
 import { useDashboard } from '@/features/dashboard/hooks/useDashboard';
@@ -378,16 +379,11 @@ export function HabitsScreen() {
       contentContainerStyle={styles.scroll}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <View style={styles.headerText}>
-          <Text style={styles.title}>Habits</Text>
-          <Text style={styles.subtitle}>
-            Carry-over keeps misses due; reset breaks the streak. Toggle complete and track
-            streaks by day.
-          </Text>
-        </View>
-        <PrimaryButton label="Add Habit" icon="add" onPress={openAddHabit} />
-      </View>
+      <PageHeader
+        title="Habits"
+        subtitle="Carry-over keeps misses due; reset breaks the streak. Toggle complete and track streaks by day."
+        right={<PrimaryButton label="Add Habit" icon="add" onPress={openAddHabit} />}
+      />
 
       <View style={styles.summaryGrid}>
         {summaryCards.map((card) => (
@@ -616,25 +612,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scroll: {
-    padding: 16,
+    padding: 24,
     paddingBottom: 40,
     gap: 16,
-  },
-  header: {
-    gap: 12,
-  },
-  headerText: {
-    gap: 4,
-  },
-  title: {
-    fontFamily: fonts.heading,
-    fontSize: 24,
-    color: colors.cyan300,
-  },
-  subtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.slate400,
   },
   summaryGrid: {
     flexDirection: 'row',
