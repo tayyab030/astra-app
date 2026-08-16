@@ -19,6 +19,7 @@ import { ROUTES } from '@/constants/routes';
 import { colors, fonts } from '@/constants/theme';
 import { AUTH, publicApi } from '@/lib/api';
 import { setSession } from '@/lib/auth/tokenManager';
+import { getMobileClientDeviceMeta } from '@/lib/auth/clientDevice';
 import { GlassCard } from './GlassCard';
 import { schema, type LoginType } from './login.schema';
 
@@ -62,10 +63,18 @@ export function LoginForm() {
     setToast(null);
 
     try {
-      const response = await publicApi.post(AUTH.LOGIN, data);
-      const { access, refresh, user } = response.data;
+      const response = await publicApi.post(AUTH.LOGIN, {
+        ...data,
+        ...getMobileClientDeviceMeta(),
+      });
+      const { access, refresh, user, session_id } = response.data;
 
-      await setSession({ access, refresh, user });
+      await setSession({
+        access,
+        refresh,
+        user,
+        sessionId: session_id ? String(session_id) : null,
+      });
       showToast('success', 'Login successful');
       router.replace(ROUTES.APP.DASHBOARD);
     } catch (error: unknown) {

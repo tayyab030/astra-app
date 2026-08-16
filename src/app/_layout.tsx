@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { AppState, type AppStateStatus } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
@@ -22,7 +23,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { colors } from '@/constants/theme';
 import { useSession } from '@/hooks/useSession';
-import { hydrateSession } from '@/lib/auth/tokenManager';
+import {
+  hydrateSession,
+  startSessionWatchdog,
+  stopSessionWatchdog,
+} from '@/lib/auth/tokenManager';
+import { GlobalToast } from '@/components/GlobalToast';
 import '@/lib/notifications';
 
 SplashScreen.preventAutoHideAsync();
@@ -70,12 +76,35 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <StatusBar style="light" />
       <RootNavigator />
+      <GlobalToast />
     </QueryClientProvider>
   );
 }
 
 function RootNavigator() {
   const { isAuthenticated } = useSession();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      stopSessionWatchdog();
+      return;
+    }
+
+    const syncWatchdog = (state: AppStateStatus) => {
+      if (state === 'active') {
+        startSessionWatchdog();
+      } else {
+        stopSessionWatchdog();
+      }
+    };
+
+    syncWatchdog(AppState.currentState);
+    const sub = AppState.addEventListener('change', syncWatchdog);
+    return () => {
+      sub.remove();
+      stopSessionWatchdog();
+    };
+  }, [isAuthenticated]);
 
   return (
     <Stack

@@ -12,6 +12,9 @@ export const API_ENDPOINTS = {
     FORGOT_PASSWORD: '/auth/password/forgot/',
     RESET_PASSWORD: '/auth/password/reset/',
     PASSWORD_RESET_STATUS: (token: string) => `/auth/password/${token}/status/`,
+    SESSIONS: '/auth/sessions/',
+    SESSION: (id: string) => `/auth/sessions/${id}/`,
+    LOGOUT_ALL: '/auth/sessions/logout-all/',
   },
   TASKS: {
     LIST: '/tasks/',

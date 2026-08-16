@@ -15,4 +15,6 @@ export type AuthSession = {
   access: string;
   refresh: string;
   user: AuthUser;
+  /** Server device-session id — required to detect website revoke. */
+  sessionId?: string | null;
 };

@@ -52,7 +52,7 @@ export function AppSidebar({ onNavigate }: AppSidebarProps) {
           style: 'destructive',
           onPress: async () => {
             onNavigate?.();
-            await logoutSession();
+            await logoutSession('manual');
             router.replace(ROUTES.AUTH.LOGIN);
           },
         },

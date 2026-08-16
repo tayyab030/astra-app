@@ -39,7 +39,7 @@ authApi.interceptors.response.use(
         return authApi(originalRequest);
       }
 
-      await logoutSession();
+      await logoutSession('expired');
     }
 
     return Promise.reject(error);
