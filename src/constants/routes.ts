@@ -13,6 +13,7 @@ export const ROUTES = {
     GOALS: '/app/goals',
     WEALTH: '/app/wealth',
     HEALTH: '/app/health',
+    HABITS: '/app/habits',
     NOTES: '/app/notes',
     ASSISTANT: '/app/assistant',
     COMMUNICATION: '/app/communication',

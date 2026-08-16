@@ -1,13 +1,106 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import { colors, fonts } from '@/constants/theme';
+import { ROUTES } from '@/constants/routes';
 import { useCurrency } from '@/hooks/useCurrency';
+import { useSession } from '@/hooks/useSession';
+import { useAiInsight } from '@/hooks/useAiInsight';
+import { InsightHorizonBadge } from '@/components/insights/InsightHorizonBadge';
 import { DashboardCard } from './DashboardCard';
+import { QuickActions } from './QuickActions';
+import { WeeklyExpensesChart } from './WeeklyExpensesChart';
+import { useDashboard } from './hooks/useDashboard';
+import { useDailyQuote } from './hooks/useDailyQuote';
+import type { DashboardView } from './utils/computeDashboard';
+
+function getGreeting(hour: number) {
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
+function formatFocusHours(hours: number) {
+  if (hours <= 0) return '0h';
+  if (hours < 10) return `${hours.toFixed(1)}h`;
+  return `${Math.round(hours)}h`;
+}
+
+function buildDashboardInsightContext(dashboard: DashboardView) {
+  return {
+    lifeScoreOverall: dashboard.lifeScoreOverall,
+    tasksDueToday: dashboard.tasksDueToday,
+    tasksCompletedToday: dashboard.tasksCompletedToday,
+    spendingToday: dashboard.spendingToday,
+    budgetToday: dashboard.budgetToday,
+    waterGlasses: dashboard.waterGlasses,
+    waterGoal: dashboard.waterGoal,
+    waterProgress: dashboard.waterProgress,
+    focusHours: dashboard.focusHours,
+    sessionCount: dashboard.sessionCount,
+    topHabitStreaks: dashboard.habitStreaks.slice(0, 5).map((h) => ({
+      name: h.name,
+      streak: h.streak,
+      completed: h.completed,
+    })),
+    expenseCategories: dashboard.expenseDistribution.slice(0, 5).map((s) => ({
+      category: s.category,
+      value: s.value,
+    })),
+  };
+}
 
 export function DashboardScreen() {
+  const router = useRouter();
   const { formatCurrency } = useCurrency();
+  const { user } = useSession();
+  const { dashboard, isLoading, isError, refetch } = useDashboard();
+  const { quote } = useDailyQuote();
+
+  const insightContext = dashboard ? buildDashboardInsightContext(dashboard) : undefined;
+  const {
+    data: insightData,
+    hasInsight,
+    isLoading: insightLoading,
+    enabled: insightsEnabled,
+  } = useAiInsight('dashboard', insightContext, { enabled: Boolean(dashboard) });
+
+  const firstName = user?.first_name?.trim() || user?.username || 'there';
+  const greeting = getGreeting(new Date().getHours());
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={colors.cyan400} />
+        <Text style={styles.loadingText}>Loading dashboard…</Text>
+      </View>
+    );
+  }
+
+  if (isError || !dashboard) {
+    return (
+      <View style={styles.centered}>
+        <DashboardCard style={styles.errorCard}>
+          <Text style={styles.errorText}>Couldn't load dashboard.</Text>
+          <Pressable style={styles.retryButton} onPress={() => refetch()}>
+            <Text style={styles.retryText}>Retry</Text>
+          </Pressable>
+        </DashboardCard>
+      </View>
+    );
+  }
+
+  const maxHabitStreak = Math.max(...dashboard.habitStreaks.map((h) => h.streak), 1);
+  const showInsights = insightsEnabled && (hasInsight || insightLoading);
 
   return (
     <ScrollView
@@ -16,195 +109,190 @@ export function DashboardScreen() {
     >
       <View style={styles.greetingRow}>
         <View style={styles.greeting}>
-          <Text style={styles.title}>Good morning, Tayyab 🚀</Text>
-          <Text style={styles.quote}>
-            "Success is the sum of small efforts repeated day in and day out."
+          <Text style={styles.title}>
+            {greeting}, {firstName}
           </Text>
+          <Text style={styles.quote}>{`"${quote}"`}</Text>
         </View>
-        <LinearGradient
-          colors={[colors.cyan500, colors.blue600]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.badge}
-        >
-          <Ionicons name="star" size={16} color={colors.white} />
-          <Text style={styles.badgeText}>Life Score: 85</Text>
-        </LinearGradient>
+        <Pressable onPress={() => router.push(ROUTES.APP.LIFE_SCORE as never)}>
+          <LinearGradient
+            colors={[colors.cyan500, colors.blue600]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.badge}
+          >
+            <Ionicons name="star" size={16} color={colors.white} />
+            <Text style={styles.badgeText}>Life Score: {dashboard.lifeScoreOverall}</Text>
+          </LinearGradient>
+        </Pressable>
       </View>
 
       <View style={styles.stats}>
-        <DashboardCard
-          borderColor="rgba(6, 182, 212, 0.3)"
-          shadowColor={colors.cyan500}
-        >
-          <Text style={[styles.statLabel, { color: colors.cyan300 }]}>
-            Tasks Due Today
-          </Text>
-          <Text style={[styles.statValue, { color: colors.cyan200 }]}>5</Text>
-          <Text style={styles.statHint}>2 completed</Text>
-        </DashboardCard>
+        <Pressable onPress={() => router.push(ROUTES.APP.TASKS as never)}>
+          <DashboardCard
+            borderColor="rgba(6, 182, 212, 0.3)"
+            shadowColor={colors.cyan500}
+          >
+            <Text style={[styles.statLabel, { color: colors.cyan300 }]}>
+              Tasks Due Today
+            </Text>
+            <Text style={[styles.statValue, { color: colors.cyan200 }]}>
+              {dashboard.tasksDueToday}
+            </Text>
+            <Text style={styles.statHint}>{dashboard.tasksCompletedToday} completed</Text>
+          </DashboardCard>
+        </Pressable>
 
-        <DashboardCard
-          borderColor="rgba(59, 130, 246, 0.3)"
-          shadowColor={colors.blue500}
-        >
-          <Text style={[styles.statLabel, { color: colors.blue300 }]}>
-            Daily Spending
-          </Text>
-          <Text style={[styles.statValue, { color: colors.blue200 }]}>
-            {formatCurrency(47)}
-          </Text>
-          <Text style={styles.statHint}>Budget: {formatCurrency(80)}</Text>
-        </DashboardCard>
+        <Pressable onPress={() => router.push(ROUTES.APP.WEALTH as never)}>
+          <DashboardCard
+            borderColor="rgba(59, 130, 246, 0.3)"
+            shadowColor={colors.blue500}
+          >
+            <Text style={[styles.statLabel, { color: colors.blue300 }]}>Daily Spending</Text>
+            <Text style={[styles.statValue, { color: colors.blue200 }]}>
+              {formatCurrency(dashboard.spendingToday)}
+            </Text>
+            <Text style={styles.statHint}>
+              Budget: {formatCurrency(dashboard.budgetToday)}
+            </Text>
+          </DashboardCard>
+        </Pressable>
 
-        <DashboardCard
-          borderColor="rgba(34, 211, 238, 0.3)"
-          shadowColor={colors.cyan400}
-        >
-          <Text style={[styles.statLabel, { color: colors.cyan300 }]}>
-            Health Progress
-          </Text>
-          <View style={styles.healthRow}>
-            <Text style={styles.healthLabel}>Water</Text>
-            <Text style={styles.healthLabel}>6/8 glasses</Text>
-          </View>
-          <View style={styles.progressTrack}>
-            <View style={styles.progressFill} />
-          </View>
-        </DashboardCard>
+        <Pressable onPress={() => router.push(ROUTES.APP.HEALTH as never)}>
+          <DashboardCard
+            borderColor="rgba(34, 211, 238, 0.3)"
+            shadowColor={colors.cyan400}
+          >
+            <Text style={[styles.statLabel, { color: colors.cyan300 }]}>
+              Health Progress
+            </Text>
+            <View style={styles.healthRow}>
+              <Text style={styles.healthLabel}>Water</Text>
+              <Text style={styles.healthLabel}>
+                {dashboard.waterGlasses}/{dashboard.waterGoal} glasses
+              </Text>
+            </View>
+            <View style={styles.progressTrack}>
+              <View
+                style={[
+                  styles.progressFill,
+                  { width: `${Math.min(100, dashboard.waterProgress)}%` },
+                ]}
+              />
+            </View>
+          </DashboardCard>
+        </Pressable>
 
-        <DashboardCard
-          borderColor="rgba(96, 165, 250, 0.3)"
-          shadowColor={colors.blue400}
-        >
-          <Text style={[styles.statLabel, { color: colors.blue300 }]}>
-            Focus Time
-          </Text>
-          <Text style={[styles.statValue, { color: colors.blue200 }]}>3.2h</Text>
-          <Text style={styles.statHint}>4 Pomodoros</Text>
-        </DashboardCard>
+        <Pressable onPress={() => router.push(ROUTES.APP.TIME_TRACK as never)}>
+          <DashboardCard
+            borderColor="rgba(96, 165, 250, 0.3)"
+            shadowColor={colors.blue400}
+          >
+            <Text style={[styles.statLabel, { color: colors.blue300 }]}>Focus Time</Text>
+            <Text style={[styles.statValue, { color: colors.blue200 }]}>
+              {formatFocusHours(dashboard.focusHours)}
+            </Text>
+            <Text style={styles.statHint}>
+              {dashboard.sessionCount}{' '}
+              {dashboard.sessionCount === 1 ? 'session' : 'sessions'}
+            </Text>
+          </DashboardCard>
+        </Pressable>
       </View>
 
       <View style={styles.charts}>
         <DashboardCard>
           <Text style={styles.cardTitle}>Weekly Expenses</Text>
-          <Text style={styles.cardDescription}>
-            Your spending vs income this week
-          </Text>
-          <View style={styles.chartPlaceholder}>
-            <Ionicons name="bar-chart-outline" size={48} color={colors.slate400} />
-            <Text style={styles.chartLabel}>Chart visualization</Text>
-          </View>
+          <Text style={styles.cardDescription}>Your spending by category this week</Text>
+          <WeeklyExpensesChart slices={dashboard.expenseDistribution} />
         </DashboardCard>
 
         <DashboardCard>
-          <Text style={styles.cardTitle}>Habit Streaks</Text>
-          <Text style={styles.cardDescription}>Your consistency over time</Text>
-          <View style={styles.chartPlaceholder}>
-            <Ionicons name="trending-up-outline" size={48} color={colors.slate400} />
-            <Text style={styles.chartLabel}>Streak visualization</Text>
+          <View style={styles.habitsHeader}>
+            <Ionicons name="flame" size={20} color={colors.cyan400} />
+            <Text style={styles.cardTitle}>Habit Streaks</Text>
           </View>
+          <Text style={styles.cardDescription}>Your consistency over time</Text>
+          {dashboard.habitStreaks.length === 0 ? (
+            <View style={styles.emptyHabits}>
+              <Text style={styles.emptyHabitsText}>No habits yet</Text>
+              <Pressable
+                style={styles.addHabitButton}
+                onPress={() => router.push(`${ROUTES.APP.HABITS}?action=add` as never)}
+              >
+                <Text style={styles.addHabitText}>Add Habit</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={styles.habitList}>
+              {dashboard.habitStreaks.map((habit) => (
+                <View key={habit.id} style={styles.habitRow}>
+                  <View style={styles.habitMeta}>
+                    <Text style={styles.habitName} numberOfLines={1}>
+                      {habit.name}
+                    </Text>
+                    <Text style={styles.habitStreak}>{habit.streak}-day streak</Text>
+                  </View>
+                  <View style={styles.progressTrack}>
+                    <View
+                      style={[
+                        styles.progressFill,
+                        {
+                          width: `${Math.min(
+                            100,
+                            Math.round((habit.streak / maxHabitStreak) * 100),
+                          )}%`,
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
+              ))}
+              <Pressable onPress={() => router.push(ROUTES.APP.HABITS as never)}>
+                <Text style={styles.viewAllHabits}>View all habits</Text>
+              </Pressable>
+            </View>
+          )}
         </DashboardCard>
       </View>
 
-      <DashboardCard
-        borderColor="rgba(6, 182, 212, 0.3)"
-        style={styles.block}
-      >
-        <View style={styles.insightsHeader}>
-          <Ionicons name="flash" size={20} color={colors.cyan400} />
-          <Text style={styles.cardTitle}>Smart Insights</Text>
-        </View>
-        <View style={styles.insights}>
-          <LinearGradient
-            colors={['rgba(22, 78, 99, 0.3)', 'rgba(30, 58, 138, 0.3)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={[styles.insight, { borderColor: 'rgba(6, 182, 212, 0.3)' }]}
-          >
-            <Text style={styles.insightText}>
-              🎉 You spent 20% less this week than last week!
-            </Text>
-          </LinearGradient>
-          <LinearGradient
-            colors={['rgba(30, 58, 138, 0.3)', 'rgba(22, 78, 99, 0.3)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={[styles.insight, { borderColor: 'rgba(59, 130, 246, 0.3)' }]}
-          >
-            <Text style={styles.insightText}>
-              🔥 You've kept a 10-day streak on workouts—keep going!
-            </Text>
-          </LinearGradient>
-          <LinearGradient
-            colors={['rgba(30, 41, 59, 0.3)', 'rgba(51, 65, 85, 0.3)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={[styles.insight, { borderColor: 'rgba(100, 116, 139, 0.3)' }]}
-          >
-            <Text style={styles.insightText}>
-              ⚠️ 3 tasks are overdue. Suggest rescheduling?
-            </Text>
-          </LinearGradient>
-        </View>
-      </DashboardCard>
+      {showInsights ? (
+        <DashboardCard borderColor="rgba(6, 182, 212, 0.3)" style={styles.block}>
+          <View style={styles.insightsHeader}>
+            <Ionicons name="flash" size={20} color={colors.cyan400} />
+            <Text style={styles.cardTitle}>Smart Insights</Text>
+          </View>
+          {insightLoading && !hasInsight ? (
+            <View style={styles.insights}>
+              <View style={styles.insightSkeleton} />
+              <View style={styles.insightSkeleton} />
+            </View>
+          ) : (
+            <View style={styles.insights}>
+              {(insightData?.items ?? []).map((item, index) => (
+                <LinearGradient
+                  key={`${item.message}-${index}`}
+                  colors={['rgba(22, 78, 99, 0.3)', 'rgba(30, 58, 138, 0.3)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={[styles.insight, { borderColor: 'rgba(6, 182, 212, 0.3)' }]}
+                >
+                  <View style={styles.insightTitleRow}>
+                    <InsightHorizonBadge horizon={item.horizon} />
+                    {item.title ? (
+                      <Text style={styles.insightTitle}>{item.title}</Text>
+                    ) : null}
+                  </View>
+                  <Text style={styles.insightText}>{item.message}</Text>
+                </LinearGradient>
+              ))}
+            </View>
+          )}
+        </DashboardCard>
+      ) : null}
 
-      <DashboardCard>
-        <Text style={[styles.cardTitle, styles.actionsTitle]}>Quick Actions</Text>
-        <View style={styles.actions}>
-          <QuickAction
-            icon="add"
-            label="Add Task"
-            borderColor="rgba(6, 182, 212, 0.3)"
-            color={colors.cyan300}
-          />
-          <QuickAction
-            icon="cash-outline"
-            label="Log Expense"
-            borderColor="rgba(59, 130, 246, 0.3)"
-            color={colors.blue300}
-          />
-          <QuickAction
-            icon="heart-outline"
-            label="Log Habit"
-            borderColor="rgba(34, 211, 238, 0.3)"
-            color={colors.cyan300}
-          />
-          <QuickAction
-            icon="document-text-outline"
-            label="Quick Note"
-            borderColor="rgba(96, 165, 250, 0.3)"
-            color={colors.blue300}
-          />
-        </View>
-      </DashboardCard>
+      <QuickActions />
     </ScrollView>
-  );
-}
-
-function QuickAction({
-  icon,
-  label,
-  borderColor,
-  color,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  borderColor: string;
-  color: string;
-}) {
-  return (
-    <Pressable style={[styles.action, { borderColor }]}>
-      <LinearGradient
-        colors={['rgba(30, 41, 59, 0.5)', 'rgba(51, 65, 85, 0.5)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        pointerEvents="none"
-        style={StyleSheet.absoluteFill}
-      />
-      <Ionicons name={icon} size={20} color={color} />
-      <Text style={[styles.actionLabel, { color }]}>{label}</Text>
-    </Pressable>
   );
 }
 
@@ -213,6 +301,40 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 40,
     gap: 24,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    gap: 12,
+  },
+  loadingText: {
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: colors.slate400,
+  },
+  errorCard: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 16,
+    paddingVertical: 32,
+  },
+  errorText: {
+    fontFamily: fonts.regular,
+    fontSize: 15,
+    color: colors.slate300,
+  },
+  retryButton: {
+    backgroundColor: colors.cyan600,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryText: {
+    fontFamily: fonts.semibold,
+    fontSize: 14,
+    color: colors.white,
   },
   greetingRow: {
     gap: 16,
@@ -286,7 +408,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   progressFill: {
-    width: '75%',
     height: '100%',
     backgroundColor: colors.cyan500,
     borderRadius: 4,
@@ -304,18 +425,64 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.slate400,
     marginTop: 4,
+    marginBottom: 12,
   },
-  chartPlaceholder: {
-    height: 192,
+  habitsHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     gap: 8,
   },
-  chartLabel: {
+  emptyHabits: {
+    height: 160,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  emptyHabitsText: {
     fontFamily: fonts.regular,
-    fontSize: 16,
+    fontSize: 14,
     color: colors.slate400,
+  },
+  addHabitButton: {
+    borderWidth: 1,
+    borderColor: 'rgba(6, 182, 212, 0.4)',
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  addHabitText: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.cyan300,
+  },
+  habitList: {
+    gap: 16,
+  },
+  habitRow: {
+    gap: 8,
+  },
+  habitMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  habitName: {
+    flex: 1,
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.slate200,
+  },
+  habitStreak: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors.slate400,
+  },
+  viewAllHabits: {
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.cyan300,
+    textAlign: 'center',
+    marginTop: 4,
   },
   block: {
     gap: 12,
@@ -329,36 +496,31 @@ const styles = StyleSheet.create({
   insights: {
     gap: 12,
   },
+  insightSkeleton: {
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: 'rgba(51, 65, 85, 0.5)',
+  },
   insight: {
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
+    gap: 6,
+  },
+  insightTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  insightTitle: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    color: colors.cyan300,
   },
   insightText: {
     fontFamily: fonts.regular,
     fontSize: 14,
     color: colors.slate200,
-  },
-  actionsTitle: {
-    marginBottom: 12,
-  },
-  actions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  action: {
-    width: '47%',
-    height: 80,
-    borderRadius: 8,
-    borderWidth: 1,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  actionLabel: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
   },
 });

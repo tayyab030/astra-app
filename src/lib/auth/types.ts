@@ -9,6 +9,12 @@ export type AuthUser = {
   country?: string | null;
   timezone?: string;
   theme?: 'light' | 'dark' | 'neon';
+  ai_voice?: string | null;
+  ai_voice_mode?: boolean | null;
+  ai_personality?: string | null;
+  ai_insights?: boolean | null;
+  ai_data_scope?: string | null;
+  ai_language?: string | null;
 };
 
 export type AuthSession = {

@@ -26,6 +26,17 @@ export type SendAssistantMessageResponse = {
   assistant_message: AssistantChatMessage;
 };
 
+export type DailyQuoteResponse = {
+  quote: string;
+  date: string;
+  source: 'groq' | 'cache' | 'fallback';
+};
+
+export async function fetchDailyQuote() {
+  const response = await authApi.get<DailyQuoteResponse>(ASSISTANT.DAILY_QUOTE);
+  return response.data;
+}
+
 export async function sendAssistantMessage(options: {
   message: string;
   conversationId?: string | null;

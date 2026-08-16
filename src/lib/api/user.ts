@@ -18,6 +18,12 @@ export interface CurrentUser {
   country: string | null;
   timezone: string;
   theme: AuthTheme | string;
+  ai_voice?: string | null;
+  ai_voice_mode?: boolean | null;
+  ai_personality?: string | null;
+  ai_insights?: boolean | null;
+  ai_data_scope?: string | null;
+  ai_language?: string | null;
 }
 
 export async function fetchCurrentUser() {
