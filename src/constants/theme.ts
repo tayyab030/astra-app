@@ -1,65 +1,87 @@
+/** Neon fallback palette for rare module-level StyleSheets. Prefer `useAppTheme().colors`. */
+export const colors = {
+  slate900: '#0f172a',
+  slate800: '#1e293b',
+  slate700: '#334155',
+  slate600: '#475569',
+  slate500: '#64748b',
+  slate400: '#94a3b8',
+  slate300: '#cbd5e1',
+  slate200: '#e2e8f0',
+  cyan100: '#cffafe',
+  cyan200: '#a5f3fc',
+  cyan300: '#67e8f9',
+  cyan400: '#22d3ee',
+  cyan500: '#06b6d4',
+  cyan600: '#0891b2',
+  blue200: '#bfdbfe',
+  blue300: '#93c5fd',
+  blue400: '#60a5fa',
+  blue500: '#3b82f6',
+  blue600: '#2563eb',
+  blue900: '#1e3a8a',
+  cyan900: '#164e63',
+  purple500: '#a855f7',
+  pink500: '#ec4899',
+  emerald500: '#10b981',
+  teal500: '#14b8a6',
+  amber50: '#fffbeb',
+  amber100: '#fef3c7',
+  amber200: '#fde68a',
+  red300: '#fca5a5',
+  red400: '#f87171',
+  red600: '#dc2626',
+  red700: '#b91c1c',
+  white: '#ffffff',
+};
+
+export const fonts = {
+  regular: 'Inter_400Regular',
+  medium: 'Inter_500Medium',
+  semibold: 'Inter_600SemiBold',
+  bold: 'Inter_700Bold',
+  heading: 'Poppins_600SemiBold',
+  headingBold: 'Poppins_700Bold',
+};
+
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Mobile-first type scale (pt). Tuned for phone density — smaller than web
+ * `text-3xl` page titles, readable body, compact meta.
  */
-
-import '@/global.css';
-
-import { Platform } from 'react-native';
-
-export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-  },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-  },
+export const type = {
+  /** Badges, tiny captions */
+  xs: 11,
+  /** Hints, timestamps, meta */
+  sm: 12,
+  /** Field labels, tab labels, secondary UI */
+  md: 13,
+  /** Default body / buttons */
+  body: 15,
+  /** Emphasized body, list titles */
+  bodyLg: 16,
+  /** Section / card titles */
+  titleSm: 17,
+  /** In-page section headers */
+  titleMd: 18,
+  /** Screen page titles (PageHeader) */
+  title: 22,
+  /** Auth / hero titles */
+  titleLg: 24,
+  /** Large stats (life score, big metrics) */
+  display: 36,
+  displaySm: 28,
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
-
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
-});
-
-export const Spacing = {
-  half: 2,
-  one: 4,
-  two: 8,
-  three: 16,
-  four: 24,
-  five: 32,
-  six: 64,
+export const lineHeights = {
+  xs: 14,
+  sm: 16,
+  md: 18,
+  body: 22,
+  bodyLg: 24,
+  titleSm: 22,
+  titleMd: 24,
+  title: 28,
+  titleLg: 30,
+  display: 40,
+  displaySm: 34,
 } as const;
-
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;

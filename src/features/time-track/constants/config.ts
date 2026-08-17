@@ -1,0 +1,2 @@
+export const DEFAULT_WEEKLY_TARGET_HOURS = 40;
+export const TIMER_AUTO_SAVE_SECONDS = 5;

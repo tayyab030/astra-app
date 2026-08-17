@@ -17,21 +17,36 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+google-services.json
+GoogleService-Info.plist
 
 # Metro
 .metro-health-check*
 
-# debug
+# debug / logs
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+*.log
 
-# macOS
+# testing
+coverage/
+.nyc_output/
+
+# env files (keep .env.example)
+.env
+.env.*
+!.env.example
+
+# OS
 .DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 *.pem
 
-# local env files
-.env*.local
+# IDE
+.idea/
 
 # typescript
 *.tsbuildinfo
