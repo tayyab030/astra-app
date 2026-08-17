@@ -249,11 +249,19 @@ export function useAppNotifications() {
       goals: bundle.goals,
       projects: bundle.projects,
       healthToday: bundle.healthToday,
+      accountCreatedAt: user?.created_at ?? null,
       aiWarningMessages: aiWarnings,
       modulesEnabled: moduleSettings.enabled,
       categoriesEnabled: prefs.categories,
     });
-  }, [bundle, moduleSettings.enabled, prefs.categories, aiWarnings, dataUpdatedAt]);
+  }, [
+    bundle,
+    moduleSettings.enabled,
+    prefs.categories,
+    aiWarnings,
+    user?.created_at,
+    dataUpdatedAt,
+  ]);
 
   const visibleAlerts: InboxAlert[] = useMemo(() => {
     const dismissed = new Set(inbox.dismissedIds);

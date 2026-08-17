@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -12,9 +12,11 @@ import {
   View,
 } from 'react-native';
 
+import { OverflowMenu } from '@/components/OverflowMenu';
 import { fonts } from '@/constants/theme';
 import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import type { AssistantConversation } from '@/lib/api/assistant';
+import { formatConversationStamp, sortByRecentActivity } from './chatDate';
 
 type Props = {
   visible: boolean;
@@ -143,6 +145,11 @@ export function ConversationDrawer({
     rowTitleActive: {
       color: c.cyan200,
     },
+    rowStamp: {
+      fontFamily: fonts.regular,
+      fontSize: 10,
+      color: c.slate400,
+    },
     renameInput: {
       flex: 1,
       minHeight: 34,
@@ -155,16 +162,6 @@ export function ConversationDrawer({
       fontFamily: fonts.regular,
       fontSize: 14,
     },
-    rowActions: {
-      flexDirection: 'row' as const,
-      gap: 2,
-    },
-    rowAction: {
-      width: 28,
-      height: 28,
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-    },
     disabled: {
       opacity: 0.55,
     },
@@ -172,6 +169,13 @@ export function ConversationDrawer({
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftTitle, setDraftTitle] = useState('');
+
+  // The API already returns newest first; re-sort so an optimistic local
+  // update still floats the active chat to the top before the next refetch.
+  const ordered = useMemo(
+    () => sortByRecentActivity(conversations),
+    [conversations],
+  );
 
   const startRename = (item: AssistantConversation) => {
     setEditingId(item.id);
@@ -231,7 +235,7 @@ export function ConversationDrawer({
             {conversations.length === 0 ? (
               <Text style={styles.empty}>No chats yet. Start a new one.</Text>
             ) : (
-              conversations.map((item) => {
+              ordered.map((item) => {
                 const active = item.id === activeId;
                 const editing = editingId === item.id;
                 return (
@@ -268,25 +272,32 @@ export function ConversationDrawer({
                         >
                           {item.title || 'New chat'}
                         </Text>
+                        <Text style={styles.rowStamp}>
+                          {formatConversationStamp(
+                            new Date(item.updated_at || item.created_at),
+                          )}
+                        </Text>
                       </Pressable>
                     )}
 
-                    <View style={styles.rowActions}>
-                      <Pressable
-                        onPress={() => startRename(item)}
-                        hitSlop={8}
-                        style={styles.rowAction}
-                      >
-                        <Ionicons name="pencil-outline" size={15} color={colors.slate400} />
-                      </Pressable>
-                      <Pressable
-                        onPress={() => confirmDelete(item)}
-                        hitSlop={8}
-                        style={styles.rowAction}
-                      >
-                        <Ionicons name="trash-outline" size={15} color={colors.red400} />
-                      </Pressable>
-                    </View>
+                    <OverflowMenu
+                      accessibilityLabel="Chat actions"
+                      items={[
+                        {
+                          key: 'rename',
+                          label: 'Rename',
+                          icon: 'pencil-outline',
+                          onPress: () => startRename(item),
+                        },
+                        {
+                          key: 'delete',
+                          label: 'Delete',
+                          icon: 'trash-outline',
+                          destructive: true,
+                          onPress: () => confirmDelete(item),
+                        },
+                      ]}
+                    />
                   </View>
                 );
               })
