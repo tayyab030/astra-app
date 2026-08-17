@@ -5,6 +5,20 @@ import type { AppAlert, DeriveAlertsInput } from './types';
 const MS_DAY = 24 * 60 * 60 * 1000;
 const REMINDER_WINDOW_MS = 30 * 60 * 1000;
 
+/** Quiet window before a brand-new, still-empty account starts getting nudged. */
+const NEW_ACCOUNT_GRACE_DAYS = 3;
+
+function isNewAccount(
+  createdAt: string | null | undefined,
+  now: Date,
+): boolean {
+  if (!createdAt) return false;
+  const created = new Date(createdAt).getTime();
+  if (!Number.isFinite(created)) return false;
+  const age = now.getTime() - created;
+  return age >= 0 && age < NEW_ACCOUNT_GRACE_DAYS * MS_DAY;
+}
+
 function parseDate(value: string | null | undefined): Date | null {
   if (!value) return null;
   const d = new Date(value);
@@ -59,6 +73,7 @@ export function deriveAlerts(input: DeriveAlertsInput): AppAlert[] {
     goals,
     projects,
     healthToday,
+    accountCreatedAt,
     aiWarningMessages,
     modulesEnabled,
     categoriesEnabled,
@@ -247,7 +262,16 @@ export function deriveAlerts(input: DeriveAlertsInput): AppAlert[] {
 
   if (modulesEnabled.health && healthToday) {
     const hour = now.getHours();
-    if (hour >= 18) {
+    // Targets are defaults every account gets, so a brand-new user who has
+    // logged nothing is flagged as "at risk" on day one. Stay quiet for the
+    // first few days, then nudge as normal whether or not they have started.
+    const nothingLoggedToday =
+      healthToday.waterGlasses <= 0 &&
+      healthToday.exerciseMinutes <= 0 &&
+      healthToday.sleepHours <= 0;
+    const inGracePeriod =
+      nothingLoggedToday && isNewAccount(accountCreatedAt, now);
+    if (hour >= 18 && !inGracePeriod) {
       if (
         healthToday.waterTarget > 0 &&
         healthToday.waterGlasses < healthToday.waterTarget * 0.5

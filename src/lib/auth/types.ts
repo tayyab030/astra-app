@@ -19,6 +19,9 @@ export type AuthUser = {
   ai_data_scope?: string | null;
   ai_language?: string | null;
   module_settings?: ModuleSettings;
+  is_verified?: boolean;
+  /** ISO signup date from the API. */
+  created_at?: string | null;
 };
 
 export type AuthSession = {

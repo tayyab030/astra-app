@@ -81,6 +81,8 @@ export type DeriveAlertsInput = {
     exerciseMinutes: number;
     exerciseTarget: number;
   } | null;
+  /** ISO signup date, used to keep a brand-new account quiet for a few days. */
+  accountCreatedAt?: string | null;
   aiWarningMessages: Array<{ id: string; title: string; message: string }>;
   modulesEnabled: {
     tasks: boolean;
