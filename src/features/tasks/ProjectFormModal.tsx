@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { DateField } from '@/components/DateField';
 import { fonts } from '@/constants/theme';
 import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { FormFieldError } from '@/features/wealth/FormFieldError';
@@ -250,13 +251,13 @@ export function ProjectFormModal({ visible, onClose, mode, project }: ProjectFor
 
       <View style={styles.field}>
         <Text style={styles.fieldLabel}>Due Date</Text>
-        <TextInput
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor={colors.slate500}
-          style={[styles.input, errors.due_date && styles.inputError]}
-          value={dueDate ?? ''}
-          onChangeText={(value) =>
-            setValue('due_date', value || null, { shouldValidate: true })
+        <DateField
+          value={dueDate}
+          placeholder="Select due date"
+          clearable
+          error={Boolean(errors.due_date)}
+          onChange={(value) =>
+            setValue('due_date', value, { shouldValidate: true })
           }
         />
         <FormFieldError message={errors.due_date?.message} />

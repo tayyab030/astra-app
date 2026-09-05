@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { DateField } from '@/components/DateField';
 import { OverflowMenu } from '@/components/OverflowMenu';
 import { fonts } from '@/constants/theme';
 import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
@@ -444,12 +445,13 @@ export function TransactionsTab({
 
         <View style={styles.field}>
           <Text style={styles.fieldLabel}>Date</Text>
-          <TextInput
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={colors.slate500}
-            style={[styles.input, errors.date && styles.inputError]}
+          <DateField
             value={date}
-            onChangeText={(value) => setValue('date', value, { shouldValidate: true })}
+            placeholder="Select date"
+            error={Boolean(errors.date)}
+            onChange={(value) =>
+              setValue('date', value ?? '', { shouldValidate: true })
+            }
           />
           <FormFieldError message={errors.date?.message} />
         </View>

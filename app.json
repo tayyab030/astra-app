@@ -16,6 +16,7 @@
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png"
       },
+      "package": "com.astra.app",
       "predictiveBackGestureEnabled": false
     },
     "web": {
@@ -44,6 +45,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "0d4a2c16-2017-4d23-a9f7-aa7255c963bb"
+      }
+    },
+    "owner": "tayyab564"
   }
 }

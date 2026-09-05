@@ -1,6 +1,7 @@
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
+import { DateField } from '@/components/DateField';
 import { fonts } from '@/constants/theme';
 import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 
@@ -205,25 +206,20 @@ export function HabitScheduleFields({ value, onChange }: HabitScheduleFieldsProp
 
       <View style={styles.row}>
         <View style={[styles.field, styles.half]}>
-          <Text style={styles.label}>Starts from (YYYY-MM-DD)</Text>
-          <TextInput
-            style={styles.input}
+          <Text style={styles.label}>Starts from</Text>
+          <DateField
             value={value.startDate}
-            onChangeText={(startDate) => onChange({ startDate })}
-            autoCapitalize="none"
-            placeholder="2026-01-01"
-            placeholderTextColor={colors.slate500}
+            placeholder="Select start date"
+            onChange={(startDate) => onChange({ startDate: startDate ?? value.startDate })}
           />
         </View>
         <View style={[styles.field, styles.half]}>
           <Text style={styles.label}>Ends on (optional)</Text>
-          <TextInput
-            style={styles.input}
-            value={value.endDate ?? ''}
-            onChangeText={(text) => onChange({ endDate: text.trim() ? text : null })}
-            autoCapitalize="none"
+          <DateField
+            value={value.endDate}
             placeholder="No end"
-            placeholderTextColor={colors.slate500}
+            clearable
+            onChange={(endDate) => onChange({ endDate })}
           />
         </View>
       </View>

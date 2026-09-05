@@ -4,6 +4,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { DateField } from '@/components/DateField';
 import { fonts } from '@/constants/theme';
 import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
 import { FormFieldError } from '@/features/wealth/FormFieldError';
@@ -358,26 +359,26 @@ export function GoalFormModal({
 
       <View style={styles.row}>
         <View style={[styles.field, styles.half]}>
-          <Text style={styles.label}>Start Date (YYYY-MM-DD)</Text>
-          <TextInput
-            style={[styles.input, errors.start_date && styles.inputError]}
-            placeholder="2026-01-01"
-            placeholderTextColor={colors.slate500}
+          <Text style={styles.label}>Start Date</Text>
+          <DateField
             value={startDate}
-            onChangeText={(value) => setValue('start_date', value, { shouldValidate: true })}
-            autoCapitalize="none"
+            placeholder="Select start date"
+            error={Boolean(errors.start_date)}
+            onChange={(value) =>
+              setValue('start_date', value ?? '', { shouldValidate: true })
+            }
           />
           <FormFieldError message={errors.start_date?.message} />
         </View>
         <View style={[styles.field, styles.half]}>
-          <Text style={styles.label}>Target Date (YYYY-MM-DD)</Text>
-          <TextInput
-            style={[styles.input, errors.target_date && styles.inputError]}
-            placeholder="2026-12-31"
-            placeholderTextColor={colors.slate500}
+          <Text style={styles.label}>Target Date</Text>
+          <DateField
             value={targetDate}
-            onChangeText={(value) => setValue('target_date', value, { shouldValidate: true })}
-            autoCapitalize="none"
+            placeholder="Select target date"
+            error={Boolean(errors.target_date)}
+            onChange={(value) =>
+              setValue('target_date', value ?? '', { shouldValidate: true })
+            }
           />
           <FormFieldError message={errors.target_date?.message} />
         </View>
@@ -415,18 +416,15 @@ export function GoalFormModal({
                   }
                 />
                 <FormFieldError message={errors.milestones?.[index]?.title?.message} />
-                <TextInput
-                  style={[
-                    styles.input,
-                    errors.milestones?.[index]?.due_date && styles.inputError,
-                  ]}
-                  placeholder="Due date YYYY-MM-DD"
-                  placeholderTextColor={colors.slate500}
+                <DateField
                   value={watch(`milestones.${index}.due_date`)}
-                  onChangeText={(value) =>
-                    setValue(`milestones.${index}.due_date`, value, { shouldValidate: true })
+                  placeholder="Select due date"
+                  error={Boolean(errors.milestones?.[index]?.due_date)}
+                  onChange={(value) =>
+                    setValue(`milestones.${index}.due_date`, value ?? '', {
+                      shouldValidate: true,
+                    })
                   }
-                  autoCapitalize="none"
                 />
                 <FormFieldError message={errors.milestones?.[index]?.due_date?.message} />
                 <Pressable onPress={() => remove(index)} style={styles.removeMilestone}>
