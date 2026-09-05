@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { addDays, format, parseISO } from 'date-fns';
 
-import { fetchPrayerLogs } from '@/lib/api/prayer';
+import {
+  fetchPrayerLogs,
+  type PrayerOfferStatus,
+} from '@/lib/api/prayer';
 import { getUserErrorMessage } from '@/lib/api/user';
 import { getLocalDateString } from '@/features/health/utils/date';
 import { TRACKABLE_PRAYER_KEYS } from '../constants';
+import type { PrayerAnalysisInsightSlice } from '@/lib/insights/prayerInsightContext';
 
 export type PrayerAnalysisRange = 7 | 30;
 
@@ -16,12 +20,41 @@ export type PrayerAnalysisPoint = {
   percent: number;
 };
 
+type RawDay = {
+  date: string;
+  completed: Record<string, boolean>;
+  statuses?: Record<string, PrayerOfferStatus | null>;
+};
+
+function countStatuses(
+  days: RawDay[],
+): { onTimeCount: number; qazaCount: number } {
+  let onTimeCount = 0;
+  let qazaCount = 0;
+  for (const day of days) {
+    const statuses = day.statuses ?? {};
+    for (const key of TRACKABLE_PRAYER_KEYS) {
+      if (!day.completed[key]) continue;
+      if (statuses[key] === 'on_time') onTimeCount += 1;
+      else if (statuses[key] === 'qaza') qazaCount += 1;
+    }
+  }
+  return { onTimeCount, qazaCount };
+}
+
+function consecutiveCompleteDays(points: PrayerAnalysisPoint[]): number {
+  let streak = 0;
+  for (let i = points.length - 1; i >= 0; i -= 1) {
+    if (points[i].percent >= 100) streak += 1;
+    else break;
+  }
+  return streak;
+}
+
 export function usePrayerAnalysis(days: PrayerAnalysisRange) {
   const today = getLocalDateString();
   const from = format(addDays(parseISO(today), -(days - 1)), 'yyyy-MM-dd');
-  const [rawDays, setRawDays] = useState<
-    Array<{ date: string; completed: Record<string, boolean> }>
-  >([]);
+  const [rawDays, setRawDays] = useState<RawDay[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,5 +112,22 @@ export function usePrayerAnalysis(days: PrayerAnalysisRange) {
     return Math.round(sum / points.length);
   }, [points]);
 
-  return { points, overallPercent, isLoading, error };
+  const insightSlice = useMemo((): PrayerAnalysisInsightSlice => {
+    const { onTimeCount, qazaCount } = countStatuses(rawDays);
+    return {
+      rangeDays: days,
+      overallPercent,
+      onTimeCount,
+      qazaCount,
+      perfectDays: points.filter((p) => p.percent >= 100).length,
+      consecutiveCompleteDays: consecutiveCompleteDays(points),
+      recentDays: points.map((p) => ({
+        date: p.date,
+        completedCount: p.completedCount,
+        percent: p.percent,
+      })),
+    };
+  }, [rawDays, days, overallPercent, points]);
+
+  return { points, overallPercent, insightSlice, isLoading, error };
 }

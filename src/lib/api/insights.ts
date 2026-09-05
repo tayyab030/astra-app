@@ -11,6 +11,7 @@ export const INSIGHT_KINDS = [
   'goals',
   'wealth',
   'health',
+  'prayer',
 ] as const;
 
 export type InsightKind = (typeof INSIGHT_KINDS)[number];

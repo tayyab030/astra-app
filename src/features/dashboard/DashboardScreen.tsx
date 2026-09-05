@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -10,7 +11,13 @@ import { useCurrency } from '@/hooks/useCurrency';
 import { useSession } from '@/hooks/useSession';
 import { useAiInsight } from '@/hooks/useAiInsight';
 import { InsightHorizonBadge } from '@/components/insights/InsightHorizonBadge';
+import { getLocalDateString } from '@/features/health/utils/date';
+import { buildLifeOsInsightExtras } from '@/lib/insights/lifeOsContext';
+import { buildPrayerInsightSlice } from '@/lib/insights/prayerInsightContext';
+import { usePrayer } from '@/features/prayer/hooks/usePrayer';
+import { usePrayerDay } from '@/features/prayer/hooks/usePrayerDay';
 import { DashboardCard } from './DashboardCard';
+import { PrayerWidget } from './PrayerWidget';
 import { QuickActions } from './QuickActions';
 import { WeeklyExpensesChart } from './WeeklyExpensesChart';
 import { useDashboard } from './hooks/useDashboard';
@@ -312,7 +319,23 @@ export function DashboardScreen() {
     refresh: refreshLocation,
   } = useCurrentLocation();
 
-  const insightContext = dashboard ? buildDashboardInsightContext(dashboard) : undefined;
+  const prayer = usePrayer();
+  const today = getLocalDateString();
+  const { day: todayPrayerLog } = usePrayerDay(today);
+
+  const insightContext = useMemo(() => {
+    if (!dashboard) return undefined;
+    return {
+      ...buildLifeOsInsightExtras(user, dashboard),
+      ...buildDashboardInsightContext(dashboard),
+      ...buildPrayerInsightSlice({
+        timings: prayer.timings,
+        today: todayPrayerLog,
+        analysis: null,
+      }),
+    };
+  }, [dashboard, user, prayer.timings, todayPrayerLog]);
+
   const {
     data: insightData,
     hasInsight,
@@ -462,6 +485,8 @@ export function DashboardScreen() {
           </DashboardCard>
         </Pressable>
       </View>
+
+      <PrayerWidget />
 
       <View style={styles.charts}>
         <DashboardCard>
