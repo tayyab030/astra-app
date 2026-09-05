@@ -315,15 +315,5 @@ export function deriveAlerts(input: DeriveAlertsInput): AppAlert[] {
     });
   }
 
-  const severityRank: Record<AppAlert['severity'], number> = {
-    critical: 0,
-    warning: 1,
-    info: 2,
-  };
-
-  return alerts.sort((a, b) => {
-    const s = severityRank[a.severity] - severityRank[b.severity];
-    if (s !== 0) return s;
-    return b.createdAt.localeCompare(a.createdAt);
-  });
+  return alerts.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }

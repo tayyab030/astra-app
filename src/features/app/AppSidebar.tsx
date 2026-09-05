@@ -29,6 +29,7 @@ const sidebarItems: SidebarItem[] = [
   { id: 'wealth', label: 'Wealth', icon: 'cash-outline', href: ROUTES.APP.WEALTH },
   { id: 'health', label: 'Health', icon: 'heart-outline', href: ROUTES.APP.HEALTH },
   { id: 'habits', label: 'Habits', icon: 'repeat-outline', href: ROUTES.APP.HABITS },
+  { id: 'prayer', label: 'Prayer', icon: 'moon-outline', href: ROUTES.APP.PRAYER },
   { id: 'notes', label: 'Notes', icon: 'document-text-outline', href: ROUTES.APP.NOTES },
   { id: 'assistant', label: 'Assistant', icon: 'hardware-chip-outline', href: ROUTES.APP.ASSISTANT },
   { id: 'communication', label: 'Communication', icon: 'mail-outline', href: ROUTES.APP.COMMUNICATION },

@@ -16,6 +16,7 @@ export const ROUTES = {
     WEALTH: '/app/wealth',
     HEALTH: '/app/health',
     HABITS: '/app/habits',
+    PRAYER: '/app/prayer',
     NOTES: '/app/notes',
     ASSISTANT: '/app/assistant',
     COMMUNICATION: '/app/communication',

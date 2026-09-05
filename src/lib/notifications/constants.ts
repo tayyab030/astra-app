@@ -1,5 +1,6 @@
 export const NOTIFICATION_CHANNELS = {
   DEFAULT: 'default',
+  ADHAN: 'adhan',
 } as const;
 
 export type NotificationChannelId =
@@ -8,6 +9,7 @@ export type NotificationChannelId =
 export const NOTIFICATION_SOURCES = {
   TEST: 'test',
   ALERT: 'alert',
+  ADHAN: 'adhan',
 } as const;
 
 export type NotificationSource =

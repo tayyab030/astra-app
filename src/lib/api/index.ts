@@ -9,6 +9,7 @@ export const {
   TIME_TRACK,
   HABITS,
   HEALTH,
+  PRAYER,
   NOTES,
   ASSISTANT,
 } = API_ENDPOINTS;
@@ -20,6 +21,7 @@ export * from './goals';
 export * from './notes';
 export * from './habits';
 export * from './health';
+export * from './prayer';
 export * from './timeTrack';
 export * from './insights';
 export * from './sessions';

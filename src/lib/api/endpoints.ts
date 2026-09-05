@@ -72,6 +72,14 @@ export const API_ENDPOINTS = {
     WORKOUTS: '/health/workouts/',
     MOOD: '/health/mood/',
   },
+  PRAYER: {
+    METHODS: '/prayer/methods/',
+    PREFERENCES: '/prayer/preferences/',
+    TIMINGS: '/prayer/timings/',
+    TIMINGS_BY_CITY: '/prayer/timings-by-city/',
+    DAY: '/prayer/day/',
+    LOGS: '/prayer/logs/',
+  },
   NOTES: {
     DASHBOARD: '/notes/',
     NOTES: '/notes/',

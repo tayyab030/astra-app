@@ -12,7 +12,7 @@ export type { NotificationPayload, ScheduleOptions } from './types';
 export { ensureNotificationPermissions } from './permissions';
 export { ensureAndroidChannel } from './channels';
 export { getExpoPushToken } from './token';
-export { scheduleLocalNotification } from './schedule';
+export { scheduleLocalNotification, scheduleDateNotification, scheduleAdhanNotifications, cancelAdhanNotifications } from './schedule';
 export {
   canShowPush,
   getPushPermission,

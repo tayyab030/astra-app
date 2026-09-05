@@ -15,6 +15,7 @@ import { QuickActions } from './QuickActions';
 import { WeeklyExpensesChart } from './WeeklyExpensesChart';
 import { useDashboard } from './hooks/useDashboard';
 import { useDailyQuote } from './hooks/useDailyQuote';
+import { useCurrentLocation } from './hooks/useCurrentLocation';
 import type { DashboardView } from './utils/computeDashboard';
 
 function getGreeting(hour: number) {
@@ -113,6 +114,20 @@ export function DashboardScreen() {
     color: colors.slate300,
     marginTop: 4,
     lineHeight: 20,
+  },
+  locationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 6,
+    marginTop: 8,
+    paddingVertical: 2,
+  },
+  locationText: {
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors.slate400,
+    flexShrink: 1,
   },
   badge: {
     alignSelf: 'flex-start',
@@ -290,6 +305,12 @@ export function DashboardScreen() {
   const { user } = useSession();
   const { dashboard, isLoading, isError, refetch } = useDashboard();
   const { quote } = useDailyQuote();
+  const {
+    label: locationLabel,
+    isLoading: locationLoading,
+    error: locationError,
+    refresh: refreshLocation,
+  } = useCurrentLocation();
 
   const insightContext = dashboard ? buildDashboardInsightContext(dashboard) : undefined;
   const {
@@ -337,6 +358,23 @@ export function DashboardScreen() {
           <Text style={styles.title}>
             {greeting}, {firstName}
           </Text>
+          <Pressable
+            style={styles.locationRow}
+            onPress={refreshLocation}
+            accessibilityRole="button"
+            accessibilityLabel="Refresh current location"
+          >
+            <Ionicons
+              name="location-outline"
+              size={14}
+              color={colors.cyan400}
+            />
+            <Text style={styles.locationText} numberOfLines={1}>
+              {locationLoading
+                ? 'Finding your location…'
+                : locationLabel ?? locationError ?? 'Location unavailable'}
+            </Text>
+          </Pressable>
           <Text style={styles.quote}>{`"${quote}"`}</Text>
         </View>
         <Pressable onPress={() => router.push(ROUTES.APP.LIFE_SCORE as never)}>

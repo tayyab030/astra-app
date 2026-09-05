@@ -14,15 +14,9 @@ type Props = {
 export function MessageBubble({ message }: Props) {
   const { colors, tokens } = useAppTheme();
   const styles = useThemedStyles((colors, tokens) => ({
-  list: {
-    flex: 1,
-  },
-  listContent: {
-    paddingVertical: 8,
-    gap: 12,
-  },
   row: {
     flexDirection: 'row',
+    width: '100%',
   },
   rowUser: {
     justifyContent: 'flex-end',
@@ -30,8 +24,11 @@ export function MessageBubble({ message }: Props) {
   rowAssistant: {
     justifyContent: 'flex-start',
   },
-  bubble: {
+  bubbleWrap: {
     maxWidth: '86%',
+    flexShrink: 1,
+  },
+  bubble: {
     borderRadius: 14,
     paddingHorizontal: 14,
     paddingVertical: 10,
@@ -58,12 +55,14 @@ export function MessageBubble({ message }: Props) {
     fontSize: 15,
     color: colors.white,
     lineHeight: 22,
+    flexShrink: 1,
   },
   assistantText: {
     fontFamily: fonts.regular,
     fontSize: 15,
     color: colors.slate200,
     lineHeight: 22,
+    flexShrink: 1,
   },
   time: {
     fontFamily: fonts.regular,
@@ -82,7 +81,7 @@ export function MessageBubble({ message }: Props) {
   if (isUser) {
     return (
       <View style={[styles.row, styles.rowUser]}>
-        <View>
+        <View style={styles.bubbleWrap}>
           <LinearGradient
             colors={tokens.accentGradient}
             start={{ x: 0, y: 0 }}
@@ -99,7 +98,7 @@ export function MessageBubble({ message }: Props) {
 
   return (
     <View style={[styles.row, styles.rowAssistant]}>
-      <View>
+      <View style={styles.bubbleWrap}>
         <View style={[styles.bubble, styles.assistantBubble]}>
           <Text style={styles.assistantLabel}>Astra</Text>
           <Text style={styles.assistantText}>{message.content}</Text>

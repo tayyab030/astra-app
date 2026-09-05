@@ -17,7 +17,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png"
       },
       "package": "com.astra.app",
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "output": "static",
@@ -39,6 +40,12 @@
         {
           "color": "#22D3EE",
           "defaultChannel": "default"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow Astra to show your current location on the dashboard and prayer times."
         }
       ]
     ],

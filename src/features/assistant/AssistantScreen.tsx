@@ -1,7 +1,20 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Animated, KeyboardAvoidingView, LayoutAnimation, Platform, Pressable, ScrollView, Text, TextInput, UIManager, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Animated,
+  Keyboard,
+  LayoutAnimation,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  UIManager,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { fonts } from '@/constants/theme';
 import { useAppTheme, useThemedStyles } from '@/features/theme/AppThemeProvider';
@@ -14,12 +27,13 @@ import { VoiceWaveform } from "./VoiceWaveform";
 
 export function AssistantScreen() {
   const { colors, tokens } = useAppTheme();
+  const insets = useSafeAreaInsets();
+  const [keyboardPad, setKeyboardPad] = useState(0);
   const styles = useThemedStyles((colors, tokens) => ({
   root: {
     flex: 1,
     paddingHorizontal: 24,
     paddingTop: 16,
-    paddingBottom: 16,
     gap: 12,
   },
   headerActions: {
@@ -90,6 +104,7 @@ export function AssistantScreen() {
   },
   middle: {
     flex: 1,
+    minWidth: 0,
     minHeight: 44,
     justifyContent: "center",
   },
@@ -97,7 +112,11 @@ export function AssistantScreen() {
     flex: 1,
     minHeight: 44,
   },
+  inputWrap: {
+    width: "100%",
+  },
   input: {
+    width: "100%",
     minHeight: 44,
     maxHeight: 120,
     borderRadius: 12,
@@ -173,6 +192,29 @@ export function AssistantScreen() {
   }, []);
 
   useEffect(() => {
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const onShow = Keyboard.addListener(showEvent, (event) => {
+      const lift = Math.max(0, event.endCoordinates.height - insets.bottom);
+      setKeyboardPad(lift);
+      requestAnimationFrame(() => {
+        listRef.current?.scrollToEnd({ animated: true });
+      });
+    });
+    const onHide = Keyboard.addListener(hideEvent, () => {
+      setKeyboardPad(0);
+    });
+
+    return () => {
+      onShow.remove();
+      onHide.remove();
+    };
+  }, [insets.bottom]);
+
+  useEffect(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     Animated.parallel([
       Animated.timing(textMode, {
@@ -209,10 +251,11 @@ export function AssistantScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.root}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={88}
+    <View
+      style={[
+        styles.root,
+        { paddingBottom: 16 + keyboardPad },
+      ]}
     >
       <PageHeader
         title={activeTitle || "Assistant"}
@@ -333,7 +376,7 @@ export function AssistantScreen() {
               <VoiceWaveform active={isRecording} level={meteringLevel} />
             </Animated.View>
           ) : (
-            <Animated.View style={{ opacity: textMode }}>
+            <Animated.View style={[styles.inputWrap, { opacity: textMode }]}>
               <TextInput
                 value={input}
                 onChangeText={setInput}
@@ -341,7 +384,13 @@ export function AssistantScreen() {
                 placeholderTextColor={colors.slate500}
                 style={styles.input}
                 multiline
+                textAlignVertical="center"
                 editable={!busy && !transcribing}
+                onFocus={() => {
+                  requestAnimationFrame(() => {
+                    listRef.current?.scrollToEnd({ animated: true });
+                  });
+                }}
                 onSubmitEditing={() => {
                   void sendMessage();
                 }}
@@ -369,7 +418,7 @@ export function AssistantScreen() {
           </LinearGradient>
         </Pressable>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
